@@ -1,0 +1,34 @@
+﻿@model List<Category>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Categories</h4>
+    <a asp-action="Create" class="btn btn-primary btn-sm">+ New Category</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-bordered table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Category Name</th>
+                    <th class="text-center">Display Order</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var category in Model.OrderBy(c => c.DisplayOrder))
+                {
+                    <tr>
+                        <td>@category.Name</td>
+                        <td class="text-center">@category.DisplayOrder</td>
+                        <td class="text-center">
+                            <a asp-action="Details" asp-route-id="@category.Id" class="btn btn-sm btn-primary">Show</a>
+                            <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-warning">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@category.Id" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
