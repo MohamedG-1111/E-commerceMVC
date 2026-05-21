@@ -1,3 +1,6 @@
+using E_commece.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace E_commece
 {
     public class Program
@@ -8,6 +11,8 @@ namespace E_commece
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             var app = builder.Build();
 
