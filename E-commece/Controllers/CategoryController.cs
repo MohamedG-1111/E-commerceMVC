@@ -1,4 +1,5 @@
 ﻿using E_commece.Data;
+using E_commece.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
@@ -14,6 +15,18 @@ namespace E_commece.Controllers
         {
             var categories = _context.Categories.ToList();
             return View(categories);
+        }
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+        [HttpPost]
+        public IActionResult Create(Category obj)
+        {
+            _context.Categories.Add(obj);
+            _context.SaveChanges();
+            return RedirectToAction(nameof(Index));
         }
     }
 }
