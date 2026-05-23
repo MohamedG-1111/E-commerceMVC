@@ -1,0 +1,63 @@
+﻿@using BLL.ViewModels
+@model CategoryVM
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header border-0 py-3 bg-danger bg-opacity-10">
+                    <h5 class="mb-0 fw-bold text-danger">
+                        <i class="bi bi-trash-fill me-2"></i>
+                        Delete Category
+                    </h5>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <!-- Alert -->
+                    <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                        <span>Are you sure you want to delete this category? This action <strong>cannot be undone</strong>.</span>
+                    </div>
+
+                    <!-- Read-only Info -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Name</label>
+                        <input value="@Model.Name" class="form-control" readonly disabled />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-secondary">Display Order</label>
+                        <input value="@Model.DisplayOrder" class="form-control" readonly disabled />
+                    </div>
+
+                    <!-- Buttons -->
+                    <form asp-action="ConfirmDelete" method="post">
+                        <input readyonly type="hidden" name="id" value="@ViewBag.Id" />
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a asp-controller="Category" asp-action="Index"
+                                   class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger fw-semibold">
+                                <i class="bi bi-trash-fill me-1"></i>Yes, Delete
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+
+}

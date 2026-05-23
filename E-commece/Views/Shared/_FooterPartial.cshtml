@@ -1,0 +1,109 @@
+﻿<footer class="bg-dark text-light pt-5 pb-3 mt-auto">
+    <div class="container">
+        <div class="row g-4 mb-4">
+
+            <div class="col-lg-4 col-md-6">
+                <h5 class="fw-bold mb-2">
+                    <i class="bi bi-bag-heart-fill text-warning me-1"></i>E_commece
+                </h5>
+                <p class="text-secondary small">
+                    متجرك الإلكتروني الموثوق. أفضل المنتجات بأسعار منافسة
+                    وشحن سريع لباب بيتك مع ضمان الإرجاع.
+                </p>
+                <div class="d-flex gap-2 mt-3">
+                    <a href="#" class="btn btn-outline-secondary btn-sm"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="btn btn-outline-secondary btn-sm"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="btn btn-outline-secondary btn-sm"><i class="bi bi-twitter-x"></i></a>
+                    <a href="#" class="btn btn-outline-secondary btn-sm"><i class="bi bi-whatsapp"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6 class="text-uppercase text-secondary fw-semibold mb-3"
+                    style="font-size: 11px; letter-spacing: .08em;">
+                    تسوّق
+                </h6>
+                <ul class="list-unstyled small">
+                    <li class="mb-2">
+                        <a asp-controller="Products" asp-action="Index"
+                           class="text-secondary text-decoration-none">المنتجات</a>
+                    </li>
+                    <li class="mb-2">
+                        <a asp-controller="Home" asp-action="Offers"
+                           class="text-secondary text-decoration-none">العروض</a>
+                    </li>
+                    <li class="mb-2">
+                        <a asp-controller="Home" asp-action="New"
+                           class="text-secondary text-decoration-none">الجديد</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6 class="text-uppercase text-secondary fw-semibold mb-3"
+                    style="font-size: 11px; letter-spacing: .08em;">
+                    الدعم
+                </h6>
+                <ul class="list-unstyled small">
+                    <li class="mb-2">
+                        <a asp-controller="Home" asp-action="Help"
+                           class="text-secondary text-decoration-none">مركز المساعدة</a>
+                    </li>
+                    <li class="mb-2">
+                        <a asp-controller="Orders" asp-action="Track"
+                           class="text-secondary text-decoration-none">تتبع الطلب</a>
+                    </li>
+                    <li class="mb-2">
+                        <a asp-controller="Home" asp-action="Returns"
+                           class="text-secondary text-decoration-none">الإرجاع</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6 class="text-uppercase text-secondary fw-semibold mb-3"
+                    style="font-size: 11px; letter-spacing: .08em;">
+                    قانوني
+                </h6>
+                <ul class="list-unstyled small">
+                    <li class="mb-2">
+                        <a asp-area="" asp-controller="Home" asp-action="Privacy"
+                           class="text-secondary text-decoration-none">الخصوصية</a>
+                    </li>
+                    <li class="mb-2">
+                        <a asp-controller="Home" asp-action="Terms"
+                           class="text-secondary text-decoration-none">الشروط والأحكام</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6 class="text-uppercase text-secondary fw-semibold mb-3"
+                    style="font-size: 11px; letter-spacing: .08em;">
+                    النشرة البريدية
+                </h6>
+                <p class="text-secondary small mb-2">اشترك لتصلك أحدث العروض</p>
+                <div class="input-group input-group-sm">
+                    <input type="email" class="form-control bg-secondary border-0 text-white"
+                           placeholder="بريدك الإلكتروني" />
+                    <button class="btn btn-warning">
+                        <i class="bi bi-send"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="border-top border-secondary pt-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <p class="text-secondary small mb-0">
+                &copy; 2026 E_commece — جميع الحقوق محفوظة
+            </p>
+            <div class="d-flex gap-3">
+                <a asp-area="" asp-controller="Home" asp-action="Privacy"
+                   class="text-secondary text-decoration-none small">الخصوصية</a>
+                <a asp-controller="Home" asp-action="Terms"
+                   class="text-secondary text-decoration-none small">الشروط</a>
+            </div>
+        </div>
+    </div>
+</footer>
