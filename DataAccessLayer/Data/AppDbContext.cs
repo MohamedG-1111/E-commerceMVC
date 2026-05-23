@@ -1,7 +1,7 @@
-﻿using E_commece.Models;
+﻿using DataAcessLayer.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace E_commece.Data
+namespace DataAcessLayer.Data
 {
     public class AppDbContext : DbContext
     {

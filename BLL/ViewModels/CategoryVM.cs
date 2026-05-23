@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace E_commece.ViewModels
+namespace BLL.ViewModels
 {
     public class CategoryVM
     {

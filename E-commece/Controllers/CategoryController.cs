@@ -1,6 +1,6 @@
-﻿using E_commece.Data;
-using E_commece.Models;
-using E_commece.ViewModels;
+﻿using BLL.ViewModels;
+using DataAcessLayer.Data;
+using DataAcessLayer.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
@@ -67,6 +67,36 @@ namespace E_commece.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            var category = _context.Categories.Find(id);
+            if (category == null)
+                return NotFound();
+            CategoryVM categoryVM = new CategoryVM
+            {
+                Name = category.Name,
+                DisplayOrder = category.DisplayOrder
+            };
+            ViewBag.Id = id;
+            return View(categoryVM);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
 
+        public IActionResult ConfirmDelete(int? id)
+        {
+            if (id <= 0)
+                return NotFound();
+
+            var category = _context.Categories.Find(id);
+            if (category == null)
+                return NotFound();
+
+            _context.Categories.Remove(category);
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

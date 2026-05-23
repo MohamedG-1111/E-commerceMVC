@@ -1,4 +1,4 @@
-﻿namespace E_commece.Models
+﻿namespace DataAcessLayer.Models
 {
     public class Category
     {
