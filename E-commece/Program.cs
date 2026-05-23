@@ -1,4 +1,6 @@
 
+using DataAccessLayer.Repositories.Implementation;
+using DataAccessLayer.Repositories.Interfaces;
 using DataAcessLayer.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +16,8 @@ namespace E_commece
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
