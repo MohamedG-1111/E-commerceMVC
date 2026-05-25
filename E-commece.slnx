@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="BLL/BLL.csproj" Id="d781a216-8e00-46f9-862f-071162efa515" />
-  <Project Path="DataAccessLayer/DataAccessLayer.csproj" Id="24944513-7993-416f-bfc0-22b97b3bb817" />
-  <Project Path="E-commece/E-commece.csproj" />
+  <Project Path="BLL/E-commece.BLL.csproj" Id="d781a216-8e00-46f9-862f-071162efa515" />
+  <Project Path="DataAccessLayer/E-commece.DAL.csproj" Id="24944513-7993-416f-bfc0-22b97b3bb817" />
+  <Project Path="E-commece/E-commece.PL.csproj" />
 </Solution>
