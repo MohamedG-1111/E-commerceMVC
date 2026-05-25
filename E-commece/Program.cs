@@ -1,4 +1,6 @@
 
+using BLL.Services.Implementation;
+using BLL.Services.Interfaces;
 using DataAccessLayer.Repositories.Implementation;
 using DataAccessLayer.Repositories.Interfaces;
 using DataAcessLayer.Data;
@@ -18,6 +20,7 @@ namespace E_commece
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

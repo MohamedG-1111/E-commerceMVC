@@ -1,20 +1,20 @@
-﻿using BLL.ViewModels;
-using DataAcessLayer.Data;
-using DataAcessLayer.Models;
+﻿using BLL.Services.Interfaces;
+using BLL.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
 {
     public class CategoryController : Controller
     {
-        private readonly AppDbContext _context;
-        public CategoryController(AppDbContext context)
+        private readonly ICategoryService CategoryService;
+
+        public CategoryController(ICategoryService _CategoryService)
         {
-            _context = context;
+            CategoryService = _CategoryService;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var categories = _context.Categories.ToList();
+            var categories = await CategoryService.AllCategoriesAsync();
             return View(categories);
         }
         [HttpGet]
@@ -23,80 +23,77 @@ namespace E_commece.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Create(CategoryVM obj)
+        public async Task<IActionResult> Create(CategoryVM obj)
         {
             if (!ModelState.IsValid)
                 return View(obj);
-            Category category = new Category
+            var IsCreated = await CategoryService.CreateCategoryAsync(obj);
+            if (IsCreated)
             {
-                Name = obj.Name,
-                DisplayOrder = obj.DisplayOrder
-            };
+                TempData["success"] = "Category created successfully";
+            }
+            else
+            {
+                TempData["error"] = "Failed to create category";
+            }
 
-            _context.Categories.Add(category);
-            _context.SaveChanges();
             return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var category = _context.Categories.Find(id);
-            CategoryVM categoryVM = new CategoryVM
-            {
-                Name = category.Name,
-                DisplayOrder = category.DisplayOrder
-            };
-
+            var categoryVM = await CategoryService.CategoryDetailsAsync(id);
             return View(categoryVM);
         }
         [HttpPost]
-        public IActionResult Edit(int id, CategoryVM obj)
+        public async Task<IActionResult> Edit(int id, CategoryVM obj)
         {
-            if (id <= 0)
-                return NotFound();
-            if (!ModelState.IsValid)
-                return View(obj);
-            var category = _context.Categories.Find(id);
-            if (category == null)
-                return NotFound();
-            category.Name = obj.Name;
-            category.DisplayOrder = obj.DisplayOrder;
-
-            _context.SaveChanges();
+            var IsUpdated = await CategoryService.UpdateCategoryAsync(id, obj);
+            if (IsUpdated)
+            {
+                TempData["success"] = "Category updated successfully";
+            }
+            else
+            {
+                TempData["error"] = "Failed to update category";
+            }
             return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var category = _context.Categories.Find(id);
-            if (category == null)
+            var categoryVM = await CategoryService.CategoryDetailsAsync(id);
+            if (categoryVM == null)
                 return NotFound();
-            CategoryVM categoryVM = new CategoryVM
-            {
-                Name = category.Name,
-                DisplayOrder = category.DisplayOrder
-            };
-            ViewBag.Id = id;
+            ViewBag.id = id;
             return View(categoryVM);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
 
-        public IActionResult ConfirmDelete(int? id)
+        public async Task<IActionResult> ConfirmDelete(int id)
         {
-            if (id <= 0)
-                return NotFound();
 
-            var category = _context.Categories.Find(id);
-            if (category == null)
-                return NotFound();
-
-            _context.Categories.Remove(category);
-            _context.SaveChanges();
+            var isDeleted = await CategoryService.DeleteCategoryAsync(id);
+            if (isDeleted)
+            {
+                TempData["success"] = "Category deleted successfully";
+            }
+            else
+            {
+                TempData["error"] = "Failed to delete category";
+            }
 
             return RedirectToAction(nameof(Index));
+        }
+        public async Task<IActionResult> Details(int id)
+        {
+            var category = await CategoryService.CategoryDetailsAsync(id);
+            if (category == null)
+                return NotFound();
+            return View(category);
         }
     }
 }
