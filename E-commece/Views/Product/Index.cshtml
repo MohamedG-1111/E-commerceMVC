@@ -1,0 +1,85 @@
+﻿@using BLL.ViewModels
+@model IEnumerable<ProductListVm>
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Products</h3>
+
+        <a asp-controller="Product"
+               asp-action="Create"
+               class="btn btn-primary">
+            + Add Product
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Image</th>
+                        <th>Title</th>
+                        <th>ISBN</th>
+                        <th>Category</th>
+                        <th>List Price</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <img src="@item.ImageUrl"
+                                         alt="product"
+                                         style="width:60px;height:60px;object-fit:cover;border-radius:8px;" />
+                                </td>
+
+                                <td>@item.Title</td>
+                                <td>@item.ISBN</td>
+                                <td>@item.CategoryName</td>
+                                <td>@item.ListPrice</td>
+
+                                <td class="text-center">
+                                    <a asp-action="Edit"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-warning">
+                                        Edit
+                                    </a>
+
+                                    <a asp-action="Details"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-info text-white">
+                                        Details
+                                    </a>
+
+                                    <a asp-action="Delete"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-danger">
+                                        Delete
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                No products found
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>

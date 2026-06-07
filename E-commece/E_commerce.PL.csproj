@@ -15,7 +15,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\BLL\E-commece.BLL.csproj" />
+		<ProjectReference Include="..\BLL\E_commerce.BLL.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="wwwroot\assets\Images\Products\" />
 	</ItemGroup>
 
 </Project>

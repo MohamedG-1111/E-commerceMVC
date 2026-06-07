@@ -2,6 +2,7 @@
 using BLL.ViewModels;
 using DataAccessLayer.Repositories.Interfaces;
 using DataAcessLayer.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BLL.Services.Implementation
 {
@@ -73,6 +74,16 @@ namespace BLL.Services.Implementation
             unitOfWork.Repository<Category>().Delete(category);
 
             return await unitOfWork.SaveChangesAsync() > 0;
+        }
+
+        public async Task<IEnumerable<SelectListItem>> GetAllCategoriesItems()
+        {
+            var categories = await unitOfWork.Repository<Category>().GetAllAsync();
+            return categories.Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString()
+            });
         }
     }
 }
