@@ -1,5 +1,6 @@
 ﻿using BLL.ViewModels;
 using DataAcessLayer.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BLL.Services.Interfaces
 {
@@ -12,6 +13,8 @@ namespace BLL.Services.Interfaces
 
         public Task<bool> UpdateCategoryAsync(int id, CategoryVM Obj);
         public Task<bool> DeleteCategoryAsync(int id);
+
+        public Task<IEnumerable<SelectListItem>> GetAllCategoriesItems();
 
     }
 }

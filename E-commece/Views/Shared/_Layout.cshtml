@@ -4,30 +4,37 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - E_commece</title>
-    <script type="importmap"></script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/E_commece.styles.css" asp-append-version="true" />
 </head>
+
 <body class="d-flex flex-column min-vh-100">
 
-    <!-- ========== NAVBAR ========== -->
-    <partial name="_HeaderPartial.cshtml"/>
+    <!-- NAVBAR -->
+    <partial name="_HeaderPartial" />
 
-    <!-- ========== CONTENT ========== -->
+    <!-- CONTENT -->
     <div class="container flex-grow-1 py-4">
         <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <!-- ========== FOOTER ========== -->
-	<partial name="_FooterPartial" />
+    <!-- FOOTER -->
+    <partial name="_FooterPartial" />
 
+    <!-- SCRIPTS (IMPORTANT ORDER) -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <!-- NOTIFICATION (LAST THING) -->
+    <partial name="_Notification" />
+
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

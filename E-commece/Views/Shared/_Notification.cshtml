@@ -1,0 +1,90 @@
+﻿<style>
+    /* ===== TOAST STYLE (NO ICON + SOLID) ===== */
+
+    #toast-container > div {
+        opacity: 1 !important;
+        border-radius: 8px !important;
+        font-size: 14px !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important;
+        padding: 12px 16px !important;
+    }
+
+    /* Remove icon completely */
+    .toast-message {
+        margin-left: 0 !important;
+    }
+
+    .toast-title {
+        font-weight: 600 !important;
+        margin-bottom: 5px !important;
+    }
+
+    /* Colors */
+    #toast-container > .toast-success {
+        background-color: #28a745 !important;
+        color: #fff !important;
+    }
+
+    #toast-container > .toast-error {
+        background-color: #dc3545 !important;
+        color: #fff !important;
+    }
+
+    #toast-container > .toast-info {
+        background-color: #17a2b8 !important;
+        color: #fff !important;
+    }
+
+    #toast-container > .toast-warning {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    /* Hide default icon */
+    .toast-success .toast-message::before,
+    .toast-error .toast-message::before,
+    .toast-info .toast-message::before,
+    .toast-warning .toast-message::before {
+        display: none !important;
+    }
+</style>
+
+<script>
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-top-right",
+        timeOut: 4000,
+        extendedTimeOut: 1000,
+        preventDuplicates: true,
+        newestOnTop: true,
+
+        // مهم: نخلي الشكل بسيط بدون icon style
+        iconClass: "",
+
+        // Header support
+        titleClass: "toast-title",
+        messageClass: "toast-message"
+    };
+
+    var successMessage = @Json.Serialize(TempData["success"]);
+    var errorMessage   = @Json.Serialize(TempData["error"]);
+    var infoMessage    = @Json.Serialize(TempData["info"]);
+    var warningMessage = @Json.Serialize(TempData["warning"]);
+
+    if (successMessage) {
+        toastr.success(successMessage, "Success");
+    }
+
+    if (errorMessage) {
+        toastr.error(errorMessage, "Error");
+    }
+
+    if (infoMessage) {
+        toastr.info(infoMessage, "Info");
+    }
+
+    if (warningMessage) {
+        toastr.warning(warningMessage, "Warning");
+    }
+</script>

@@ -1,4 +1,6 @@
-﻿namespace DataAcessLayer.Models
+﻿using E_commerce.DAL.Entities;
+
+namespace DataAcessLayer.Models
 {
     public class Category
     {
@@ -6,5 +8,7 @@
 
         public string Name { get; set; } = string.Empty;
         public int DisplayOrder { get; set; }
+
+        public List<Product> Products { get; set; } = new List<Product>();
     }
 }

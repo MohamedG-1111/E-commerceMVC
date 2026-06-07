@@ -1,0 +1,13 @@
+﻿using E_commerce.BLL.Attributes;
+using E_commerce.BLL.Settings;
+using Microsoft.AspNetCore.Http;
+
+namespace E_commerce.BLL.ViewModels
+{
+    public class CreateProductViewModel : ProductVm
+    {
+        [AllowedExtensions(FileSettings.AllowedExtensions)]
+        [MaxSizeAllowed(FileSettings.MaxSizeInBytes)]
+        public IFormFile Cover { get; set; } = null!;
+    }
+}
