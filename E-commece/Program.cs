@@ -5,6 +5,7 @@ using DataAccessLayer.Repositories.Implementation;
 using DataAccessLayer.Repositories.Interfaces;
 using DataAcessLayer.Data;
 using E_commerce.BLL.Services.Implementation;
+using E_commerce.BLL.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace E_commece
@@ -23,6 +24,7 @@ namespace E_commece
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IAttachmentService, AttachmentService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
