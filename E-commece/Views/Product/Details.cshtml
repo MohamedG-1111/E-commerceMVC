@@ -1,0 +1,137 @@
+﻿@using E_commerce.BLL.Settings
+@using E_commerce.DAL.Entities
+
+@model Product
+
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<div class="container py-4">
+
+    <div class="card shadow border-0 rounded-3 overflow-hidden">
+
+        <!-- Header -->
+        <div class="card-header bg-primary text-white py-3">
+            <h4 class="mb-0">
+                <i class="bi bi-box-seam me-2"></i>
+                Product Details
+            </h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-4">
+
+                <!-- Image -->
+                <div class="col-lg-4 text-center">
+
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img asp-append-version="true"
+                             src="~/@FileSettings.ImagesPath/@Model.ImageUrl"
+                             alt="@Model.Title"
+                             class="img-fluid rounded shadow-sm border"
+                             style="max-height: 420px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="border rounded d-flex justify-content-center align-items-center bg-light"
+                             style="height:420px;">
+                            <i class="bi bi-image text-secondary fs-1"></i>
+                        </div>
+                    }
+
+                </div>
+
+                <!-- Info -->
+                <div class="col-lg-8">
+
+                    <h2 class="fw-bold mb-2">@Model.Title</h2>
+
+                    <div class="mb-3">
+                        <span class="badge bg-info fs-6">
+                            @Model.Category?.Name
+                        </span>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-muted">Description</h6>
+                        <div class="border rounded p-3 bg-light">
+                            @Html.Raw(Model.Description)
+                        </div>
+                    </div>
+
+                    <!-- Prices -->
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <div class="card border-success h-100">
+                                <div class="card-body">
+                                    <small class="text-muted">List Price</small>
+                                    <h5 class="text-success mb-0">$@Model.ListPrice</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card border-primary h-100">
+                                <div class="card-body">
+                                    <small class="text-muted">Price (1 - 50)</small>
+                                    <h5 class="text-primary mb-0">$@Model.PriceFor1To50</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card border-warning h-100">
+                                <div class="card-body">
+                                    <small class="text-muted">Price (50+)</small>
+                                    <h5 class="text-warning mb-0">$@Model.PriceFor50Plus</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card border-danger h-100">
+                                <div class="card-body">
+                                    <small class="text-muted">Price (100+)</small>
+                                    <h5 class="text-danger mb-0">$@Model.PriceFor100Plus</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ISBN (Fixed placement) -->
+                        <div class="col-12">
+                            <div class="card border-dark">
+                                <div class="card-body d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">ISBN</small>
+                                    <h5 class="mb-0 fw-bold">@Model.ISBN</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer bg-white d-flex justify-content-between">
+
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+
+            <a asp-action="Edit"
+               asp-route-id="@Model.Id"
+               class="btn btn-warning">
+                <i class="bi bi-pencil-square"></i> Edit
+            </a>
+
+        </div>
+
+    </div>
+</div>

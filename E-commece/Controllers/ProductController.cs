@@ -32,6 +32,8 @@ namespace E_commece.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateOrUpdateProductViewModel model)
         {
+            ModelState.Remove("Product.Id");
+
             if (!ModelState.IsValid)
             {
                 model.Categories = await _categoryService.GetAllCategoriesItems();
@@ -106,5 +108,13 @@ namespace E_commece.Controllers
         }
 
 
+        public async Task<IActionResult> Details(int id)
+        {
+            var product = await _productService.ProductDetailsAsync(id);
+            if (product == null)
+                return NotFound();
+            return View(product);
+
+        }
     }
 }

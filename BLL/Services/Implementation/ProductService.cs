@@ -90,10 +90,9 @@ namespace E_commerce.BLL.Services.Implementation
 
         public async Task<Product?> ProductDetailsAsync(int Id)
         {
-            var Product = await _unitOfWork.Repository<Product>().GetAsQuery()
+            return await _unitOfWork.Repository<Product>().GetAsQuery()
                 .Include(x => x.Category)
                 .FirstOrDefaultAsync(x => x.Id == Id);
-            return Product;
         }
 
         public async Task<bool> UpdateProductAsync(CreateOrUpdateProductViewModel obj)
