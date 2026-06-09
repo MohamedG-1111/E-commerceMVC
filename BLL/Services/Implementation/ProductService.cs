@@ -70,14 +70,29 @@ namespace E_commerce.BLL.Services.Implementation
             }
         }
 
-        public Task<bool> DeleteProductAsync(int id)
+        public async Task<bool> DeleteProductAsync(int id)
         {
-            throw new NotImplementedException();
+            var productFromDb = await _unitOfWork.Repository<Product>().FindAsync(id);
+            if (productFromDb == null) return false;
+            var ImageUrl = productFromDb.ImageUrl;
+
+            _unitOfWork.Repository<Product>().Delete(productFromDb);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result >= 1)
+            {
+                if (!string.IsNullOrEmpty(productFromDb.ImageUrl))
+                    await attachmentService.DeleteAttachmentAsync(ImageUrl);
+                return true;
+
+            }
+            return false;
         }
 
         public async Task<Product?> ProductDetailsAsync(int Id)
         {
-            var Product = await _unitOfWork.Repository<Product>().FindAsync(Id);
+            var Product = await _unitOfWork.Repository<Product>().GetAsQuery()
+                .Include(x => x.Category)
+                .FirstOrDefaultAsync(x => x.Id == Id);
             return Product;
         }
 
