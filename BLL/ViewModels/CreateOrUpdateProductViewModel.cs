@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace E_commerce.BLL.ViewModels
 {
-    public class CreateProductViewModel : ProductVm
+    public class CreateOrUpdateProductViewModel : ProductVm
     {
         [AllowedExtensions(FileSettings.AllowedExtensions)]
         [MaxSizeAllowed(FileSettings.MaxSizeInBytes)]

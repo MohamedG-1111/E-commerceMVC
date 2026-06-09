@@ -35,7 +35,7 @@ namespace E_commerce.BLL.Services.Implementation
         }
 
 
-        public async Task<bool> CreateProductAsync(CreateProductViewModel obj)
+        public async Task<bool> CreateProductAsync(CreateOrUpdateProductViewModel obj)
         {
             if (obj == null || obj.Product == null)
                 return false;
@@ -75,14 +75,59 @@ namespace E_commerce.BLL.Services.Implementation
             throw new NotImplementedException();
         }
 
-        public Task<Product?> ProductDetailsAsync(int Id)
+        public async Task<Product?> ProductDetailsAsync(int Id)
         {
-            throw new NotImplementedException();
+            var Product = await _unitOfWork.Repository<Product>().FindAsync(Id);
+            return Product;
         }
 
-        public Task<bool> UpdateProductAsync(int id, Product Obj)
+        public async Task<bool> UpdateProductAsync(CreateOrUpdateProductViewModel obj)
         {
-            throw new NotImplementedException();
+            if (obj == null || obj.Product == null || obj.Product.Id == 0)
+                return false;
+
+            var productFromDb = await _unitOfWork.Repository<Product>().FindAsync(obj.Product.Id);
+            if (productFromDb == null) return false;
+
+            string oldImage = productFromDb.ImageUrl;
+            string newImage = string.Empty;
+
+            try
+            {
+                if (obj.Cover != null)
+                    newImage = await attachmentService.UploadAttachmentAsync(obj.Cover);
+
+                productFromDb.Title = obj.Product.Title;
+                productFromDb.ISBN = obj.Product.ISBN;
+                productFromDb.Description = obj.Product.Description;
+                productFromDb.CategoryId = obj.Product.CategoryId;
+                productFromDb.ListPrice = obj.Product.ListPrice;
+                productFromDb.PriceFor1To50 = obj.Product.PriceFor1To50;
+                productFromDb.PriceFor50Plus = obj.Product.PriceFor50Plus;
+                productFromDb.PriceFor100Plus = obj.Product.PriceFor100Plus;
+                productFromDb.ImageUrl = !string.IsNullOrEmpty(newImage) ? newImage : oldImage;
+
+                _unitOfWork.Repository<Product>().Update(productFromDb);
+                var result = await _unitOfWork.SaveChangesAsync();
+
+                if (result <= 0)
+                {
+                    if (!string.IsNullOrEmpty(newImage))
+                        await attachmentService.DeleteAttachmentAsync(newImage);
+                    return false;
+                }
+
+                if (!string.IsNullOrEmpty(newImage) && !string.IsNullOrEmpty(oldImage))
+                    await attachmentService.DeleteAttachmentAsync(oldImage);
+
+                return true;
+            }
+            catch
+            {
+                if (!string.IsNullOrEmpty(newImage))
+                    await attachmentService.DeleteAttachmentAsync(newImage);
+                return false;
+            }
         }
     }
 }
