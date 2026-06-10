@@ -7,8 +7,8 @@
         public string Title { get; set; } = string.Empty;
 
         public string ISBN { get; set; } = string.Empty;
-
         public int ListPrice { get; set; }
+        public string Author { get; set; } = string.Empty;
 
         public string CategoryName { get; set; } = string.Empty;
 

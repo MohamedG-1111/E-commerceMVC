@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using DataAccessLayer.Repositories.Interfaces;
 using DataAcessLayer.Data;
+using E_commerce.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DataAccessLayer.Repositories.Implementation
@@ -11,9 +12,11 @@ namespace DataAccessLayer.Repositories.Implementation
         private ConcurrentDictionary<Type, object> Repositories { get; set; }
             = new ConcurrentDictionary<Type, object>();
 
-        public UnitOfWork(AppDbContext context)
+        public IProductRepository ProductRepository { get; }
+        public UnitOfWork(AppDbContext context, IProductRepository _ProductRepository)
         {
             _context = context;
+            ProductRepository = _ProductRepository;
         }
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()

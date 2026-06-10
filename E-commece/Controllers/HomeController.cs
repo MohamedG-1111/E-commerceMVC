@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using BLL.Services.Interfaces;
 using E_commece.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,9 +7,16 @@ namespace E_commece.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly IProductService productService;
+
+        public HomeController(IProductService IProductService)
         {
-            return View();
+            this.productService = IProductService;
+        }
+        public async Task<IActionResult> Index(string item)
+        {
+            var Products = await productService.AllProductsAsync(item);
+            return View(Products);
         }
 
         public IActionResult Privacy()

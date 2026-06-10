@@ -22,9 +22,10 @@
                     <tr>
                         <th>Image</th>
                         <th>Title</th>
+                        <th>Author</th>
+
                         <th>ISBN</th>
                         <th>Category</th>
-                        <th>List Price</th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -42,9 +43,9 @@
                                 </td>
 
                                 <td>@item.Title</td>
+                                <td>@item.Author</td>
                                 <td>@item.ISBN</td>
                                 <td>@item.CategoryName</td>
-                                <td>@item.ListPrice</td>
 
                                 <td class="text-center">
                                     <a asp-action="Edit"

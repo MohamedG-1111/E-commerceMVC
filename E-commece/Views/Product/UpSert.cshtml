@@ -43,6 +43,13 @@
                                         <input asp-for="Product.Title" class="form-control" placeholder="e.g. The Great Gatsby" />
                                         <span asp-validation-for="Product.Title" class="text-danger small"></span>
                                     </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="Product.Author" class="form-label">
+                                            Author <span class="req">*</span>
+                                        </label>
+                                        <input asp-for="Product.Author" class="form-control" placeholder="e.g. F. Scott Fitzgerald" />
+                                        <span asp-validation-for="Product.Author" class="text-danger small"></span>
+                                    </div>
 
                                     <div class="col-md-6">
                                         <label asp-for="Product.ISBN" class="form-label">

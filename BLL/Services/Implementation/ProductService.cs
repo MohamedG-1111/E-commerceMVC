@@ -20,21 +20,30 @@ namespace E_commerce.BLL.Services.Implementation
         }
 
 
-        public async Task<IEnumerable<ProductListVm>?> AllProductsAsync()
+        public async Task<IEnumerable<ProductListVm>?> AllProductsAsync(string? searchTerm)
         {
-            return await _unitOfWork.Repository<Product>().GetAsQuery()
-                .Select(x => new ProductListVm()
+            var productsQuery =
+                _unitOfWork.ProductRepository.GetAsQuery();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                productsQuery = _unitOfWork.ProductRepository
+                    .Search(searchTerm);
+            }
+
+            return await productsQuery
+                .Select(x => new ProductListVm
                 {
                     Id = x.Id,
                     Title = x.Title,
                     ISBN = x.ISBN,
+                    Author = x.Author,
                     ListPrice = x.ListPrice,
                     CategoryName = x.Category.Name,
-                    ImageUrl = x.ImageUrl,
-                }).ToListAsync();
+                    ImageUrl = x.ImageUrl
+                })
+                .ToListAsync();
         }
-
-
         public async Task<bool> CreateProductAsync(CreateOrUpdateProductViewModel obj)
         {
             if (obj == null || obj.Product == null)
@@ -49,7 +58,7 @@ namespace E_commerce.BLL.Services.Implementation
                 var product = obj.Product;
                 product.ImageUrl = imageUrl;
 
-                await _unitOfWork.Repository<Product>().AddAsync(product);
+                await _unitOfWork.ProductRepository.AddAsync(product);
 
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result <= 0)
@@ -72,11 +81,11 @@ namespace E_commerce.BLL.Services.Implementation
 
         public async Task<bool> DeleteProductAsync(int id)
         {
-            var productFromDb = await _unitOfWork.Repository<Product>().FindAsync(id);
+            var productFromDb = await _unitOfWork.ProductRepository.FindAsync(id);
             if (productFromDb == null) return false;
             var ImageUrl = productFromDb.ImageUrl;
 
-            _unitOfWork.Repository<Product>().Delete(productFromDb);
+            _unitOfWork.ProductRepository.Delete(productFromDb);
             var result = await _unitOfWork.SaveChangesAsync();
             if (result >= 1)
             {
@@ -90,7 +99,7 @@ namespace E_commerce.BLL.Services.Implementation
 
         public async Task<Product?> ProductDetailsAsync(int Id)
         {
-            return await _unitOfWork.Repository<Product>().GetAsQuery()
+            return await _unitOfWork.ProductRepository.GetAsQuery()
                 .Include(x => x.Category)
                 .FirstOrDefaultAsync(x => x.Id == Id);
         }
@@ -100,7 +109,7 @@ namespace E_commerce.BLL.Services.Implementation
             if (obj == null || obj.Product == null || obj.Product.Id == 0)
                 return false;
 
-            var productFromDb = await _unitOfWork.Repository<Product>().FindAsync(obj.Product.Id);
+            var productFromDb = await _unitOfWork.ProductRepository.FindAsync(obj.Product.Id);
             if (productFromDb == null) return false;
 
             string oldImage = productFromDb.ImageUrl;
@@ -121,7 +130,7 @@ namespace E_commerce.BLL.Services.Implementation
                 productFromDb.PriceFor100Plus = obj.Product.PriceFor100Plus;
                 productFromDb.ImageUrl = !string.IsNullOrEmpty(newImage) ? newImage : oldImage;
 
-                _unitOfWork.Repository<Product>().Update(productFromDb);
+                _unitOfWork.ProductRepository.Update(productFromDb);
                 var result = await _unitOfWork.SaveChangesAsync();
 
                 if (result <= 0)
