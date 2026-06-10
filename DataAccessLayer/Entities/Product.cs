@@ -12,7 +12,11 @@ namespace E_commerce.DAL.Entities
         [StringLength(100, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 100 characters.")]
         public string Title { get; set; } = string.Empty;
         [Required]
+        [StringLength(20, MinimumLength = 3, ErrorMessage = "Description must be between 3 and 20 characters.")]
+        public string Author { get; set; } = string.Empty;
+        [Required]
         [StringLength(200, MinimumLength = 10, ErrorMessage = "Description must be between 10 and 200 characters.")]
+
         public string Description { get; set; } = string.Empty;
         [Required]
         public string ISBN { get; set; } = string.Empty;

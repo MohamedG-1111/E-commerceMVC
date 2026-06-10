@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Ecommece.DAL.Migrations
+namespace E_commerce.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260607112211_Intial")]
-    partial class Intial
+    [Migration("20260610151219_IntiailCreated")]
+    partial class IntiailCreated
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,13 +54,25 @@ namespace Ecommece.DAL.Migrations
                         {
                             Id = 2,
                             DisplayOrder = 2,
-                            Name = "Novels"
+                            Name = "Database"
                         },
                         new
                         {
                             Id = 3,
                             DisplayOrder = 3,
-                            Name = "Science"
+                            Name = "Web Development"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DisplayOrder = 4,
+                            Name = "Software Engineering"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DisplayOrder = 5,
+                            Name = "Artificial Intelligence"
                         });
                 });
 
@@ -72,12 +84,18 @@ namespace Ecommece.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("ISBN")
                         .IsRequired()
@@ -101,7 +119,8 @@ namespace Ecommece.DAL.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -113,132 +132,142 @@ namespace Ecommece.DAL.Migrations
                         new
                         {
                             Id = 1,
-                            CategoryId = 1,
-                            Description = "A Handbook of Agile Software Craftsmanship",
+                            Author = "Robert Martin",
+                            CategoryId = 4,
+                            Description = "A handbook of agile software craftsmanship.",
                             ISBN = "9780132350884",
                             ImageUrl = "",
-                            ListPrice = 500,
-                            PriceFor100Plus = 400,
-                            PriceFor1To50 = 450,
-                            PriceFor50Plus = 420,
+                            ListPrice = 60,
+                            PriceFor100Plus = 45,
+                            PriceFor1To50 = 55,
+                            PriceFor50Plus = 50,
                             Title = "Clean Code"
                         },
                         new
                         {
                             Id = 2,
-                            CategoryId = 1,
-                            Description = "Your Journey to Mastery",
-                            ISBN = "9780201616224",
+                            Author = "Andrew Hunt",
+                            CategoryId = 4,
+                            Description = "Classic guide for software developers.",
+                            ISBN = "9780135957059",
                             ImageUrl = "",
-                            ListPrice = 550,
-                            PriceFor100Plus = 450,
-                            PriceFor1To50 = 500,
-                            PriceFor50Plus = 470,
+                            ListPrice = 65,
+                            PriceFor100Plus = 50,
+                            PriceFor1To50 = 60,
+                            PriceFor50Plus = 55,
                             Title = "The Pragmatic Programmer"
                         },
                         new
                         {
                             Id = 3,
-                            CategoryId = 1,
-                            Description = "Elements of Reusable Object-Oriented Software",
+                            Author = "Erich Gamma",
+                            CategoryId = 4,
+                            Description = "Elements of reusable object oriented software.",
                             ISBN = "9780201633610",
                             ImageUrl = "",
-                            ListPrice = 600,
-                            PriceFor100Plus = 500,
-                            PriceFor1To50 = 550,
-                            PriceFor50Plus = 520,
+                            ListPrice = 70,
+                            PriceFor100Plus = 55,
+                            PriceFor1To50 = 65,
+                            PriceFor50Plus = 60,
                             Title = "Design Patterns"
                         },
                         new
                         {
                             Id = 4,
-                            CategoryId = 2,
-                            Description = "Fantasy novel series",
-                            ISBN = "9780747532743",
+                            Author = "Jon Skeet",
+                            CategoryId = 1,
+                            Description = "Deep dive into advanced C# concepts.",
+                            ISBN = "9781617294532",
                             ImageUrl = "",
-                            ListPrice = 300,
-                            PriceFor100Plus = 230,
-                            PriceFor1To50 = 270,
-                            PriceFor50Plus = 250,
-                            Title = "Harry Potter"
+                            ListPrice = 55,
+                            PriceFor100Plus = 40,
+                            PriceFor1To50 = 50,
+                            PriceFor50Plus = 45,
+                            Title = "C# in Depth"
                         },
                         new
                         {
                             Id = 5,
-                            CategoryId = 2,
-                            Description = "Fantasy adventure novel",
-                            ISBN = "9780261103344",
+                            Author = "Adam Freeman",
+                            CategoryId = 3,
+                            Description = "Comprehensive guide to ASP.NET Core.",
+                            ISBN = "9781484269237",
                             ImageUrl = "",
-                            ListPrice = 320,
-                            PriceFor100Plus = 250,
-                            PriceFor1To50 = 290,
-                            PriceFor50Plus = 270,
-                            Title = "The Hobbit"
+                            ListPrice = 75,
+                            PriceFor100Plus = 60,
+                            PriceFor1To50 = 70,
+                            PriceFor50Plus = 65,
+                            Title = "ASP.NET Core"
                         },
                         new
                         {
                             Id = 6,
+                            Author = "Itzik BenGan",
                             CategoryId = 2,
-                            Description = "Dystopian novel",
-                            ISBN = "9780451524935",
+                            Description = "Practical T SQL fundamentals and techniques.",
+                            ISBN = "9781509302000",
                             ImageUrl = "",
-                            ListPrice = 280,
-                            PriceFor100Plus = 210,
-                            PriceFor1To50 = 250,
-                            PriceFor50Plus = 230,
-                            Title = "1984"
+                            ListPrice = 50,
+                            PriceFor100Plus = 35,
+                            PriceFor1To50 = 45,
+                            PriceFor50Plus = 40,
+                            Title = "SQL Server"
                         },
                         new
                         {
                             Id = 7,
-                            CategoryId = 3,
-                            Description = "Cosmology explained",
-                            ISBN = "9780553380163",
+                            Author = "Eric Matthes",
+                            CategoryId = 1,
+                            Description = "Fast paced introduction to Python.",
+                            ISBN = "9781718502703",
                             ImageUrl = "",
-                            ListPrice = 400,
-                            PriceFor100Plus = 330,
-                            PriceFor1To50 = 370,
-                            PriceFor50Plus = 350,
-                            Title = "A Brief History of Time"
+                            ListPrice = 45,
+                            PriceFor100Plus = 30,
+                            PriceFor1To50 = 40,
+                            PriceFor50Plus = 35,
+                            Title = "Python Crash"
                         },
                         new
                         {
                             Id = 8,
-                            CategoryId = 3,
-                            Description = "Evolutionary biology book",
-                            ISBN = "9780199291151",
+                            Author = "Ian Goodfellow",
+                            CategoryId = 5,
+                            Description = "Foundational deep learning concepts.",
+                            ISBN = "9780262035613",
                             ImageUrl = "",
-                            ListPrice = 420,
-                            PriceFor100Plus = 350,
-                            PriceFor1To50 = 390,
-                            PriceFor50Plus = 370,
-                            Title = "The Selfish Gene"
+                            ListPrice = 80,
+                            PriceFor100Plus = 65,
+                            PriceFor1To50 = 75,
+                            PriceFor50Plus = 70,
+                            Title = "Deep Learning"
                         },
                         new
                         {
                             Id = 9,
-                            CategoryId = 3,
-                            Description = "Science and universe exploration",
-                            ISBN = "9780345539434",
+                            Author = "Aurelien Geron",
+                            CategoryId = 5,
+                            Description = "Machine learning with Scikit Learn and TensorFlow.",
+                            ISBN = "9781098125974",
                             ImageUrl = "",
-                            ListPrice = 450,
-                            PriceFor100Plus = 380,
-                            PriceFor1To50 = 420,
-                            PriceFor50Plus = 400,
-                            Title = "Cosmos"
+                            ListPrice = 85,
+                            PriceFor100Plus = 70,
+                            PriceFor1To50 = 80,
+                            PriceFor50Plus = 75,
+                            Title = "Hands On ML"
                         },
                         new
                         {
                             Id = 10,
-                            CategoryId = 1,
-                            Description = "Rules for focused success",
-                            ISBN = "9781455586691",
+                            Author = "David Flanagan",
+                            CategoryId = 3,
+                            Description = "Definitive JavaScript reference and guide.",
+                            ISBN = "9781491952023",
                             ImageUrl = "",
-                            ListPrice = 380,
-                            PriceFor100Plus = 310,
-                            PriceFor1To50 = 350,
-                            PriceFor50Plus = 330,
-                            Title = "Deep Work"
+                            ListPrice = 60,
+                            PriceFor100Plus = 45,
+                            PriceFor1To50 = 55,
+                            PriceFor50Plus = 50,
+                            Title = "JavaScript Guide"
                         });
                 });
 

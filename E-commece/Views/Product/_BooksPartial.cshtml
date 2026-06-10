@@ -1,0 +1,43 @@
+﻿@using E_commerce.BLL.Settings
+@model IEnumerable<ProductListVm>
+
+@foreach (var product in Model)
+{
+    <article class="book-card"
+             data-title="@product.Title.ToLower()"
+             data-author="@product.Author.ToLower()"
+             data-isbn="@product.ISBN.ToLower()"
+             data-category="@product.CategoryName">
+
+        <div class="book-cover">
+            @if (!string.IsNullOrEmpty(product.ImageUrl))
+            {
+                <img src="@($"{FileSettings.ImagesPath}/{product.ImageUrl}")" alt="Cover of @product.Title" loading="lazy" />
+            }
+            else
+            {
+                <div class="book-cover-placeholder">
+                    📖
+                    <span>No cover</span>
+                </div>
+            }
+            <span class="category-badge">@product.CategoryName</span>
+        </div>
+
+        <div class="book-info">
+            <p class="book-title">@product.Title</p>
+            <p class="book-author">@product.Author</p>
+            <p class="book-isbn">@product.ISBN</p>
+
+            <div class="book-footer">
+                <span class="book-price">
+                    <sup>EGP</sup>@product.ListPrice.ToString("N0")
+                </span>
+                <a href="/Product/Details/@product.Id" class="btn-details">
+                    View
+                    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+                </a>
+            </div>
+        </div>
+    </article>
+}

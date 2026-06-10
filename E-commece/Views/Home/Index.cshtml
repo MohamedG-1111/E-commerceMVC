@@ -1,8 +1,128 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@using E_commerce.BLL.Settings
+@model IEnumerable<E_commerce.BLL.ViewModels.ProductListVm>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@{
+    ViewData["Title"] = "Home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/css/home/index.css" rel="stylesheet" />
+<!-- ─── HERO ─── -->
+<section class="hero">
+    <p class="hero-eyebrow">Our Collection</p>
+    <h1>Every book you<br>could ever need.</h1>
+    <p>Browse thousands of titles across every genre — from timeless classics to today's bestsellers.</p>
+    <div class="hero-search">
+        <input type="text" placeholder="Search by title, author, or ISBN…" id="searchInput" />
+        <button onclick="filterBooks()">Search</button>
+    </div>
+</section>
+
+<!-- ─── FILTER BAR ─── -->
+<nav class="filter-bar" aria-label="Category filter">
+    <span class="filter-label">Browse:</span>
+    <button class="filter-chip active" onclick="setCategory(this, '')">All</button>
+    @foreach (var cat in Model.Select(p => p.CategoryName).Distinct().OrderBy(c => c))
+    {
+        <button class="filter-chip" onclick="setCategory(this, '@cat')">@cat</button>
+    }
+</nav>
+
+<!-- ─── CATALOGUE ─── -->
+<main class="catalogue">
+    <div class="catalogue-header">
+        <h2>All Books</h2>
+        <span id="count-label">@Model.Count() titles</span>
+    </div>
+
+    <div class="book-grid" id="bookGrid">
+        @foreach (var product in Model)
+        {
+            <article class="book-card"
+                     data-title="@product.Title.ToLower()"
+                     data-author="@product.Author.ToLower()"
+                     data-isbn="@product.ISBN.ToLower()"
+                     data-category="@product.CategoryName">
+
+                <div class="book-cover">
+                    @if (!string.IsNullOrEmpty(product.ImageUrl))
+                    {
+                        <img src="@($"{FileSettings.ImagesPath}/{product.ImageUrl}")" alt="Cover of @product.Title" loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="book-cover-placeholder">
+                            📖
+                            <span>No cover</span>
+                        </div>
+                    }
+                    <span class="category-badge">@product.CategoryName</span>
+                </div>
+
+                <div class="book-info">
+                    <p class="book-title">@product.Title</p>
+                    <p class="book-author">@product.Author</p>
+                    <p class="book-isbn">@product.ISBN</p>
+
+                    <div class="book-footer">
+                        <span class="book-price">
+                            <sup>EGP</sup>@product.ListPrice.ToString("N0")
+                        </span>
+                        <a href="/Product/Details/@product.Id" class="btn-details">
+                            View
+                            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+                        </a>
+                    </div>
+                </div>
+            </article>
+        }
+        <div id="emptyState" style="display:none; text-align:center; padding:40px;">
+            <p>No books match your search.</p>
+        </div>
+    </div>
+
+    <div class="empty-state" id="emptyState" style="display:none;">
+        <p>No books match your search.</p>
+    </div>
+</main>
+
+<script>
+    let activeCategory = '';
+    let searchTerm = '';
+
+    function setCategory(btn, cat) {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        activeCategory = cat;
+        applyFilters();
+    }
+    document.getElementById('searchInput').addEventListener('input', function() {
+        filterBooks();
+    });
+
+    function filterBooks() {
+        const searchTerm = document.getElementById('searchInput').value.trim();
+
+        $.ajax({
+            url: '/Product/SearchAsync',
+            type: 'GET',
+            data: { searchTerm: searchTerm },  
+
+            success: function(result) {
+                $("#bookGrid").html(result);
+                const count = $("#bookGrid .book-card").length;
+                $("#count-label").text(count + " titles");
+
+                if (count === 0) {
+                    $("#emptyState").show();
+                } else {
+                    $("#emptyState").hide();
+                }
+            },
+
+            error: function(xhr) {
+                console.log(xhr.responseText);
+            }
+        });
+    }
+
+</script>
