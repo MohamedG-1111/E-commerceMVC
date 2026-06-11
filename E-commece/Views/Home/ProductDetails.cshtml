@@ -1,0 +1,181 @@
+﻿@using E_commerce.BLL.Settings
+@using E_commerce.DAL.Entities
+@model Product
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container py-4">
+
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+
+        <div class="row g-0">
+
+            <!-- Product Image -->
+            <div class="col-lg-5 bg-light d-flex align-items-center justify-content-center p-5">
+
+           @if (!string.IsNullOrEmpty(Model.ImageUrl))
+{
+                    <img asp-append-version="true"
+                         src="~/@FileSettings.ImagesPath/@Model.ImageUrl"
+                         alt="@Model.Title"
+                         class="img-fluid rounded shadow-sm border"
+                   style="max-height:490px; object-fit:contain;" />
+
+                    
+}
+                
+            </div>
+
+            <!-- Product Details -->
+            <div class="col-lg-7">
+
+                <div class="p-4 p-lg-5">
+
+                    <!-- Category -->
+                    <span class="badge bg-dark px-3 py-2 rounded-pill mb-3">
+                        @Model.Category?.Name
+                    </span>
+
+                    <!-- Title -->
+                    <h1 class="fw-bold display-6 mb-2">
+                        @Model.Title
+                    </h1>
+                    <!-- Description -->
+                    <h5 class="fw-bold mb-3">
+                        @Html.Raw(Model.Description)
+                    </h5>
+                    <!-- Author -->
+                    <p class="text-secondary fs-5 mb-4">
+                        By <span class="fw-semibold">@Model.Author</span>
+                    </p>
+                    <!-- ISBN -->
+                    <div class="mb-4">
+                        <span class="badge text-bg-secondary p-2">
+                            ISBN: @Model.ISBN
+                        </span>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="bg-light rounded-4 p-4 mb-4">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <h2 class="text-success fw-bold mb-0">
+                                $@Model.PriceFor1To50
+                            </h2>
+
+                            <span class="text-decoration-line-through text-muted fs-5">
+                                $@Model.ListPrice
+                            </span>
+
+                        </div>
+
+                        <small class="text-success fw-semibold">
+                            Save $@(Model.ListPrice - Model.PriceFor1To50)
+                        </small>
+
+                    </div>
+                    <!-- Bulk Pricing -->
+                    <h5 class="fw-bold mt-5 mb-3">
+                        Bulk Pricing
+                    </h5>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 shadow-sm text-center">
+                                <div class="card-body">
+                                    <small class="text-muted d-block">
+                                        1 - 50 Copies
+                                    </small>
+
+                                    <h4 class="text-primary fw-bold mt-2">
+                                        $@Model.PriceFor1To50
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 shadow-sm text-center">
+                                <div class="card-body">
+                                    <small class="text-muted d-block">
+                                        51 - 100 Copies
+                                    </small>
+
+                                    <h4 class="text-primary fw-bold mt-2">
+                                        $@Model.PriceFor50Plus
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 shadow-sm text-center">
+                                <div class="card-body">
+                                    <small class="text-muted d-block">
+                                        100+ Copies
+                                    </small>
+
+                                    <h4 class="text-primary fw-bold mt-2">
+                                        $@Model.PriceFor100Plus
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Add To Cart -->
+                    <form asp-controller="Cart"
+                          asp-action="AddToCart"
+                          method="post"
+                          class="mt-5">
+
+                        <input type="hidden"
+                               name="ProductId"
+                               value="@Model.Id" />
+
+                        <div class="row g-3">
+
+                            <div class="col-md-3">
+                                <input type="number"
+                                       name="Count"
+                                       value="1"
+                                       min="1"
+                                       class="form-control form-control-lg text-center">
+                            </div>
+
+                            <div class="col-md-6">
+                                <button type="submit"
+                                        class="btn btn-success btn-lg w-100">
+
+                                    <i class="bi bi-cart-plus-fill me-2"></i>
+                                    Add To Cart
+
+                                </button>
+                            </div>
+
+                            <div class="col-md-3">
+                                <a asp-controller="Home"
+                                   asp-action="Index"
+                                   class="btn btn-outline-secondary btn-lg w-100">
+                                    Back
+                                </a>
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

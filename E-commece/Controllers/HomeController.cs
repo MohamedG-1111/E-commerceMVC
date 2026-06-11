@@ -9,14 +9,24 @@ namespace E_commece.Controllers
     {
         private readonly IProductService productService;
 
-        public HomeController(IProductService IProductService)
+        public HomeController(IProductService ProductService)
         {
-            this.productService = IProductService;
+            this.productService = ProductService;
         }
-        public async Task<IActionResult> Index(string item)
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            var Products = await productService.AllProductsAsync(item);
-            return View(Products);
+            var products = await productService.AllProductsAsync();
+            return View(products);
+        }
+        public async Task<IActionResult> ProductDetails(int id)
+        {
+            var product = await productService.ProductDetailsAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return View(product);
         }
 
         public IActionResult Privacy()

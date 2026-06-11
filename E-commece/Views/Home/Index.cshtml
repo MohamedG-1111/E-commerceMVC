@@ -20,10 +20,16 @@
 <!-- ─── FILTER BAR ─── -->
 <nav class="filter-bar" aria-label="Category filter">
     <span class="filter-label">Browse:</span>
-    <button class="filter-chip active" onclick="setCategory(this, '')">All</button>
+
+    <button class="filter-chip active" onclick="setCategory(this, '')">
+        All
+    </button>
+
     @foreach (var cat in Model.Select(p => p.CategoryName).Distinct().OrderBy(c => c))
     {
-        <button class="filter-chip" onclick="setCategory(this, '@cat')">@cat</button>
+        <button class="filter-chip" onclick="setCategory(this, '@cat')">
+            @cat
+        </button>
     }
 </nav>
 
@@ -67,7 +73,7 @@
                         <span class="book-price">
                             <sup>EGP</sup>@product.ListPrice.ToString("N0")
                         </span>
-                        <a href="/Product/Details/@product.Id" class="btn-details">
+                        <a href="/Home/ProductDetails/@product.Id" class="btn-details">
                             View
                             <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
                         </a>
@@ -89,26 +95,36 @@
     let activeCategory = '';
     let searchTerm = '';
 
-    function setCategory(btn, cat) {
-        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
-        activeCategory = cat;
+    // Search input
+    document.getElementById('searchInput').addEventListener('input', function () {
+        searchTerm = this.value.trim();
         applyFilters();
-    }
-    document.getElementById('searchInput').addEventListener('input', function() {
-        filterBooks();
     });
 
-    function filterBooks() {
-        const searchTerm = document.getElementById('searchInput').value.trim();
+    // Category filter
+    function setCategory(btn, cat) {
+        document.querySelectorAll('.filter-chip')
+            .forEach(c => c.classList.remove('active'));
 
+        btn.classList.add('active');
+        activeCategory = cat;
+
+        applyFilters();
+    }
+
+    // Main filter function (AJAX unified)
+    function applyFilters() {
         $.ajax({
             url: '/Product/SearchAsync',
             type: 'GET',
-            data: { searchTerm: searchTerm },  
+            data: {
+                searchTerm: searchTerm,
+                category: activeCategory
+            },
+            success: function (result) {
 
-            success: function(result) {
                 $("#bookGrid").html(result);
+
                 const count = $("#bookGrid .book-card").length;
                 $("#count-label").text(count + " titles");
 
@@ -118,11 +134,9 @@
                     $("#emptyState").hide();
                 }
             },
-
-            error: function(xhr) {
+            error: function (xhr) {
                 console.log(xhr.responseText);
             }
         });
     }
-
 </script>
