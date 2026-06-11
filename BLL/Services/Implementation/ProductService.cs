@@ -20,16 +20,18 @@ namespace E_commerce.BLL.Services.Implementation
         }
 
 
-        public async Task<IEnumerable<ProductListVm>?> AllProductsAsync(string? searchTerm)
+        public async Task<IEnumerable<ProductListVm>?> AllProductsAsync(string? searchTerm, string? category)
         {
             var productsQuery =
                 _unitOfWork.ProductRepository.GetAsQuery();
 
-            if (!string.IsNullOrWhiteSpace(searchTerm))
+            if (!string.IsNullOrWhiteSpace(searchTerm) || !string.IsNullOrWhiteSpace(category))
             {
                 productsQuery = _unitOfWork.ProductRepository
-                    .Search(searchTerm);
+                    .Search(searchTerm, category);
             }
+
+
 
             return await productsQuery
                 .Select(x => new ProductListVm
@@ -44,6 +46,9 @@ namespace E_commerce.BLL.Services.Implementation
                 })
                 .ToListAsync();
         }
+
+
+
         public async Task<bool> CreateProductAsync(CreateOrUpdateProductViewModel obj)
         {
             if (obj == null || obj.Product == null)

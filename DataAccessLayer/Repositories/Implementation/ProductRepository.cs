@@ -2,7 +2,6 @@
 using DataAcessLayer.Data;
 using E_commerce.DAL.Entities;
 using E_commerce.DAL.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace E_commerce.DAL.Repositories.Implementation
 {
@@ -14,18 +13,28 @@ namespace E_commerce.DAL.Repositories.Implementation
         {
             this.context = context;
         }
-        public IQueryable<Product> Search(string searchTerm)
+        public IQueryable<Product> Search(string? searchTerm, string? category)
         {
-            var query = context.Products
-                    .Include(p => p.Category);
+            var query = context.Products.AsQueryable();
 
-            if (string.IsNullOrWhiteSpace(searchTerm))
-                return query;
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
 
-            return query.Where(p =>
-                p.Title.Contains(searchTerm) ||
-                p.Author.Contains(searchTerm) ||
-                p.ISBN.Contains(searchTerm));
+                query = query.Where(p =>
+                    p.Title.ToLower().Contains(searchTerm) ||
+                    p.Author.ToLower().Contains(searchTerm) ||
+                    p.ISBN.ToLower().Contains(searchTerm));
+            }
+
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+
+                query = query.Where(p =>
+                    p.Category != null &&
+                    p.Category.Name == category);
+            }
+
+            return query;
         }
     }
 }

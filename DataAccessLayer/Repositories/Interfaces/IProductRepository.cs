@@ -5,6 +5,6 @@ namespace E_commerce.DAL.Repositories.Interfaces
 {
     public interface IProductRepository : IGenericRepository<Product>
     {
-        public IQueryable<Product> Search(string searchTerm);
+        public IQueryable<Product> Search(string? searchTerm, string? category);
     }
 }
