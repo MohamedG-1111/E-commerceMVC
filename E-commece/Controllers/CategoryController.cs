@@ -27,14 +27,14 @@ namespace E_commece.Controllers
         {
             if (!ModelState.IsValid)
                 return View(obj);
-            var IsCreated = await CategoryService.CreateCategoryAsync(obj);
-            if (IsCreated)
+            var Result = await CategoryService.CreateCategoryAsync(obj);
+            if (Result.IsSuccess)
             {
                 TempData["success"] = "Category created successfully";
             }
             else
             {
-                TempData["error"] = "Failed to create category";
+                TempData["error"] = Result.ErrorMessage;
             }
 
             return RedirectToAction(nameof(Index));

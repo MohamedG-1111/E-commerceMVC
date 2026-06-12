@@ -2,6 +2,7 @@
 using BLL.ViewModels;
 using DataAccessLayer.Repositories.Interfaces;
 using DataAcessLayer.Models;
+using Ecommerce.Utility;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BLL.Services.Implementation
@@ -34,19 +35,24 @@ namespace BLL.Services.Implementation
             };
         }
 
-        public async Task<bool> CreateCategoryAsync(CategoryVM obj)
+        public async Task<Result> CreateCategoryAsync(CategoryVM obj)
         {
             if (obj == null)
-                return false;
+                return Result.Failure("Invalid category data.");
             Category category = new Category
             {
                 Name = obj.Name,
                 DisplayOrder = obj.DisplayOrder
             };
+            var existingCategory = await unitOfWork.Repository<Category>().AnyAsync(c => c.Name.ToLower() == obj.Name.ToLower());
+
+            if (existingCategory)
+                return Result.Failure("A category with the same name already exists.");
 
             await unitOfWork.Repository<Category>().AddAsync(category);
 
-            return await unitOfWork.SaveChangesAsync() > 0;
+            return await unitOfWork.SaveChangesAsync() > 0 ?
+                Result.Success() : Result.Failure("Failed to create category.");
         }
 
         public async Task<bool> UpdateCategoryAsync(int id, CategoryVM Obj)

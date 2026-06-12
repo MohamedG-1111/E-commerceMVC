@@ -1,12 +1,13 @@
 ﻿using BLL.ViewModels;
 using DataAcessLayer.Models;
+using Ecommerce.Utility;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BLL.Services.Interfaces
 {
     public interface ICategoryService
     {
-        public Task<bool> CreateCategoryAsync(CategoryVM obj);
+        public Task<Result> CreateCategoryAsync(CategoryVM obj);
         public Task<CategoryVM?> CategoryDetailsAsync(int Id);
 
         public Task<IEnumerable<Category>?> AllCategoriesAsync();
