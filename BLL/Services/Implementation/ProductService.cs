@@ -22,29 +22,20 @@ namespace E_commerce.BLL.Services.Implementation
 
         public async Task<IEnumerable<ProductListVm>?> AllProductsAsync(string? searchTerm, string? category)
         {
-            var productsQuery =
-                _unitOfWork.ProductRepository.GetAsQuery();
+            var query = (string.IsNullOrWhiteSpace(searchTerm) && string.IsNullOrWhiteSpace(category))
+                ? _unitOfWork.ProductRepository.GetAsQuery()
+                : _unitOfWork.ProductRepository.Search(searchTerm, category);
 
-            if (!string.IsNullOrWhiteSpace(searchTerm) || !string.IsNullOrWhiteSpace(category))
+            return await query.Select(x => new ProductListVm
             {
-                productsQuery = _unitOfWork.ProductRepository
-                    .Search(searchTerm, category);
-            }
-
-
-
-            return await productsQuery
-                .Select(x => new ProductListVm
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    ISBN = x.ISBN,
-                    Author = x.Author,
-                    ListPrice = x.ListPrice,
-                    CategoryName = x.Category.Name,
-                    ImageUrl = x.ImageUrl
-                })
-                .ToListAsync();
+                Id = x.Id,
+                Title = x.Title,
+                ISBN = x.ISBN,
+                Author = x.Author,
+                ListPrice = x.ListPrice,
+                CategoryName = x.Category.Name,
+                ImageUrl = x.ImageUrl
+            }).ToListAsync();
         }
 
 

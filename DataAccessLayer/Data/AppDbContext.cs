@@ -1,10 +1,12 @@
 ﻿using DataAcessLayer.Models;
 using E_commerce.DAL.Entities;
+using E_commerce.DAL.Entities.Users;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAcessLayer.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -12,6 +14,8 @@ namespace DataAcessLayer.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
             // =========================
             // Categories Seed
