@@ -13,5 +13,7 @@ namespace E_commerce.DAL.Entities.Users
         {
             get; set;
         }
+
+        public string? ProfilePicture { get; set; }
     }
 }

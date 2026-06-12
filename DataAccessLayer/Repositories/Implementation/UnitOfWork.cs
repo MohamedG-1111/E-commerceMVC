@@ -36,5 +36,11 @@ namespace DataAccessLayer.Repositories.Implementation
         }
 
         public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
+
+        public async Task CommitTransactionAsync(IDbContextTransaction transaction)
+        => await transaction.CommitAsync();
+
+        public async Task RollbackTransactionAsync(IDbContextTransaction transaction)
+        => await transaction.RollbackAsync();
     }
 }

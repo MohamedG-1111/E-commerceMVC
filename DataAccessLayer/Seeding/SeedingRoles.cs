@@ -1,7 +1,7 @@
 ﻿using Ecommerce.Utility;
 using Microsoft.AspNetCore.Identity;
 
-namespace E_commerce.DAL.Data
+namespace E_commerce.DAL.Seeding
 {
     public static class SeedingRoles
     {

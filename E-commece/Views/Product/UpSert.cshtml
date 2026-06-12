@@ -1,4 +1,4 @@
-﻿@using E_commerce.BLL.Settings
+﻿@using E_commerce.Utility.Settings
 @model E_commerce.BLL.ViewModels.CreateOrUpdateProductViewModel
 
 @{
@@ -6,7 +6,7 @@
     ViewData["Title"] = isEditMode ? "Edit Product" : "Create Product";
     var imageUrl = string.IsNullOrEmpty(Model.Product?.ImageUrl)
         ? ""
-        : $"/{FileSettings.ImagesPath.Trim('/')}/{Model.Product.ImageUrl.TrimStart('/')}";
+        : $"/{FileSettings.ImagesPathProducts.Trim('/')}/{Model.Product.ImageUrl.TrimStart('/')}";
 }
 
 <link href="~/css/product/productupsert.css" rel="stylesheet" />
