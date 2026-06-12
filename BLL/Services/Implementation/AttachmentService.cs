@@ -1,5 +1,4 @@
 ﻿using E_commerce.BLL.Services.Interfaces;
-using E_commerce.BLL.Settings;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
@@ -15,9 +14,9 @@ namespace E_commerce.BLL.Services.Implementation
             _environment = environment;
         }
 
-        public async Task DeleteAttachmentAsync(string fileName)
+        public async Task DeleteAttachmentAsync(string fileName, string folderPath)
         {
-            var path = Path.Combine(_environment.WebRootPath, FileSettings.ImagesPath, fileName);
+            var path = Path.Combine(_environment.WebRootPath, folderPath, fileName);
 
             if (File.Exists(path))
             {
@@ -25,14 +24,14 @@ namespace E_commerce.BLL.Services.Implementation
             }
         }
 
-        public async Task<string> UploadAttachmentAsync(IFormFile file)
+        public async Task<string> UploadAttachmentAsync(IFormFile file, string folderPath)
         {
             if (file == null || file.Length == 0)
             {
                 return null;
             }
             var CoverName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            var FullPath = Path.Combine(_environment.WebRootPath, FileSettings.ImagesPath, CoverName);
+            var FullPath = Path.Combine(_environment.WebRootPath, folderPath, CoverName);
             using var stream = new FileStream(FullPath, FileMode.Create);
             await file.CopyToAsync(stream);
             return CoverName;

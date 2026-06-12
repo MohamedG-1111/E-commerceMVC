@@ -3,6 +3,7 @@ using DataAccessLayer.Repositories.Interfaces;
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities;
+using E_commerce.Utility.Settings;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -22,29 +23,20 @@ namespace E_commerce.BLL.Services.Implementation
 
         public async Task<IEnumerable<ProductListVm>?> AllProductsAsync(string? searchTerm, string? category)
         {
-            var productsQuery =
-                _unitOfWork.ProductRepository.GetAsQuery();
+            var query = (string.IsNullOrWhiteSpace(searchTerm) && string.IsNullOrWhiteSpace(category))
+                ? _unitOfWork.ProductRepository.GetAsQuery()
+                : _unitOfWork.ProductRepository.Search(searchTerm, category);
 
-            if (!string.IsNullOrWhiteSpace(searchTerm) || !string.IsNullOrWhiteSpace(category))
+            return await query.Select(x => new ProductListVm
             {
-                productsQuery = _unitOfWork.ProductRepository
-                    .Search(searchTerm, category);
-            }
-
-
-
-            return await productsQuery
-                .Select(x => new ProductListVm
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    ISBN = x.ISBN,
-                    Author = x.Author,
-                    ListPrice = x.ListPrice,
-                    CategoryName = x.Category.Name,
-                    ImageUrl = x.ImageUrl
-                })
-                .ToListAsync();
+                Id = x.Id,
+                Title = x.Title,
+                ISBN = x.ISBN,
+                Author = x.Author,
+                ListPrice = x.ListPrice,
+                CategoryName = x.Category.Name,
+                ImageUrl = x.ImageUrl
+            }).ToListAsync();
         }
 
 
@@ -58,7 +50,7 @@ namespace E_commerce.BLL.Services.Implementation
 
             try
             {
-                imageUrl = await attachmentService.UploadAttachmentAsync(obj.Cover);
+                imageUrl = await attachmentService.UploadAttachmentAsync(obj.Cover, FileSettings.ImagesPathProducts);
 
                 var product = obj.Product;
                 product.ImageUrl = imageUrl;
@@ -68,7 +60,7 @@ namespace E_commerce.BLL.Services.Implementation
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result <= 0)
                 {
-                    await attachmentService.DeleteAttachmentAsync(imageUrl);
+                    await attachmentService.DeleteAttachmentAsync(imageUrl, FileSettings.ImagesPathProducts);
                     return false;
                 }
 
@@ -78,7 +70,7 @@ namespace E_commerce.BLL.Services.Implementation
             {
                 if (!string.IsNullOrEmpty(imageUrl))
                 {
-                    await attachmentService.DeleteAttachmentAsync(imageUrl);
+                    await attachmentService.DeleteAttachmentAsync(imageUrl, FileSettings.ImagesPathProducts);
                 }
                 return false;
             }
@@ -95,7 +87,7 @@ namespace E_commerce.BLL.Services.Implementation
             if (result >= 1)
             {
                 if (!string.IsNullOrEmpty(productFromDb.ImageUrl))
-                    await attachmentService.DeleteAttachmentAsync(ImageUrl);
+                    await attachmentService.DeleteAttachmentAsync(ImageUrl, FileSettings.ImagesPathProducts);
                 return true;
 
             }
@@ -123,7 +115,7 @@ namespace E_commerce.BLL.Services.Implementation
             try
             {
                 if (obj.Cover != null)
-                    newImage = await attachmentService.UploadAttachmentAsync(obj.Cover);
+                    newImage = await attachmentService.UploadAttachmentAsync(obj.Cover, FileSettings.ImagesPathProducts);
 
                 productFromDb.Title = obj.Product.Title;
                 productFromDb.ISBN = obj.Product.ISBN;
@@ -141,19 +133,19 @@ namespace E_commerce.BLL.Services.Implementation
                 if (result <= 0)
                 {
                     if (!string.IsNullOrEmpty(newImage))
-                        await attachmentService.DeleteAttachmentAsync(newImage);
+                        await attachmentService.DeleteAttachmentAsync(newImage, FileSettings.ImagesPathProducts);
                     return false;
                 }
 
                 if (!string.IsNullOrEmpty(newImage) && !string.IsNullOrEmpty(oldImage))
-                    await attachmentService.DeleteAttachmentAsync(oldImage);
+                    await attachmentService.DeleteAttachmentAsync(oldImage, FileSettings.ImagesPathProducts);
 
                 return true;
             }
             catch
             {
                 if (!string.IsNullOrEmpty(newImage))
-                    await attachmentService.DeleteAttachmentAsync(newImage);
+                    await attachmentService.DeleteAttachmentAsync(newImage, FileSettings.ImagesPathProducts);
                 return false;
             }
         }

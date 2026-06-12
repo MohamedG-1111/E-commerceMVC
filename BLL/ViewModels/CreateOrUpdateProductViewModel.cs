@@ -1,5 +1,5 @@
 ﻿using E_commerce.BLL.Attributes;
-using E_commerce.BLL.Settings;
+using E_commerce.Utility.Settings;
 using Microsoft.AspNetCore.Http;
 
 namespace E_commerce.BLL.ViewModels

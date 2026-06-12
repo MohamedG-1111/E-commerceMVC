@@ -12,5 +12,10 @@ namespace DataAccessLayer.Repositories.Interfaces
 
         public Task<IDbContextTransaction> BeginTransactionAsync();
 
+        public Task CommitTransactionAsync(IDbContextTransaction transaction);
+
+        public Task RollbackTransactionAsync(IDbContextTransaction transaction);
+
+
     }
 }

@@ -1,5 +1,5 @@
 ﻿@using BLL.ViewModels
-@using E_commerce.BLL.Settings
+@using E_commerce.Utility.Settings
 @model IEnumerable<ProductListVm>
 
 <div class="container py-4">
@@ -37,7 +37,7 @@
                         {
                             <tr>
                                 <td>
-                                    <img src="@($"{FileSettings.ImagesPath}/{item.ImageUrl}")"
+                                    <img src="@($"{FileSettings.ImagesPathProducts}/{item.ImageUrl}")"
                                          alt="product"
                                          style="width:60px;height:60px;object-fit:cover;border-radius:8px;" />
                                 </td>

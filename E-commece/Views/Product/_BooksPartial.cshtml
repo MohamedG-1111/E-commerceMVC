@@ -1,4 +1,4 @@
-﻿@using E_commerce.BLL.Settings
+﻿@using E_commerce.Utility.Settings
 @model IEnumerable<ProductListVm>
 
 @foreach (var product in Model)
@@ -12,7 +12,7 @@
         <div class="book-cover">
             @if (!string.IsNullOrEmpty(product.ImageUrl))
             {
-                <img src="@($"{FileSettings.ImagesPath}/{product.ImageUrl}")" alt="Cover of @product.Title" loading="lazy" />
+                <img src="@($"{FileSettings.ImagesPathProducts}/{product.ImageUrl}")" alt="Cover of @product.Title" loading="lazy" />
             }
             else
             {
