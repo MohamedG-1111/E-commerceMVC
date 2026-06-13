@@ -39,9 +39,10 @@ namespace E_commerce.DAL.Data.Configuration
                 );
             });
 
-
-
-
         }
+
+
+
+
     }
 }
