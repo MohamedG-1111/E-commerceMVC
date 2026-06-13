@@ -62,17 +62,6 @@ namespace E_commece.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var result = await CategoryService.CategoryDetailsAsync(id);
-            if (result.IsFailure)
-                return HandleResult(result);
-            ViewBag.id = id;
-            return View(result.Value);
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-
         public async Task<IActionResult> ConfirmDelete(int id)
         {
 
@@ -81,18 +70,13 @@ namespace E_commece.Controllers
             {
                 if (result.ErrorType == ErrorType.VALIDATION)
                 {
-                    var categoryResult = await CategoryService.CategoryDetailsAsync(id);
-                    if (categoryResult.IsFailure)
-                        return HandleResult(categoryResult);
-                    ViewBag.id = id;
-                    return HandleResult(result, nameof(Delete), categoryResult.Value);
+                    TempData["error"] = result.ErrorMessage;
+                    return RedirectToAction(nameof(Index));
                 }
                 return HandleResult(result);
             }
             TempData["success"] = "Category Deleted Successfully";
             return RedirectToAction(nameof(Index));
-
-
         }
 
         public async Task<IActionResult> Details(int id)
@@ -109,8 +93,6 @@ namespace E_commece.Controllers
      string? viewName = null,
      object? model = null)
         {
-
-
             switch (result.ErrorType)
             {
                 case ErrorType.VALIDATION:
