@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
 {
-    public class ProductController : Controller
+    public class ProductController : AppController
     {
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
@@ -41,10 +41,9 @@ namespace E_commece.Controllers
                 return View("UpSert", model);
             }
             var result = await _productService.CreateProductAsync(model);
-            if (result)
-                TempData["Success"] = "Product Created Successfully";
-            else
-                TempData["Error"] = "Failed to Create Product";
+            if (result.IsFailure)
+                return HandleResult(result, nameof(Create), model);
+            TempData["Success"] = "Product Created Successfully ";
             return RedirectToAction(nameof(Index));
 
         }

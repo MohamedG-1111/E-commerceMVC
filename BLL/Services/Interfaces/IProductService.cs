@@ -6,7 +6,7 @@ namespace BLL.Services.Interfaces
 {
     public interface IProductService
     {
-        public Task<bool> CreateProductAsync(CreateOrUpdateProductViewModel obj);
+        public Task<Result> CreateProductAsync(CreateOrUpdateProductViewModel obj);
         public Task<Product?> ProductDetailsAsync(int Id);
 
         public Task<Result<IEnumerable<ProductListVm>?>> AllProductsAsync(string? searchTerm = null, string? category = null);
