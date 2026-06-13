@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
 {
-    public class ProductController : Controller
+    public class ProductController : AppController
     {
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
@@ -17,8 +17,8 @@ namespace E_commece.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var products = await _productService.AllProductsAsync();
-            return View(products);
+            var Resultproducts = await _productService.AllProductsAsync();
+            return View(Resultproducts.Value);
         }
         [HttpGet]
         public async Task<IActionResult> Create()
@@ -41,10 +41,9 @@ namespace E_commece.Controllers
                 return View("UpSert", model);
             }
             var result = await _productService.CreateProductAsync(model);
-            if (result)
-                TempData["Success"] = "Product Created Successfully";
-            else
-                TempData["Error"] = "Failed to Create Product";
+            if (result.IsFailure)
+                return HandleResult(result, nameof(Create), model);
+            TempData["Success"] = "Product Created Successfully ";
             return RedirectToAction(nameof(Index));
 
         }
@@ -121,8 +120,8 @@ namespace E_commece.Controllers
         [Route("Product/SearchAsync")]
         public async Task<IActionResult> SearchAsync(string? searchTerm, string? category)
         {
-            var products = await _productService.AllProductsAsync(searchTerm, category);
-            return PartialView("_BooksPartial", products);
+            var Resultproducts = await _productService.AllProductsAsync(searchTerm, category);
+            return PartialView("_BooksPartial", Resultproducts.Value);
         }
     }
 }

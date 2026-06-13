@@ -167,7 +167,7 @@
                                    class="d-none"
                                    accept="image/*"
                                    onchange="handleFile(this.files[0])" />
-
+                            <span asp-validation-for="Cover" class="text-danger small"></span>
                             <!-- Preview -->
                             <div id="previewContainer"
                                  class="@(string.IsNullOrEmpty(Model.Product?.ImageUrl) ? "d-none" : "")"

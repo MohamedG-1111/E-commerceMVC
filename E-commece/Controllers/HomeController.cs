@@ -16,8 +16,8 @@ namespace E_commece.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var products = await productService.AllProductsAsync();
-            return View(products);
+            var Resultproducts = await productService.AllProductsAsync();
+            return View(Resultproducts.Value);
         }
         public async Task<IActionResult> ProductDetails(int id)
         {

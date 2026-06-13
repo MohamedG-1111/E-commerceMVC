@@ -4,6 +4,8 @@ using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities;
 using E_commerce.Utility.Settings;
+using Ecommerce.Utility.Result;
+using Ecommerce.Utility.ResultPattern;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -21,13 +23,13 @@ namespace E_commerce.BLL.Services.Implementation
         }
 
 
-        public async Task<IEnumerable<ProductListVm>?> AllProductsAsync(string? searchTerm, string? category)
+        public async Task<Result<IEnumerable<ProductListVm>?>> AllProductsAsync(string? searchTerm = null, string? category = null)
         {
             var query = (string.IsNullOrWhiteSpace(searchTerm) && string.IsNullOrWhiteSpace(category))
                 ? _unitOfWork.ProductRepository.GetAsQuery()
                 : _unitOfWork.ProductRepository.Search(searchTerm, category);
 
-            return await query.Select(x => new ProductListVm
+            var products = await query.Select(x => new ProductListVm
             {
                 Id = x.Id,
                 Title = x.Title,
@@ -37,34 +39,51 @@ namespace E_commerce.BLL.Services.Implementation
                 CategoryName = x.Category.Name,
                 ImageUrl = x.ImageUrl
             }).ToListAsync();
+
+            return Result<IEnumerable<ProductListVm>?>.Success(products);
         }
 
 
 
-        public async Task<bool> CreateProductAsync(CreateOrUpdateProductViewModel obj)
+        public async Task<Result> CreateProductAsync(CreateOrUpdateProductViewModel obj)
         {
             if (obj == null || obj.Product == null)
-                return false;
+                return Result.Failure("Invalid product data.", errorType: ErrorType.VALIDATION);
+
+            if (obj.Cover is null)
+            {
+                return Result.Failure(
+                    "Product image is required.",
+                    errorType: ErrorType.VALIDATION);
+            }
 
             string imageUrl = string.Empty;
 
+
             try
             {
-                imageUrl = await attachmentService.UploadAttachmentAsync(obj.Cover, FileSettings.ImagesPathProducts);
 
-                var product = obj.Product;
-                product.ImageUrl = imageUrl;
+                imageUrl = await attachmentService.UploadAttachmentAsync(
+                       obj.Cover,
+                       FileSettings.ImagesPathProducts);
 
-                await _unitOfWork.ProductRepository.AddAsync(product);
+                obj.Product.ImageUrl = imageUrl;
+
+                await _unitOfWork.ProductRepository.AddAsync(obj.Product);
 
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result <= 0)
                 {
-                    await attachmentService.DeleteAttachmentAsync(imageUrl, FileSettings.ImagesPathProducts);
-                    return false;
+                    if (!string.IsNullOrEmpty(imageUrl))
+                    {
+                        await attachmentService.DeleteAttachmentAsync(
+                            imageUrl,
+                            FileSettings.ImagesPathProducts);
+                    }
+                    return Result.Failure("Failed to create product.", errorType: ErrorType.INTERNAL_ERROR);
                 }
 
-                return true;
+                return Result.Success();
             }
             catch (Exception ex)
             {
@@ -72,7 +91,7 @@ namespace E_commerce.BLL.Services.Implementation
                 {
                     await attachmentService.DeleteAttachmentAsync(imageUrl, FileSettings.ImagesPathProducts);
                 }
-                return false;
+                return Result.Failure("Failed to create product.", errorType: ErrorType.INTERNAL_ERROR);
             }
         }
 
