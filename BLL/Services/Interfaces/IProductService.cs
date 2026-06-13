@@ -1,5 +1,6 @@
 ﻿using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities;
+using Ecommerce.Utility.Result;
 
 namespace BLL.Services.Interfaces
 {
@@ -8,7 +9,7 @@ namespace BLL.Services.Interfaces
         public Task<bool> CreateProductAsync(CreateOrUpdateProductViewModel obj);
         public Task<Product?> ProductDetailsAsync(int Id);
 
-        public Task<IEnumerable<ProductListVm>?> AllProductsAsync(string? searchTerm = "", string? category = "");
+        public Task<Result<IEnumerable<ProductListVm>?>> AllProductsAsync(string? searchTerm = null, string? category = null);
 
         public Task<bool> UpdateProductAsync(CreateOrUpdateProductViewModel Obj);
         public Task<bool> DeleteProductAsync(int id);

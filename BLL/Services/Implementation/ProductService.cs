@@ -4,6 +4,7 @@ using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities;
 using E_commerce.Utility.Settings;
+using Ecommerce.Utility.Result;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -21,13 +22,13 @@ namespace E_commerce.BLL.Services.Implementation
         }
 
 
-        public async Task<IEnumerable<ProductListVm>?> AllProductsAsync(string? searchTerm, string? category)
+        public async Task<Result<IEnumerable<ProductListVm>?>> AllProductsAsync(string? searchTerm = null, string? category = null)
         {
             var query = (string.IsNullOrWhiteSpace(searchTerm) && string.IsNullOrWhiteSpace(category))
                 ? _unitOfWork.ProductRepository.GetAsQuery()
                 : _unitOfWork.ProductRepository.Search(searchTerm, category);
 
-            return await query.Select(x => new ProductListVm
+            var products = await query.Select(x => new ProductListVm
             {
                 Id = x.Id,
                 Title = x.Title,
@@ -37,6 +38,8 @@ namespace E_commerce.BLL.Services.Implementation
                 CategoryName = x.Category.Name,
                 ImageUrl = x.ImageUrl
             }).ToListAsync();
+
+            return Result<IEnumerable<ProductListVm>?>.Success(products);
         }
 
 

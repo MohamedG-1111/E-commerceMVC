@@ -17,8 +17,8 @@ namespace E_commece.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var products = await _productService.AllProductsAsync();
-            return View(products);
+            var Resultproducts = await _productService.AllProductsAsync();
+            return View(Resultproducts.Value);
         }
         [HttpGet]
         public async Task<IActionResult> Create()
@@ -121,8 +121,8 @@ namespace E_commece.Controllers
         [Route("Product/SearchAsync")]
         public async Task<IActionResult> SearchAsync(string? searchTerm, string? category)
         {
-            var products = await _productService.AllProductsAsync(searchTerm, category);
-            return PartialView("_BooksPartial", products);
+            var Resultproducts = await _productService.AllProductsAsync(searchTerm, category);
+            return PartialView("_BooksPartial", Resultproducts.Value);
         }
     }
 }
