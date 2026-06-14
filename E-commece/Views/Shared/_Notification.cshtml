@@ -1,13 +1,23 @@
 ﻿<style>
-    /* ===== TOAST STYLE (NO ICON + SOLID) ===== */
-
-    #toast-container > div {
-        opacity: 1 !important;
-        border-radius: 8px !important;
-        font-size: 14px !important;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important;
-        padding: 12px 16px !important;
+    /* ===== TOP CENTER POSITION ===== */
+    #toast-container {
+        position: fixed !important;
+        top: 30px !important;
+        left: 60% !important;
+        transform: translateX(-50%) !important;
+        z-index: 999999 !important;
     }
+
+        /* ===== TOAST STYLE (NO ICON + SOLID) ===== */
+        #toast-container > div {
+            opacity: 1 !important;
+            border-radius: 8px !important;
+            font-size: 14px !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important;
+            padding: 12px 16px !important;
+            min-width: 300px !important;
+            text-align: center !important;
+        }
 
     /* Remove icon completely */
     .toast-message {

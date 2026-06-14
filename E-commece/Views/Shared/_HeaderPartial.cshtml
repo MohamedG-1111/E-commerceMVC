@@ -2,10 +2,15 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
         <div class="container">
 
-            <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
-                <i class="bi bi-bag-heart-fill text-warning me-1"></i>E_commece
+            <!-- Brand -->
+            <a class="navbar-brand fw-bold"
+               asp-controller="Home"
+               asp-action="Index">
+                <i class="bi bi-bag-heart-fill text-warning me-1"></i>
+                E-Commerce
             </a>
 
+            <!-- Toggle -->
             <button class="navbar-toggler" type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#mainNavbar"
@@ -16,43 +21,69 @@
             </button>
 
             <div class="collapse navbar-collapse" id="mainNavbar">
+
+                <!-- Left Links -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
                     <li class="nav-item">
-                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">الرئيسية</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-area="" asp-controller="Product" asp-action="Index">المنتجات</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            الأقسام
+                        <a class="nav-link" asp-controller="Home" asp-action="Index">
+                            Home
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-dark">
-                            <li><a class="dropdown-item" asp-controller="Products" asp-action="Electronics">إلكترونيات</a></li>
-                            <li><a class="dropdown-item" asp-controller="Products" asp-action="Clothes">ملابس</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" asp-controller="Home" asp-action="Offers">العروض</a></li>
-                        </ul>
                     </li>
+
                     <li class="nav-item">
-                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Contact">تواصل معنا</a>
+                        <a class="nav-link" asp-controller="Product" asp-action="Index">
+                            Products
+                        </a>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="Contact">
+                            Contact
+                        </a>
+                    </li>
+
                 </ul>
 
+                <!-- Right Side -->
+                <div class="d-flex align-items-center">
+
+                    <!-- Cart -->
                     <a asp-controller="Cart" asp-action="Index"
-                           class="btn btn-outline-light btn-sm position-relative me-3">
+                       class="btn btn-outline-light btn-sm position-relative me-3">
                         <i class="bi bi-cart3"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark"
-                              style="font-size: 10px;">0</span>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark">
+                            0
+                        </span>
                     </a>
 
-                    <a asp-controller="Account" asp-action="Login"
-                           class="btn btn-warning btn-sm fw-semibold">
-                        تسجيل دخول
-                    </a>
+                    <!-- Auth Section (ViewComponent) -->
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @await Component.InvokeAsync("UserDropdown")
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center">
+
+                            <a asp-controller="Auth"
+                               asp-action="Login"
+                               class="btn btn-warning btn-sm fw-semibold me-2">
+                                Login
+                            </a>
+
+                            <a asp-controller="Auth"
+                               asp-action="Register"
+                               class="btn btn-outline-warning btn-sm fw-semibold">
+                                Register
+                            </a>
+
+                        </div>
+                    }
+
                 </div>
-            </div>
 
+            </div>
         </div>
     </nav>
 </header>

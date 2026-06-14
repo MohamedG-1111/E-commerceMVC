@@ -1,0 +1,48 @@
+﻿@using E_commerce.DAL.Entities.Users
+@using E_commerce.Utility.Settings
+@model ApplicationUser
+
+<li class="nav-item dropdown">
+    <a class="nav-link d-flex align-items-center gap-2 dropdown-toggle"
+       href="#"
+       role="button"
+
+       data-bs-toggle="dropdown">
+        <span class="text-white fw-semibold">
+            @($"{Model.FirstName} {Model.LastName}")
+        </span>
+        <img src="@(string.IsNullOrEmpty(Model.ProfilePicture)
+                   ? $"/{FileSettings.ImagesPathProfiles}/default-user.png"
+                   : $"/{FileSettings.ImagesPathProfiles}/{Model.ProfilePicture}")"
+             class="rounded-circle border border-2 border-light shadow-sm"
+             style="width:40px;height:40px;object-fit:cover;" />
+
+        
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+
+        <li>
+            <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                <i class="bi bi-person me-2"></i> Profile
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item" asp-controller="Account" asp-action="Test">
+                <i class="bi bi-person me-2"></i> Test
+            </a>
+        </li>
+
+        <li><hr class="dropdown-divider" /></li>
+
+        <li>
+            <form asp-controller="Auth" asp-action="Logout" method="post">
+                <button type="submit" class="dropdown-item text-danger">
+                    <i class="bi bi-box-arrow-right me-2"></i> Logout
+                </button>
+            </form>
+        </li>
+
+    </ul>
+</li> 

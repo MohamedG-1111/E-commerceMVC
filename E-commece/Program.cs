@@ -32,8 +32,16 @@ namespace E_commece
             builder.Services.AddScoped<IAttachmentService, AttachmentService>();
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+            builder.Services.AddScoped<IAccountService, AccountService>();
+
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>();
+                .AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.SignIn.RequireConfirmedEmail = true;
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
