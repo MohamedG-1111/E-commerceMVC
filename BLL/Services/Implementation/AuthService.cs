@@ -4,6 +4,8 @@ using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities.Users;
 using E_commerce.Utility.Settings;
 using Ecommerce.Utility;
+using Ecommerce.Utility.Result;
+using Ecommerce.Utility.ResultPattern;
 using Microsoft.AspNetCore.Identity;
 
 namespace E_commerce.BLL.Services.Implementation
@@ -26,10 +28,10 @@ namespace E_commerce.BLL.Services.Implementation
         }
 
 
-        public async Task<bool> LoginAsync(LoginViewModel model)
+        public async Task<Result> LoginAsync(LoginViewModel model)
         {
             if (model == null)
-                return false;
+                return Result.Failure("Invalid login credentials", errorType: ErrorType.VALIDATION);
             var result = await signInManager.PasswordSignInAsync(
                 model.Email,
                 model.Password,
@@ -37,16 +39,17 @@ namespace E_commerce.BLL.Services.Implementation
                 false
             );
             if (!result.Succeeded)
-                return false;
+                return Result.Failure("Invalid login credentials", errorType: ErrorType.VALIDATION);
 
-            return true;
+            return Result.Success();
         }
 
 
 
-        public async Task<bool> RegisterAsync(RegisterationViewModel model)
+        public async Task<Result> RegisterAsync(RegisterationViewModel model)
         {
-            if (model == null) return false;
+            if (model == null)
+                return Result.Failure("Invalid registration data", errorType: ErrorType.VALIDATION);
             var user = new ApplicationUser
             {
                 UserName = model.Email,
@@ -65,29 +68,45 @@ namespace E_commerce.BLL.Services.Implementation
             }
             try
             {
+                var existingUser = await userManager.FindByEmailAsync(model.Email);
+                if (existingUser != null)
+                {
+                    return Result.Failure("User with this email already exists", errorType: ErrorType.VALIDATION);
+                }
                 var result = await userManager.CreateAsync(user, model.Password);
                 if (!result.Succeeded)
                 {
                     await attachmentService.DeleteAttachmentAsync(user.ProfilePicture, FileSettings.ImagesPathProfiles);
-                    return false;
+                    return Result.Failure("Registration failed", errorType: ErrorType.VALIDATION);
                 }
                 await userManager.AddToRoleAsync(user, Roles.Customer);
                 await signInManager.SignInAsync(user, isPersistent: false);
 
 
-                return true;
+                return Result.Success();
             }
             catch (Exception ex)
             {
                 await userManager.DeleteAsync(user);
                 await attachmentService.DeleteAttachmentAsync(user.ProfilePicture, FileSettings.ImagesPathProfiles);
-                return false;
+                return Result.Failure("Registration failed", errorType: ErrorType.INTERNAL_ERROR);
             }
         }
 
-        Task<bool> IAuthService.LogOutAsync()
+        public async Task<Result> LogOutAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                await signInManager.SignOutAsync();
+
+                return Result.Success();
+            }
+            catch
+            {
+                return Result.Failure(
+                    "Failed to log out",
+                    errorType: ErrorType.INTERNAL_ERROR);
+            }
         }
     }
 }

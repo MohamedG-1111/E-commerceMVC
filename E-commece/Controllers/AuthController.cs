@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
 {
-    public class AuthController : Controller
+    public class AuthController : AppController
     {
         private readonly IAuthService authService;
 
@@ -32,10 +32,10 @@ namespace E_commece.Controllers
             }
 
             var result = await authService.RegisterAsync(model);
-            if (result)
-                TempData["Success"] = "Registration successful!";
+            if (result.IsFailure)
+                return HandleResult(result, nameof(Register), model);
             else
-                TempData["Error"] = "Registration failed!";
+                TempData["Success"] = "Registration successful !";
             return RedirectToAction("Index", "Home");
         }
         [HttpGet]
@@ -52,10 +52,20 @@ namespace E_commece.Controllers
                 return View(model);
             }
             var result = await authService.LoginAsync(model);
-            if (result)
-                TempData["Success"] = "Login successful!";
-            else
-                TempData["Error"] = "Login failed!";
+            if (result.IsFailure)
+                return HandleResult(result, nameof(Login), model);
+
+
+            TempData["Success"] = "Login successful!";
+            return RedirectToAction("Index", "Home");
+        }
+
+        public async Task<IActionResult> Logout()
+        {
+            var result = await authService.LogOutAsync();
+            if (result.IsFailure)
+                HandleResult(result);
+            TempData["Success"] = "Logout successful!";
             return RedirectToAction("Index", "Home");
         }
     }
