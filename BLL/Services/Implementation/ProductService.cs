@@ -95,10 +95,13 @@ namespace E_commerce.BLL.Services.Implementation
             }
         }
 
-        public async Task<bool> DeleteProductAsync(int id)
+        public async Task<Result> DeleteProductAsync(int id)
         {
+            if (id <= 0)
+                return Result.Failure("Invalid product ID.", errorType: ErrorType.NOT_FOUND);
             var productFromDb = await _unitOfWork.ProductRepository.FindAsync(id);
-            if (productFromDb == null) return false;
+            if (productFromDb == null)
+                return Result.Failure("Product not found.", errorType: ErrorType.NOT_FOUND);
             var ImageUrl = productFromDb.ImageUrl;
 
             _unitOfWork.ProductRepository.Delete(productFromDb);
@@ -107,30 +110,40 @@ namespace E_commerce.BLL.Services.Implementation
             {
                 if (!string.IsNullOrEmpty(productFromDb.ImageUrl))
                     await attachmentService.DeleteAttachmentAsync(ImageUrl, FileSettings.ImagesPathProducts);
-                return true;
+                return Result.Success();
 
             }
-            return false;
+            return Result.Failure("Failed to delete product.", errorType: ErrorType.INTERNAL_ERROR);
         }
 
-        public async Task<Product?> ProductDetailsAsync(int Id)
+        public async Task<Result<Product?>> ProductDetailsAsync(int Id)
         {
-            return await _unitOfWork.ProductRepository.GetAsQuery()
+            if (Id <= 0)
+                return Result<Product?>.Failure("Invalid product ID.", errorType: ErrorType.NOT_FOUND);
+
+            var product = await _unitOfWork.ProductRepository.GetAsQuery()
                 .Include(x => x.Category)
                 .FirstOrDefaultAsync(x => x.Id == Id);
+            if (product == null)
+                return Result<Product?>.Failure("Product not found.", errorType: ErrorType.NOT_FOUND);
+
+            return Result<Product?>.Success(product);
         }
 
-        public async Task<bool> UpdateProductAsync(CreateOrUpdateProductViewModel obj)
+        public async Task<Result> UpdateProductAsync(CreateOrUpdateProductViewModel obj)
         {
-            if (obj == null || obj.Product == null || obj.Product.Id == 0)
-                return false;
+            if (obj == null || obj.Product == null)
+                return Result.Failure("Invalid product data.", errorType: ErrorType.VALIDATION);
+            if (obj.Product.Id <= 0)
+                return Result.Failure("Invalid product ID.", errorType: ErrorType.NOT_FOUND);
+
 
             var productFromDb = await _unitOfWork.ProductRepository.FindAsync(obj.Product.Id);
-            if (productFromDb == null) return false;
+            if (productFromDb == null)
+                return Result.Failure("Product not found.", errorType: ErrorType.NOT_FOUND);
 
             string oldImage = productFromDb.ImageUrl;
-            string newImage = string.Empty;
-
+            string? newImage = null;
             try
             {
                 if (obj.Cover != null)
@@ -144,6 +157,7 @@ namespace E_commerce.BLL.Services.Implementation
                 productFromDb.PriceFor1To50 = obj.Product.PriceFor1To50;
                 productFromDb.PriceFor50Plus = obj.Product.PriceFor50Plus;
                 productFromDb.PriceFor100Plus = obj.Product.PriceFor100Plus;
+                productFromDb.Author = obj.Product.Author;
                 productFromDb.ImageUrl = !string.IsNullOrEmpty(newImage) ? newImage : oldImage;
 
                 _unitOfWork.ProductRepository.Update(productFromDb);
@@ -153,19 +167,19 @@ namespace E_commerce.BLL.Services.Implementation
                 {
                     if (!string.IsNullOrEmpty(newImage))
                         await attachmentService.DeleteAttachmentAsync(newImage, FileSettings.ImagesPathProducts);
-                    return false;
+                    return Result.Failure("Failed to update product.", errorType: ErrorType.INTERNAL_ERROR);
                 }
 
                 if (!string.IsNullOrEmpty(newImage) && !string.IsNullOrEmpty(oldImage))
                     await attachmentService.DeleteAttachmentAsync(oldImage, FileSettings.ImagesPathProducts);
 
-                return true;
+                return Result.Success();
             }
             catch
             {
                 if (!string.IsNullOrEmpty(newImage))
                     await attachmentService.DeleteAttachmentAsync(newImage, FileSettings.ImagesPathProducts);
-                return false;
+                return Result.Failure("Failed to update product.", errorType: ErrorType.INTERNAL_ERROR);
             }
         }
     }
