@@ -1,5 +1,6 @@
 ﻿using BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
+using Ecommerce.Utility.ResultPattern;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
@@ -85,25 +86,21 @@ namespace E_commece.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
         [HttpGet]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var product = await _productService.ProductDetailsAsync(id);
-            if (product == null)
-                return NotFound();
-            return View(product);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var result = await _productService.DeleteProductAsync(id);
-            if (result)
-                TempData["Success"] = "Product Deleted Successfully";
+            if (result.IsFailure)
+            {
+                if (result.ErrorType == ErrorType.VALIDATION)
+                {
+                    TempData["error"] = result.ErrorMessage;
+                    return RedirectToAction(nameof(Index));
+                }
+                return HandleResult(result);
+            }
             else
-                TempData["Error"] = "Failed to Delete Product";
+                TempData["Success"] = "Product Deleted Successfully";
             return RedirectToAction(nameof(Index));
         }
 

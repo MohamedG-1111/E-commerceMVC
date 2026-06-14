@@ -12,7 +12,7 @@ namespace BLL.Services.Interfaces
         public Task<Result<IEnumerable<ProductListVm>?>> AllProductsAsync(string? searchTerm = null, string? category = null);
 
         public Task<bool> UpdateProductAsync(CreateOrUpdateProductViewModel Obj);
-        public Task<bool> DeleteProductAsync(int id);
+        public Task<Result> DeleteProductAsync(int id);
 
     }
 }

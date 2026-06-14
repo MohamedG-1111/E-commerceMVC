@@ -1,6 +1,8 @@
 ﻿@using BLL.ViewModels
 @using E_commerce.Utility.Settings
 @model IEnumerable<ProductListVm>
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <div class="container py-4">
 
@@ -60,11 +62,10 @@
                                         Details
                                     </a>
 
-                                    <a asp-action="Delete"
-                                           asp-route-id="@item.Id"
-                                           class="btn btn-sm btn-danger">
+                                    <button class="btn btn-sm btn-danger"
+                                            onclick="openDeleteModal('@item.Title', '@Url.Action("DeleteConfirmed", "Product", new { id = item.Id })')">
                                         Delete
-                                    </a>
+                                    </button>
                                 </td>
                             </tr>
                         }
@@ -85,3 +86,63 @@
     </div>
 
 </div>
+<!-- Delete Confirmation Modal -->
+<div id="deleteOverlay" onclick="handleOverlayClick(event)"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1050; align-items:center; justify-content:center;">
+
+    <div style="background:#fff; border-radius:12px; padding:2rem; max-width:400px; width:90%; text-align:center;">
+
+        <div style="font-size:2.5rem; color:#dc3545; margin-bottom:1rem;">
+            <i class="bi bi-trash"></i>
+        </div>
+
+        <h5 class="fw-bold mb-2">Confirm Delete</h5>
+
+        <p class="text-muted mb-4">
+            Are you sure you want to delete
+            <strong id="productName"></strong> ?
+            <br />
+            This action cannot be undone.
+        </p>
+
+        <div class="d-flex justify-content-center gap-2">
+            <button class="btn btn-secondary btn-sm"
+                    onclick="closeDeleteModal()">
+                Cancel
+            </button>
+
+            <a id="confirmDeleteBtn"
+               href="#"
+               class="btn btn-danger btn-sm">
+                Delete
+            </a>
+        </div>
+
+    </div>
+</div>
+@section Scripts
+{
+    <script>
+        function openDeleteModal(name, url) {
+            document.getElementById('productName').textContent = '"' + name + '"';
+            document.getElementById('confirmDeleteBtn').href = url;
+            document.getElementById('deleteOverlay').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteOverlay').style.display = 'none';
+        }
+
+        function handleOverlayClick(e) {
+            if (e.target === document.getElementById('deleteOverlay')) {
+                closeDeleteModal();
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDeleteModal();
+            }
+        });
+    </script>
+}

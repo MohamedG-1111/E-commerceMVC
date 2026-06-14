@@ -95,10 +95,13 @@ namespace E_commerce.BLL.Services.Implementation
             }
         }
 
-        public async Task<bool> DeleteProductAsync(int id)
+        public async Task<Result> DeleteProductAsync(int id)
         {
+            if (id <= 0)
+                return Result.Failure("Invalid product ID.", errorType: ErrorType.NOT_FOUND);
             var productFromDb = await _unitOfWork.ProductRepository.FindAsync(id);
-            if (productFromDb == null) return false;
+            if (productFromDb == null)
+                return Result.Failure("Product not found.", errorType: ErrorType.NOT_FOUND);
             var ImageUrl = productFromDb.ImageUrl;
 
             _unitOfWork.ProductRepository.Delete(productFromDb);
@@ -107,10 +110,10 @@ namespace E_commerce.BLL.Services.Implementation
             {
                 if (!string.IsNullOrEmpty(productFromDb.ImageUrl))
                     await attachmentService.DeleteAttachmentAsync(ImageUrl, FileSettings.ImagesPathProducts);
-                return true;
+                return Result.Success();
 
             }
-            return false;
+            return Result.Failure("Failed to delete product.", errorType: ErrorType.INTERNAL_ERROR);
         }
 
         public async Task<Product?> ProductDetailsAsync(int Id)
