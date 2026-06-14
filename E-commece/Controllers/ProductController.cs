@@ -51,13 +51,13 @@ namespace E_commece.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var product = await _productService.ProductDetailsAsync(id);
-            if (product == null)
-                return NotFound();
+            var Resultproduct = await _productService.ProductDetailsAsync(id);
+            if (Resultproduct.IsFailure)
+                return HandleResult(Resultproduct);
 
             var model = new CreateOrUpdateProductViewModel
             {
-                Product = product,
+                Product = Resultproduct.Value,
                 Categories = await _categoryService.GetAllCategoriesItems()
             };
 
@@ -79,10 +79,17 @@ namespace E_commece.Controllers
             }
 
             var result = await _productService.UpdateProductAsync(model);
-            if (result)
-                TempData["Success"] = "Product Updated Successfully";
+            if (result.IsFailure)
+            {
+                if (result.ErrorType == ErrorType.VALIDATION)
+                {
+                    return HandleResult(result, nameof(Edit), model);
+
+                }
+                return HandleResult(result);
+            }
             else
-                TempData["Error"] = "Failed to Update Product";
+                TempData["Success"] = "Product Updated Successfully";
             return RedirectToAction(nameof(Index));
         }
 
@@ -107,10 +114,13 @@ namespace E_commece.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            var product = await _productService.ProductDetailsAsync(id);
-            if (product == null)
-                return NotFound();
-            return View(product);
+            var Resultproduct = await _productService.ProductDetailsAsync(id);
+            if (Resultproduct.IsFailure)
+            {
+                return HandleResult(Resultproduct);
+            }
+            return View(Resultproduct.Value);
+
 
         }
         [HttpGet]
@@ -122,3 +132,4 @@ namespace E_commece.Controllers
         }
     }
 }
+
