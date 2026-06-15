@@ -10,6 +10,7 @@ using E_commerce.DAL.Entities.Users;
 using E_commerce.DAL.Repositories.Implementation;
 using E_commerce.DAL.Repositories.Interfaces;
 using E_commerce.DAL.Seeding;
+using Ecommerce.Utility.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,6 +35,7 @@ namespace E_commece
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
             builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
@@ -41,7 +43,8 @@ namespace E_commece
             {
                 options.SignIn.RequireConfirmedEmail = true;
             });
-
+            builder.Services.Configure<EmailSettings>(
+     builder.Configuration.GetSection("EmailSettings"));
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

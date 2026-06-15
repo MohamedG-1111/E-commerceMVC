@@ -17,6 +17,7 @@ namespace E_commece.Controllers
             var result = await accountService.ConfirmEmailAsync(userId, Token);
             if (result.IsFailure)
                 return HandleResult(result, nameof(ConfirmEmail));
+            ViewBag.Email = result.Value;
             TempData["success"] = "Email confirmed successfully!";
             return View();
 
