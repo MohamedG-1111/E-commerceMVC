@@ -1,8 +1,11 @@
 ﻿using E_commerce.BLL.Dto;
 using E_commerce.BLL.Services.Interfaces;
+using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities.Users;
+using Ecommerce.Utility;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 namespace E_commerce.BLL.Services.Implementation
@@ -11,23 +14,26 @@ namespace E_commerce.BLL.Services.Implementation
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailService emailService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AccountService(UserManager<ApplicationUser> _userManager, IEmailService emailService)
+        public AccountService(UserManager<ApplicationUser> _userManager, IHttpContextAccessor httpContextAccessor, IEmailService emailService)
         {
             this._userManager = _userManager;
             this.emailService = emailService;
+            _httpContextAccessor = httpContextAccessor;
+
         }
-        public async Task<Result<string>> ConfirmEmailAsync(string userId, string token)
+        public async Task<Result> ConfirmEmailAsync(string userId, string token)
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
-                return Result<string>.Failure("Invalid confirmation link", errorType: ErrorType.VALIDATION);
+                return Result.Failure("Invalid confirmation link", errorType: ErrorType.VALIDATION);
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                return Result<string>.Failure("User not found", errorType: ErrorType.NOT_FOUND);
+                return Result.Failure("User not found", errorType: ErrorType.NOT_FOUND);
 
             if (user.EmailConfirmed)
-                return Result<string>.Failure("Email already confirmed", errorType: ErrorType.VALIDATION);
+                return Result.Failure("Email already confirmed", errorType: ErrorType.VALIDATION);
             var decodedToken = Uri.UnescapeDataString(token);
 
 
@@ -39,84 +45,173 @@ namespace E_commerce.BLL.Services.Implementation
                 {
                     Console.WriteLine(error.Description);
                 }
-                return Result<string>.Failure("Invalid or expired confirmation link", errorType: ErrorType.VALIDATION);
+                return Result.Failure("Invalid or expired confirmation link", errorType: ErrorType.VALIDATION);
 
             }
 
-            return Result<string>.Success(user.Email!);
+            return Result.Success();
         }
 
-        public async Task<Result> SendEmailConfirmationAsync(
-        string emailTo,
-        string confirmationLink)
+        public async Task<Result<string>> GetUserEmail(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result<string>.Failure("UserId is required", errorType: ErrorType.NOT_FOUND);
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return Result<string>.Failure("User not found", errorType: ErrorType.NOT_FOUND);
+
+            if (string.IsNullOrWhiteSpace(user.Email))
+                return Result<string>.Failure("Email not found", errorType: ErrorType.NOT_FOUND);
+
+            return Result<string>.Success(user.Email);
+        }
+
+        public async Task<Result> ReSendEmailConfirmationAsync(string emailTo)
+        {
+            if (string.IsNullOrWhiteSpace(emailTo))
+                return Result.Failure("Email is not found", errorType: ErrorType.NOT_FOUND);
+
+            var user = await _userManager.FindByEmailAsync(emailTo);
+
+            if (user == null)
+                return Result.Failure("User is not found", errorType: ErrorType.NOT_FOUND);
+
+            if (user.EmailConfirmed)
+                return Result.Failure("Email already confirmed", errorType: ErrorType.VALIDATION);
+
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = Uri.EscapeDataString(token);
+
+            var request = _httpContextAccessor.HttpContext!.Request;
+
+            var confirmationLink =
+            $"{request.Scheme}://{request.Host}/Account/ConfirmEmail?userId={user.Id}&token={encodedToken}";
+
+            // 👇 reuse نفس الميثود
+            return await SendEmailConfirmationAsync(user.Email!, confirmationLink);
+        }
+
+        public async Task<Result> ResetPasswoAsync(ResetPasswordViewModel model)
+        {
+            if (model == null || model.Email == null || model.Password == null)
+                return Result.Failure("InValid Data", errorType: ErrorType.VALIDATION);
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user == null)
+                return Result.Failure("User not found", errorType: ErrorType.NOT_FOUND);
+
+            var result = await _userManager.ResetPasswordAsync(
+                user,
+                model.Token,
+                model.Password);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return Result.Failure(errors, errorType: ErrorType.VALIDATION);
+            }
+
+            return Result.Success();
+
+
+        }
+
+        public async Task<Result> SendEmailConfirmationAsync(string emailTo, string confirmationLink)
         {
             if (string.IsNullOrWhiteSpace(emailTo))
                 return Result.Failure(
-                    "Email is required",
-                    errorType: ErrorType.VALIDATION);
+                     "Email is not Found",
+                    errorType: ErrorType.NOT_FOUND);
 
             if (string.IsNullOrWhiteSpace(confirmationLink))
                 return Result.Failure(
-                    "Confirmation link is required",
-                    errorType: ErrorType.VALIDATION);
+                    "Confirmation link is not Found",
+                    errorType: ErrorType.NOT_FOUND);
 
-            var emailRequest = new EmailRequestDto
-            (
+            var body = EmailTemplateBuilder.BuildActionEmail(
+     "Welcome to E-Commerce",
+     "Thank you for registering with us. Please confirm your email address to activate your account.",
+     "Confirm Email",
+     confirmationLink
+ );
+
+            var emailRequest = new EmailRequestDto(
                 emailTo,
                 "Verify your E-Commerce account email",
-                $@"
-<table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f4f4;padding:40px 0;'>
-    <tr>
-        <td align='center'>
+                body);
 
-            <table width='520' cellpadding='0' cellspacing='0' border='0'
-                   style='background-color:#ffffff;border-radius:10px;padding:30px;'>
-
-                <tr>
-                    <td align='center'>
-
-                        <h1 style='margin:0 0 20px 0;color:#222;font-family:Arial,sans-serif;'>
-                            Welcome to E-Commerce
-                        </h1>
-
-                        <p style='margin:0 0 25px 0;color:#555;font-size:16px;
-                                  line-height:24px;font-family:Arial,sans-serif;'>
-                            Thank you for registering with us.<br />
-                            Please confirm your email address to activate your account.
-                        </p>
-
-                        <a href='{confirmationLink}'
-                           style='background-color:#198754;
-                                  color:#ffffff;
-                                  text-decoration:none;
-                                  padding:12px 24px;
-                                  border-radius:6px;
-                                  display:inline-block;
-                                  font-family:Arial,sans-serif;
-                                  font-weight:bold;'>
-                            Confirm Email
-                        </a>
-
-                        <p style='margin-top:30px;color:#888;font-size:12px;
-                                  font-family:Arial,sans-serif;'>
-                            If you did not create this account, you can safely ignore this email.
-                        </p>
-
-                    </td>
-                </tr>
-
-            </table>
-
-        </td>
-    </tr>
-</table>"
-            );
 
             var result = await emailService.SendEmailAsync(emailRequest);
-            if (result.IsSuccess)
-                return Result.Success();
-
-            return Result.Failure(result.ErrorMessage!);
+            return result.IsSuccess
+                 ? Result.Success()
+                 : Result.Failure("Failed to send email", errorType: ErrorType.INTERNAL_ERROR);
         }
+
+        public async Task<Result> SendResetPasswordEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return Result.Failure("Email Is Required", errorType: ErrorType.VALIDATION);
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Result.Failure("Invaild Email Adddress", errorType: ErrorType.VALIDATION);
+
+
+            if (!user.EmailConfirmed)
+                return Result.Failure("Must Confirm Email First", errorType: ErrorType.VALIDATION);
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var encodedToken = Uri.EscapeDataString(token);
+
+            var request = _httpContextAccessor.HttpContext!.Request;
+
+            var resetLink =
+                $"{request.Scheme}://{request.Host}/Account/ResetPassword?email={user.Email}&token={encodedToken}";
+
+            var body = EmailTemplateBuilder.BuildActionEmail(
+            "Reset Password",
+               "Click below to reset your password",
+            "Reset Password",
+           resetLink
+);
+
+            var emailRequest = new EmailRequestDto(
+                user.Email!,
+                "Reset Password",
+                body);
+
+            var result = await emailService.SendEmailAsync(emailRequest);
+            return result.IsSuccess
+                 ? Result.Success()
+                 : Result.Failure("Failed to send email", errorType: ErrorType.INTERNAL_ERROR);
+        }
+
+        //public async Task<Result> ValidateResetPasswordTokenAsync(string email, string token)
+        //{
+        //    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+        //        return Result.Failure("Invalid reset link", errorType: ErrorType.VALIDATION);
+
+        //    var user = await _userManager.FindByEmailAsync(email);
+
+        //    if (user == null)
+        //        return Result.Failure("Invalid request");
+
+        //    var decodedToken = Uri.UnescapeDataString(token);
+
+        //    var isValid = await _userManager.VerifyUserTokenAsync(
+        //        user,
+        //        TokenOptions.DefaultProvider,
+        //        "ResetPassword",
+        //        decodedToken);
+
+        //    return isValid
+        //        ? Result.Success()
+        //        : Result.Failure("Invalid or expired reset link", errorType: ErrorType.VALIDATION);
+        //}
     }
 }
+
+

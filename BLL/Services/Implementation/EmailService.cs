@@ -62,6 +62,14 @@ namespace E_commerce.BLL.Services.Implementation
             }
             catch (Exception ex)
             {
+                var messageex = ex.Message;
+
+                if (ex.InnerException != null)
+                {
+                    messageex += " | Inner: " + ex.InnerException.Message;
+                }
+
+                Console.WriteLine(messageex);
                 return Result.Failure(ex.Message);
             }
         }

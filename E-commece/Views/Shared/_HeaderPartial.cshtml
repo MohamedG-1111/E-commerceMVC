@@ -58,7 +58,7 @@
                     </a>
 
                     <!-- Auth Section (ViewComponent) -->
-                    @if (User.Identity.IsAuthenticated)
+                    @if (User?.Identity?.IsAuthenticated == true)
                     {
                         @await Component.InvokeAsync("UserDropdown")
                     }

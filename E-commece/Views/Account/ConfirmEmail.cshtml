@@ -1,7 +1,11 @@
-﻿<div class="container d-flex justify-content-center align-items-center" style="min-height:80vh;">
+﻿@{
+    ViewData["Title"] = "Resend Email Confirmation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height:80vh;">
 
     <div class="card shadow-lg p-4 text-center" style="max-width:500px; width:100%; border-radius:12px;">
-
         <p class="text-muted mb-3">
             Email: <strong>@ViewBag.Email</strong>
         </p>
@@ -36,7 +40,7 @@
 
             <a asp-controller="Account"
                asp-action="ResendEmailConfirmation"
-               asp-route-email="@ViewBag.Email"
+               asp-route-Email="@ViewBag.Email"
                class="btn btn-primary mt-3">
                 Resend Email Confirmation
             </a>
