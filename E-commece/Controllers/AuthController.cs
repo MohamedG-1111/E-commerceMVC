@@ -9,10 +9,12 @@ namespace E_commece.Controllers
     public class AuthController : AppController
     {
         private readonly IAuthService authService;
+        private readonly IAccountService accountService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IAccountService accountService)
         {
             this.authService = authService;
+            this.accountService = accountService;
         }
         public IActionResult Index()
         {
@@ -36,6 +38,17 @@ namespace E_commece.Controllers
             var result = await authService.RegisterAsync(model);
             if (result.IsFailure)
                 return HandleResult(result, nameof(Register), model);
+
+
+            var resultEmailPrepare = await EmailConfirmation(result);
+            if (resultEmailPrepare.IsFailure)
+            {
+                TempData["warning"] =
+                       "Account created successfully, but the confirmation email could not be sent.";
+
+                ViewBag.Email = model.Email;
+                return View("EmailConfirmationRequired");
+            }
 
             TempData["Success"] =
                 "Registration successful. Please check your email to confirm your account.";
@@ -75,21 +88,22 @@ namespace E_commece.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        private void PrepareEmailConfirmation(Result<RegisterResultDto> resutlt)
+        private async Task<Result> EmailConfirmation(
+      Result<RegisterResultDto> result)
         {
             var confirmationLink = Url.Action(
-            "ConfirmEmail",
-            "Account",
-            new
-            {
-                userId = resutlt.Value.UserId,
-                token = resutlt.Value.Token
-            },
-            Request.Scheme);
+                "ConfirmEmail",
+                "Account",
+                new
+                {
+                    userId = result.Value.UserId,
+                    token = result.Value.Token
+                },
+                Request.Scheme);
 
-            //await emailService.SendConfirmationEmailAsync(
-            //   result.Value.Email,
-            //   confirmationLink!);
+            return await accountService.SendEmailConfirmationAsync(
+                result.Value.Email,
+                confirmationLink!);
         }
     }
 }

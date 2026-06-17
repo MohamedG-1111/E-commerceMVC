@@ -1,11 +1,14 @@
 ﻿@{
-    ViewData["Title"] = "Confirm Email";
+    ViewData["Title"] = "Resend Email Confirmation";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container d-flex justify-content-center align-items-center" style="min-height:80vh;">
 
     <div class="card shadow-lg p-4 text-center" style="max-width:500px; width:100%; border-radius:12px;">
+        <p class="text-muted mb-3">
+            Email: <strong>@ViewBag.Email</strong>
+        </p>
 
         @if (TempData["success"] != null)
         {
@@ -35,8 +38,11 @@
                 The confirmation link is invalid, expired, or already used.
             </p>
 
-            <a asp-controller="Account" asp-action="Register" class="btn btn-primary mt-3">
-                Back to Register
+            <a asp-controller="Account"
+               asp-action="ResendEmailConfirmation"
+               asp-route-Email="@ViewBag.Email"
+               class="btn btn-primary mt-3">
+                Resend Email Confirmation
             </a>
         }
 

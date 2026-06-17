@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace E_commerce.DAL.Entities.Users
 {
@@ -15,5 +16,11 @@ namespace E_commerce.DAL.Entities.Users
         }
 
         public string? ProfilePicture { get; set; }
+
+
+        [ValidateNever]
+        public Company Company { get; set; } = null!;
+
+        public int? CompanyId { get; set; }
     }
 }

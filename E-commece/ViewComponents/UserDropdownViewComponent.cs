@@ -14,6 +14,10 @@ namespace E_commece.ViewComponents
         public async Task<IViewComponentResult> InvokeAsync()
         {
             var currentUser = await currentUserService.GetCurrentUser();
+            if (currentUser == null)
+            {
+                return View(null);
+            }
             return View(currentUser);
         }
     }
