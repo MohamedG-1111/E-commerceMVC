@@ -107,6 +107,7 @@ namespace E_commerce.BLL.Services.Implementation
                 user,
                 model.Token,
                 model.Password);
+            await _userManager.UpdateSecurityStampAsync(user);
 
             if (!result.Succeeded)
             {
