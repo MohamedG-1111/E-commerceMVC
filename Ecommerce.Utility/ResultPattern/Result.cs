@@ -44,11 +44,11 @@ namespace Ecommerce.Utility.Result
     // =========================
     public class Result<T> : Result
     {
-        public T? Value { get; }
+        public T Value { get; }
 
         protected Result(
             bool isSuccess,
-            T? value,
+            T value,
             string? errorMessage = null,
             string? key = null,
             ErrorType? errorType = null)
@@ -60,7 +60,7 @@ namespace Ecommerce.Utility.Result
         public static Result<T> Success(T value)
             => new Result<T>(true, value);
 
-        public static Result<T> Failure(
+        public static Result<T?> Failure(
             string errorMessage,
             string? key = null,
             ErrorType? errorType = null)

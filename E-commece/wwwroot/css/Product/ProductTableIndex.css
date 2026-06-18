@@ -1,0 +1,92 @@
+﻿/* ===== ADMIN WRAPPER ===== */
+.admin-wrapper {
+    background: #f4f6f9;
+    min-height: 100vh;
+    padding: 25px;
+}
+
+/* ===== HEADER ===== */
+.admin-header {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.admin-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #111827;
+}
+
+/* ===== SEARCH BAR ===== */
+.admin-search {
+    display: flex;
+    gap: 10px;
+}
+
+    .admin-search input,
+    .admin-search select {
+        height: 42px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        padding: 0 12px;
+        outline: none;
+        background: white;
+    }
+
+    .admin-search input {
+        width: 300px;
+    }
+
+/* ===== BUTTON ===== */
+.btn-primary {
+    background: #2563eb;
+    border: none;
+}
+
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+/* ===== TABLE ===== */
+.card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+table thead {
+    background: #111827;
+    color: white;
+}
+
+table tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* ===== DELETE MODAL ===== */
+#deleteOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 1050;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    width: 380px;
+    text-align: center;
+}
+
+

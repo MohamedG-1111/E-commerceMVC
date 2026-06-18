@@ -1,0 +1,28 @@
+﻿<div class="card-body">
+    <table class="table table-bordered table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Category Name</th>
+                <th class="text-center">Display Order</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var category in Model)
+            {
+                <tr>
+                    <td>@category.Name</td>
+                    <td class="text-center">@category.DisplayOrder</td>
+                    <td class="text-center">
+                        <a asp-action="Details" asp-route-id="@category.Id" class="btn btn-sm btn-primary">Show</a>
+                        <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-warning">Edit</a>
+                        <button class="btn btn-sm btn-danger"
+                                onclick="openDeleteModal('@category.Name', '@Url.Action("ConfirmDelete", "Category", new { id = category.Id })')">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,142 +1,144 @@
 ﻿@using E_commerce.Utility.Settings
-@model IEnumerable<E_commerce.BLL.ViewModels.ProductListVm>
+@model IEnumerable<ProductListVm>
 
 @{
     ViewData["Title"] = "Home";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <link href="~/css/home/index.css" rel="stylesheet" />
-<!-- ─── HERO ─── -->
+
+<!-- HERO -->
 <section class="hero">
     <p class="hero-eyebrow">Our Collection</p>
-    <h1>Every book you<br>could ever need.</h1>
-    <p>Browse thousands of titles across every genre — from timeless classics to today's bestsellers.</p>
+
+    <h1>
+        Every book you
+        <br>
+        could ever need.
+    </h1>
+
+    <p>
+        Browse thousands of titles across every genre —
+        from timeless classics to today's bestsellers.
+    </p>
+
     <div class="hero-search">
-        <input type="text" placeholder="Search by title, author, or ISBN…" id="searchInput" />
-        <button onclick="filterBooks()">Search</button>
+        <input type="text"
+               id="searchInput"
+               placeholder="Search by title, author, or ISBN…" />
+
+        <button type="button" onclick="filterBooks()">
+            Search
+        </button>
     </div>
 </section>
 
-<!-- ─── FILTER BAR ─── -->
+<!-- FILTER BAR -->
 <nav class="filter-bar" aria-label="Category filter">
+
     <span class="filter-label">Browse:</span>
 
-    <button class="filter-chip active" onclick="setCategory(this, '')">
+    <button class="filter-chip active"
+            onclick="setCategory(this,'')">
         All
     </button>
 
-    @foreach (var cat in Model.Select(p => p.CategoryName).Distinct().OrderBy(c => c))
+    @foreach (var cat in Model.Select(p => p.CategoryName)
+                              .Distinct()
+                              .OrderBy(c => c))
     {
-        <button class="filter-chip" onclick="setCategory(this, '@cat')">
+        <button class="filter-chip"
+                onclick="setCategory(this,'@cat')">
             @cat
         </button>
     }
+
 </nav>
 
-<!-- ─── CATALOGUE ─── -->
+<!-- CATALOGUE -->
 <main class="catalogue">
+
     <div class="catalogue-header">
         <h2>All Books</h2>
         <span id="count-label">@Model.Count() titles</span>
     </div>
 
     <div class="book-grid" id="bookGrid">
-        @foreach (var product in Model)
-        {
-            <article class="book-card"
-                     data-title="@product.Title.ToLower()"
-                     data-author="@product.Author.ToLower()"
-                     data-isbn="@product.ISBN.ToLower()"
-                     data-category="@product.CategoryName">
-
-                <div class="book-cover">
-                    @if (!string.IsNullOrEmpty(product.ImageUrl))
-                    {
-                        <img src="@($"{FileSettings.ImagesPathProducts}/{product.ImageUrl}")" alt="Cover of @product.Title" loading="lazy" />
-                    }
-                    else
-                    {
-                        <div class="book-cover-placeholder">
-                            📖
-                            <span>No cover</span>
-                        </div>
-                    }
-                    <span class="category-badge">@product.CategoryName</span>
-                </div>
-
-                <div class="book-info">
-                    <p class="book-title">@product.Title</p>
-                    <p class="book-author">@product.Author</p>
-                    <p class="book-isbn">@product.ISBN</p>
-
-                    <div class="book-footer">
-                        <span class="book-price">
-                            <sup>EGP</sup>@product.ListPrice.ToString("N0")
-                        </span>
-                        <a href="/Home/ProductDetails/@product.Id" class="btn-details">
-                            View
-                            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
-                        </a>
-                    </div>
-                </div>
-            </article>
-        }
-        <div id="emptyState" style="display:none; text-align:center; padding:40px;">
-            <p>No books match your search.</p>
-        </div>
+        <partial name="~/Views/Product/_BooksPartial.cshtml" model="Model" />
     </div>
 
-    <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="empty-state"
+         id="emptyState"
+         style="display:none;">
         <p>No books match your search.</p>
     </div>
+
 </main>
 
-<script>
-    let activeCategory = '';
-    let searchTerm = '';
+@section Scripts
+{
+    <script>
 
-    // Search input
-    document.getElementById('searchInput').addEventListener('input', function () {
-        searchTerm = this.value.trim();
-        applyFilters();
-    });
+        let activeCategory = '';
+        let searchTerm = '';
 
-    // Category filter
-    function setCategory(btn, cat) {
-        document.querySelectorAll('.filter-chip')
-            .forEach(c => c.classList.remove('active'));
+        // Search while typing
+        $("#searchInput").on("input", function() {
 
-        btn.classList.add('active');
-        activeCategory = cat;
+            searchTerm = $(this).val().trim();
 
-        applyFilters();
-    }
-
-    // Main filter function (AJAX unified)
-    function applyFilters() {
-        $.ajax({
-            url: '/Product/SearchAsync',
-            type: 'GET',
-            data: {
-                searchTerm: searchTerm,
-                category: activeCategory
-            },
-            success: function (result) {
-
-                $("#bookGrid").html(result);
-
-                const count = $("#bookGrid .book-card").length;
-                $("#count-label").text(count + " titles");
-
-                if (count === 0) {
-                    $("#emptyState").show();
-                } else {
-                    $("#emptyState").hide();
-                }
-            },
-            error: function (xhr) {
-                console.log(xhr.responseText);
-            }
+            applyFilters();
         });
-    }
-</script>
+
+        // Search button
+        function filterBooks() {
+            searchTerm = $("#searchInput").val().trim();
+            applyFilters();
+        }
+
+        // Category filter
+        function setCategory(btn, category) {
+
+            $(".filter-chip").removeClass("active");
+
+            $(btn).addClass("active");
+
+            activeCategory = category;
+
+            applyFilters();
+        }
+
+        // Ajax Search + Category Filter
+        function applyFilters() {
+
+            $.ajax({
+                url: '/Product/Search',
+                type: 'GET',
+                data: {
+                    searchTerm: searchTerm,
+                    category: activeCategory
+                },
+                success: function(result) {
+
+                    $("#bookGrid").html(result);
+
+                    let count = $("#bookGrid .book-card").length;
+
+                    $("#count-label").text(count + " titles");
+
+                    if (count === 0) {
+                        $("#emptyState").show();
+                    }
+                    else {
+                        $("#emptyState").hide();
+                    }
+                },
+                error: function(xhr) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+
+    </script>
+}

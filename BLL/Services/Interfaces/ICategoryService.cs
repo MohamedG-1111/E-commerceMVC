@@ -17,5 +17,7 @@ namespace BLL.Services.Interfaces
 
         public Task<IEnumerable<SelectListItem>> GetAllCategoriesItems();
 
+        public Task<Result<IEnumerable<Category>?>> SearchAsync(string? SearchItem);
+
     }
 }

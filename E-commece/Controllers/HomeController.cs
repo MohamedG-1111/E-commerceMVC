@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : AppController
     {
         private readonly IProductService productService;
 
@@ -21,12 +21,11 @@ namespace E_commece.Controllers
         }
         public async Task<IActionResult> ProductDetails(int id)
         {
-            var product = await productService.ProductDetailsAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            return View(product);
+            var Resultproduct = await productService.ProductDetailsAsync(id);
+            if (!Resultproduct.IsSuccess)
+                return HandleResult(Resultproduct);
+
+            return View(Resultproduct.Value);
         }
 
         public IActionResult Privacy()

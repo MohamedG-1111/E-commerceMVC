@@ -1,0 +1,75 @@
+﻿
+.admin-wrapper {
+    background: #f4f6f9;
+    min-height: 100vh;
+    padding: 25px;
+}
+
+.admin-header {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.admin-title {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.search-box {
+    width: 280px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 0 10px;
+    outline: none;
+}
+
+.btn-primary {
+    background: #2563eb;
+    border: none;
+}
+
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+.card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+table thead {
+    background: #111827;
+    color: white;
+}
+
+table tbody tr:hover {
+    background: #f9fafb;
+}
+
+#deleteOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 1050;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    width: 380px;
+    text-align: center;
+}
+

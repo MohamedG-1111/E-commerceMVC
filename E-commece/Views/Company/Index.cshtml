@@ -1,0 +1,53 @@
+﻿@model IEnumerable<CompanyVM>
+
+@{
+    ViewData["Title"] = "Companies";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0 fw-bold">Companies</h2>
+        <small class="text-muted">Manage all registered companies</small>
+    </div>
+
+    <a asp-action="Create" class="btn btn-primary shadow-sm">
+        Create New Company
+    </a>
+</div>
+
+<div class="mb-3">
+    <input type="text"
+           id="searchInput"
+           class="form-control"
+           placeholder="Search by company name..." />
+</div>
+
+<div id="tableContainer">
+    <partial name="_CompanyTable" model="Model" />
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    function getCompanies() {
+
+        $.ajax({
+            url: "/Company/Search",
+            type: "GET",
+            data: {
+                search: $("#searchInput").val()
+            },
+            success: function(data) {
+                $("#tableContainer").html(data);
+            },
+            error: function() {
+                console.log("Error occurred");
+            }
+        });
+    }
+
+    // live search
+    $("#searchInput").on("keyup", function() {
+        getCompanies();
+    });
+</script>

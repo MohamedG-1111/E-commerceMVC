@@ -87,6 +87,12 @@ namespace E_commece.Controllers
             return View(Result.Value);
 
         }
+        [HttpGet]
+        public async Task<IActionResult> Search(string? searchTerm)
+        {
+            var result = await CategoryService.SearchAsync(searchTerm);
+            return PartialView("_CategoryPartial", result.Value);
+        }
 
 
     }

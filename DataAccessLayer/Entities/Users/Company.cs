@@ -1,13 +1,21 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace E_commerce.DAL.Entities.Users
+﻿namespace E_commerce.DAL.Entities.Users
 {
     public class Company
     {
         public int Id { get; set; }
-        public string ApplicationUserId { get; set; } = null!;
 
-        [ForeignKey("ApplicationUserId")]
-        public ApplicationUser ApplicationUser { get; set; } = null!;
+        public string Name { get; set; } = string.Empty;
+
+        public string Email { get; set; } = string.Empty;
+
+        public string Phone { get; set; } = string.Empty;
+
+        public string? Address { get; set; }
+
+        public string? City { get; set; }
+
+        public string? PostalCode { get; set; }
+
+        public decimal DiscountPercentage { get; set; } = 0;
     }
 }

@@ -6,7 +6,7 @@ using E_commerce.DAL.Entities;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
 using Microsoft.AspNetCore.Mvc.Rendering;
-
+using Microsoft.EntityFrameworkCore;
 namespace BLL.Services.Implementation
 {
     public class CategoryService : ICategoryService
@@ -126,5 +126,30 @@ namespace BLL.Services.Implementation
                 Value = c.Id.ToString()
             });
         }
+
+        public async Task<Result<IEnumerable<Category>>> SearchAsync(string? searchItem)
+        {
+            var query = unitOfWork.Repository<Category>()
+                .GetAsQuery();
+
+            if (!string.IsNullOrWhiteSpace(searchItem))
+            {
+                searchItem = searchItem.Trim();
+
+                query = query.Where(c => c.Name.Contains(searchItem));
+            }
+
+            var categories = await query
+                .Select(x => new Category
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    DisplayOrder = x.DisplayOrder
+                })
+                .ToListAsync();
+
+            return Result<IEnumerable<Category>>.Success(categories);
+        }
+
     }
 }

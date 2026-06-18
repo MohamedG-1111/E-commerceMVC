@@ -124,11 +124,20 @@ namespace E_commece.Controllers
 
         }
         [HttpGet]
-        [Route("Product/SearchAsync")]
-        public async Task<IActionResult> SearchAsync(string? searchTerm, string? category)
+        [Route("Product/Search")]
+        public async Task<IActionResult> Search(string? searchTerm, string? category)
         {
             var Resultproducts = await _productService.AllProductsAsync(searchTerm, category);
-            return PartialView("_BooksPartial", Resultproducts.Value);
+            return PartialView("~/Views/Product/_BooksPartial.cshtml", Resultproducts.Value);
+        }
+
+        [HttpGet]
+        [Route("Product/SearchTable")]
+        public async Task<IActionResult> SearchTable(string? searchTerm, string? category)
+        {
+            var result = await _productService.AllProductsAsync(searchTerm, category);
+
+            return PartialView("~/Views/Product/_ProductTablePartial.cshtml", result.Value);
         }
     }
 }
