@@ -179,9 +179,23 @@ namespace E_commece.Controllers
             return PartialView("_AccountPartial", result.Value);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public async Task<IActionResult> Delete(string UserId)
+        {
+            var result = await accountService.DeleteAccountAsync(UserId);
+            if (!result.IsSuccess)
+                return HandleResult(result);
+            TempData["Success"] = "Account Deleted Successfully";
+
+            return RedirectToAction(nameof(Index));
+        }
+
 
     }
 
 
 
 }
+

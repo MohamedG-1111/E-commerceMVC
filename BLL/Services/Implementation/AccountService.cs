@@ -408,6 +408,32 @@ namespace E_commerce.BLL.Services.Implementation
 
             return Result.Success();
         }
+
+        public async Task<Result> DeleteAccountAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+
+            var result = await _userManager.DeleteAsync(user);
+
+            if (!result.Succeeded)
+                return Result.Failure("Can not delete account");
+
+
+            if (!string.IsNullOrWhiteSpace(user.ProfilePicture))
+            {
+                await attachmentService.DeleteAttachmentAsync(user.ProfilePicture!, FileSettings.ImagesPathProfiles);
+            }
+
+            return Result.Success();
+
+        }
     }
 }
 

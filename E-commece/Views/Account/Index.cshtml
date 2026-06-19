@@ -1,4 +1,4 @@
-﻿@model IEnumerable<AllAccountsViewModel>
+﻿@model IEnumerable<E_commerce.BLL.ViewModels.AllAccountsViewModel>
 
 @{
     ViewData["Title"] = "Accounts";
@@ -19,35 +19,126 @@
     <input type="text"
            id="searchInput"
            class="form-control"
-           placeholder="Search for  Account ..." />
+           placeholder="Search for Account..." />
 </div>
 
 <div id="tableContainer">
     <partial name="_AccountPartial" model="Model" />
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DELETE MODAL -->
+<div id="deleteOverlay"
+     onclick="handleOverlayClick(event)"
+     style="display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.4);
+    justify-content:center;
+    align-items:center;
+    z-index:9999;">
 
-<script>
-    function getAccounts() {
+    <div class="bg-white p-4 rounded shadow" style="width:400px">
 
-        $.ajax({
-            url: "/Account/Search",
-            type: "GET",
-            data: {
-                search: $("#searchInput").val()
-            },
-            success: function(data) {
-                $("#tableContainer").html(data);
-            },
-            error: function() {
-                console.log("Error occurred");
-            }
+        <div class="text-center">
+
+            <i class="bi bi-trash text-danger"
+               style="font-size:40px"></i>
+
+            <h5 class="mt-2">Confirm Delete</h5>
+
+            <p class="text-muted">
+                Delete account
+                <strong id="accountName"></strong> ?
+            </p>
+
+            <form asp-action="Delete" method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       id="deleteUserId"
+                       name="userId" />
+
+                <div class="d-flex justify-content-center gap-2">
+
+                    <button type="button"
+                            class="btn btn-secondary btn-sm"
+                            onclick="closeDeleteModal()">
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-danger btn-sm">
+                        Delete
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+
+        function getAccounts() {
+
+            $.ajax({
+                url: "/Account/Search",
+                type: "GET",
+                data: {
+                    search: $("#searchInput").val()
+                },
+                success: function(data) {
+                    $("#tableContainer").html(data);
+                },
+                error: function() {
+                    console.log("Error occurred");
+                }
+            });
+
+        }
+
+        $("#searchInput").on("keyup", function() {
+            getAccounts();
         });
-    }
 
-    // live search
-    $("#searchInput").on("keyup", function() {
-        getAccounts();
-    });
-</script>
+        function openDeleteModal(name, userId) {
+
+            $("#accountName").text(name);
+            $("#deleteUserId").val(userId);
+
+            $("#deleteOverlay").css("display", "flex");
+        }
+
+        function closeDeleteModal() {
+
+            $("#deleteOverlay").hide();
+
+        }
+
+        function handleOverlayClick(e) {
+
+            if (e.target.id === "deleteOverlay") {
+                closeDeleteModal();
+            }
+
+        }
+
+        document.addEventListener("keydown", function(e) {
+
+            if (e.key === "Escape") {
+                closeDeleteModal();
+            }
+
+        });
+
+    </script>
+}

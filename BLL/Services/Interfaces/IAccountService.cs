@@ -32,6 +32,6 @@ namespace E_commerce.BLL.Services.Interfaces
         public Task<Result> LockAccountAsync(string UserId);
         public Task<Result> UnLockAccountAsync(string userId);
 
-
+        public Task<Result> DeleteAccountAsync(string userId);
     }
 }
