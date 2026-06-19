@@ -24,6 +24,14 @@ namespace E_commerce.BLL.Services.Interfaces
         public Task<Result<List<AllAccountsViewModel>>> GetAccountsAsync();
 
 
+        public Task<Result<AccountVM>?> GetAccountByUserId(string UserId);
+
+
         public Task<Result<List<AllAccountsViewModel>>> SearchAccountsAsync(string Search);
+
+        public Task<Result> LockAccountAsync(string UserId);
+        public Task<Result> UnLockAccountAsync(string userId);
+
+
     }
 }

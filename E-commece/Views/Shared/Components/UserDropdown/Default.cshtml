@@ -1,4 +1,5 @@
-﻿@using E_commerce.DAL.Entities.Users
+﻿@using System.Security.Claims
+@using E_commerce.DAL.Entities.Users
 @using E_commerce.Utility.Settings
 @model ApplicationUser
 
@@ -23,7 +24,9 @@
     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
 
         <li>
-            <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+            <a class="dropdown-item" asp-controller="Account" asp-action="Profile" 
+               asp-route-userId="@User.FindFirst(ClaimTypes.NameIdentifier)?.Value">
+              
                 <i class="bi bi-person me-2"></i> Profile
             </a>
         </li>

@@ -2,6 +2,7 @@
 using E_commerce.BLL.Dto;
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
+using E_commerce.DAL.Entities;
 using E_commerce.DAL.Entities.Users;
 using E_commerce.Utility.Settings;
 using Ecommerce.Utility;
@@ -337,7 +338,80 @@ namespace E_commerce.BLL.Services.Implementation
              .ToListAsync();
             return Result<List<AllAccountsViewModel>>.Success(accounts);
         }
+
+        public async Task<Result<AccountVM>?> GetAccountByUserId(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result<AccountVM>.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var account = await unitOfWork.Repository<ApplicationUser>().GetAsQuery().FirstOrDefaultAsync(x => x.Id == userId);
+            if (account == null)
+                return Result<AccountVM>.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var company = await unitOfWork.Repository<Company>().GetAsQuery()
+                .FirstOrDefaultAsync(x => x.Id == account.CompanyId);
+
+
+
+            var result = new AccountVM
+            {
+                FirstName = account.FirstName,
+                LastName = account.LastName,
+                Email = account.Email!,
+                Phone = account.PhoneNumber!,
+                StreetAddress = account.StreetAddress,
+                City = account.City,
+                PostalCode = account.PostalCode,
+                CompanyId = account.CompanyId,
+                Role = account.Role,
+                Image = account.ProfilePicture,
+                CompanyName = company?.Name ?? null
+            };
+
+            return Result<AccountVM>.Success(result);
+        }
+
+        public async Task<Result> LockAccountAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            await _userManager.SetLockoutEndDateAsync(
+                user,
+                DateTimeOffset.MaxValue
+            );
+            await _userManager.ResetAccessFailedCountAsync(user);
+
+
+            return Result.Success();
+        }
+        public async Task<Result> UnLockAccountAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            await _userManager.SetLockoutEndDateAsync(
+                user,
+                DateTimeOffset.UtcNow
+            );
+            await _userManager.ResetAccessFailedCountAsync(user);
+
+            return Result.Success();
+        }
     }
 }
+
+
+
 
 

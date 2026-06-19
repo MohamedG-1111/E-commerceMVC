@@ -49,5 +49,11 @@ namespace E_commerce.BLL.ViewModels
         public IEnumerable<SelectListItem> Companies { get; set; }
 
         public int? CompanyId { get; set; }
+
+        [ValidateNever]
+        public string? Image { get; set; }
+        [ValidateNever]
+
+        public string? CompanyName { get; set; }
     }
 }

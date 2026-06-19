@@ -43,6 +43,8 @@ namespace E_commece
             builder.Services.Configure<IdentityOptions>(options =>
             {
                 options.SignIn.RequireConfirmedEmail = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(3);
             });
             builder.Services.Configure<EmailSettings>(
      builder.Configuration.GetSection("EmailSettings"));

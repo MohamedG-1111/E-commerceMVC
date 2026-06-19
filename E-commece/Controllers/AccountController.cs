@@ -129,6 +129,43 @@ namespace E_commece.Controllers
             return View(result.Value);
         }
 
+        public async Task<IActionResult> Profile(string UserId)
+        {
+            var result = await accountService.GetAccountByUserId(UserId);
+            if (result.IsFailure)
+                HandleResult(result);
+            return View(result.Value);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LockAccount(string userId)
+        {
+            var result = await accountService.LockAccountAsync(userId);
+
+            if (result.IsFailure)
+                return HandleResult(result);
+
+            TempData["Success"] = "Account locked successfully";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnlockAccount(string userId)
+        {
+            var result = await accountService.UnLockAccountAsync(userId);
+
+            if (result.IsFailure)
+                return HandleResult(result);
+
+            TempData["Success"] = "Account unlocked successfully";
+
+            return RedirectToAction(nameof(Index));
+        }
+
         public async Task<IActionResult> Search(string search)
         {
             var result = await accountService.SearchAccountsAsync(search);
@@ -141,6 +178,8 @@ namespace E_commece.Controllers
 
             return PartialView("_AccountPartial", result.Value);
         }
+
+
     }
 
 
