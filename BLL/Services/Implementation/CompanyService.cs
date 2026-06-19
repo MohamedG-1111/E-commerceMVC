@@ -1,6 +1,7 @@
 ﻿using DataAccessLayer.Repositories.Interfaces;
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
+using E_commerce.DAL.Entities;
 using E_commerce.DAL.Entities.Users;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;

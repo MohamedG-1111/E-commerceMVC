@@ -1,4 +1,4 @@
-﻿using E_commerce.DAL.Entities.Users;
+﻿using E_commerce.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

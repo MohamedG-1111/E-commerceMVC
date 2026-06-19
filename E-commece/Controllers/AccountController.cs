@@ -7,10 +7,12 @@ namespace E_commece.Controllers
     public class AccountController : AppController
     {
         private readonly IAccountService accountService;
+        private readonly ICompanyService companyService;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, ICompanyService companyService)
         {
             this.accountService = accountService;
+            this.companyService = companyService;
         }
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
@@ -82,5 +84,65 @@ namespace E_commece.Controllers
             TempData["Success"] = "Reset Password Successfuly";
             return RedirectToAction("Login", "Auth");
         }
+
+
+        [HttpGet]
+
+        public async Task<IActionResult> CreateAccount()
+        {
+            AccountVM model = new AccountVM()
+            {
+                Companies = await companyService.GetAllCategoriesItems()
+
+            };
+            return View(model);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateAccount(AccountVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.Companies = await companyService.GetAllCategoriesItems();
+                return View(model);
+
+            }
+            var result = await accountService.CreateAccountAsync(model);
+            if (!result.IsSuccess)
+            {
+                model.Companies = await companyService.GetAllCategoriesItems();
+                return HandleResult(result, nameof(CreateAccount), model);
+            }
+
+            TempData["Success"] = "Account Created Successfully";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
+        public async Task<IActionResult> Index()
+        {
+            var result = await accountService.GetAccountsAsync();
+            return View(result.Value);
+        }
+
+        public async Task<IActionResult> Search(string search)
+        {
+            var result = await accountService.SearchAccountsAsync(search);
+
+            if (!result.IsSuccess)
+            {
+                return PartialView("_AccountPartial",
+                    Enumerable.Empty<AllAccountsViewModel>());
+            }
+
+            return PartialView("_AccountPartial", result.Value);
+        }
     }
+
+
+
 }

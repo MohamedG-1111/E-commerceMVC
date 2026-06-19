@@ -14,6 +14,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include="ViewModels\AccountVM.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\DataAccessLayer\E_commerce.DAL.csproj" />
 		<ProjectReference Include="..\Ecommerce.Utility\Ecommerce.Utility.csproj" />
 	</ItemGroup>

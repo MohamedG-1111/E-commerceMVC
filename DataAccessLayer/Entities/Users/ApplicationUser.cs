@@ -15,6 +15,7 @@ namespace E_commerce.DAL.Entities.Users
             get; set;
         }
 
+        public string Role { get; set; } = string.Empty;
         public string? ProfilePicture { get; set; }
 
 

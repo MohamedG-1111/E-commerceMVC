@@ -17,5 +17,13 @@ namespace E_commerce.BLL.Services.Interfaces
         //Task<Result> ValidateResetPasswordTokenAsync(string email, string token);
 
         public Task<Result> ResetPasswoAsync(ResetPasswordViewModel model);
+
+        public Task<Result> CreateAccountAsync(AccountVM model);
+
+
+        public Task<Result<List<AllAccountsViewModel>>> GetAccountsAsync();
+
+
+        public Task<Result<List<AllAccountsViewModel>>> SearchAccountsAsync(string Search);
     }
 }

@@ -1,0 +1,53 @@
+﻿@model IEnumerable<AllAccountsViewModel>
+
+@{
+    ViewData["Title"] = "Accounts";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0 fw-bold">Accounts</h2>
+        <small class="text-muted">Manage all registered Accounts</small>
+    </div>
+
+    <a asp-action="CreateAccount" class="btn btn-primary shadow-sm">
+        Create New Account
+    </a>
+</div>
+
+<div class="mb-3">
+    <input type="text"
+           id="searchInput"
+           class="form-control"
+           placeholder="Search for  Account ..." />
+</div>
+
+<div id="tableContainer">
+    <partial name="_AccountPartial" model="Model" />
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    function getAccounts() {
+
+        $.ajax({
+            url: "/Account/Search",
+            type: "GET",
+            data: {
+                search: $("#searchInput").val()
+            },
+            success: function(data) {
+                $("#tableContainer").html(data);
+            },
+            error: function() {
+                console.log("Error occurred");
+            }
+        });
+    }
+
+    // live search
+    $("#searchInput").on("keyup", function() {
+        getAccounts();
+    });
+</script>

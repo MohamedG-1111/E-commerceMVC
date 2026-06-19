@@ -1,25 +1,37 @@
-﻿using E_commerce.BLL.Dto;
+﻿using DataAccessLayer.Repositories.Interfaces;
+using E_commerce.BLL.Dto;
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities.Users;
+using E_commerce.Utility.Settings;
 using Ecommerce.Utility;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-
+using Microsoft.EntityFrameworkCore;
 namespace E_commerce.BLL.Services.Implementation
 {
     public class AccountService : IAccountService
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailService emailService;
+        private readonly IAttachmentService attachmentService;
+        private readonly IUnitOfWork unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AccountService(UserManager<ApplicationUser> _userManager, IHttpContextAccessor httpContextAccessor, IEmailService emailService)
+
+
+        public AccountService(UserManager<ApplicationUser> _userManager,
+            IHttpContextAccessor httpContextAccessor,
+            IEmailService emailService,
+            IAttachmentService attachmentService,
+            IUnitOfWork unitOfWork)
         {
             this._userManager = _userManager;
             this.emailService = emailService;
+            this.attachmentService = attachmentService;
+            this.unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
 
         }
@@ -190,28 +202,141 @@ namespace E_commerce.BLL.Services.Implementation
                  : Result.Failure("Failed to send email", errorType: ErrorType.INTERNAL_ERROR);
         }
 
-        //public async Task<Result> ValidateResetPasswordTokenAsync(string email, string token)
-        //{
-        //    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
-        //        return Result.Failure("Invalid reset link", errorType: ErrorType.VALIDATION);
 
-        //    var user = await _userManager.FindByEmailAsync(email);
+        public async Task<Result> CreateAccountAsync(AccountVM model)
+        {
+            if (model is null)
+                return Result.Failure("Invalid Account Data");
 
-        //    if (user == null)
-        //        return Result.Failure("Invalid request");
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
 
-        //    var decodedToken = Uri.UnescapeDataString(token);
+            if (existingUser != null)
+                return Result.Failure(
+                    "User with this email already exists",
+                    errorType: ErrorType.VALIDATION);
 
-        //    var isValid = await _userManager.VerifyUserTokenAsync(
-        //        user,
-        //        TokenOptions.DefaultProvider,
-        //        "ResetPassword",
-        //        decodedToken);
+            var user = new ApplicationUser
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                PhoneNumber = model.Phone,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                StreetAddress = model.StreetAddress,
+                City = model.City,
+                PostalCode = model.PostalCode,
+                Role = model.Role,
+                CompanyId = model.CompanyId,
+                EmailConfirmed = true
+            };
 
-        //    return isValid
-        //        ? Result.Success()
-        //        : Result.Failure("Invalid or expired reset link", errorType: ErrorType.VALIDATION);
-        //}
+            try
+            {
+                if (model.ProfilePicture != null)
+                {
+                    user.ProfilePicture =
+                        await attachmentService.UploadAttachmentAsync(
+                            model.ProfilePicture,
+                            FileSettings.ImagesPathProfiles);
+                }
+
+                var createResult =
+                    await _userManager.CreateAsync(user, model.Password);
+
+                if (!createResult.Succeeded)
+                {
+                    if (user.ProfilePicture != null)
+                    {
+                        await attachmentService.DeleteAttachmentAsync(
+                            user.ProfilePicture,
+                            FileSettings.ImagesPathProfiles);
+                    }
+
+                    return Result.Failure(
+                        string.Join(", ",
+                            createResult.Errors.Select(e => e.Description)),
+                        errorType: ErrorType.VALIDATION);
+                }
+
+                var roleResult =
+                    await _userManager.AddToRoleAsync(user, model.Role);
+
+                if (!roleResult.Succeeded)
+                {
+                    if (user.Id != null)
+                        await _userManager.DeleteAsync(user);
+
+                    if (user.ProfilePicture != null)
+                    {
+                        await attachmentService.DeleteAttachmentAsync(
+                            user.ProfilePicture,
+                            FileSettings.ImagesPathProfiles);
+                    }
+
+                    return Result.Failure(
+                        "Failed to assign role",
+                        errorType: ErrorType.INTERNAL_ERROR);
+                }
+
+                return Result.Success();
+            }
+            catch
+            {
+                if (user.ProfilePicture != null)
+                {
+                    await attachmentService.DeleteAttachmentAsync(
+                        user.ProfilePicture,
+                        FileSettings.ImagesPathProfiles);
+                }
+
+                return Result.Failure(
+                    "Registration failed",
+                    errorType: ErrorType.INTERNAL_ERROR);
+            }
+        }
+
+        public async Task<Result<List<AllAccountsViewModel>>> GetAccountsAsync()
+        {
+            var accounts = await unitOfWork.Repository<ApplicationUser>().GetAsQuery()
+                 .Select(x => new AllAccountsViewModel
+                 {
+                     UserId = x.Id,
+                     FullName = $"{x.FirstName} {x.LastName}",
+                     Email = x.Email!,
+                     Role = x.Role,
+                     IsLocked = x.LockoutEnd != null &&
+           x.LockoutEnd > DateTimeOffset.UtcNow
+                 })
+                  .ToListAsync();
+            return Result<List<AllAccountsViewModel>>.Success(accounts);
+        }
+
+        public async Task<Result<List<AllAccountsViewModel>>> SearchAccountsAsync(string Search)
+        {
+            var query = unitOfWork.Repository<ApplicationUser>().GetAsQuery();
+            if (!string.IsNullOrWhiteSpace(Search))
+            {
+                query = query.Where(
+                    x => x.Email!.Contains(Search)
+                    || x.Role!.Contains(Search)
+                    || x.FirstName.Contains(Search)
+                    || x.LastName.Contains(Search)
+
+                    );
+            }
+
+            var accounts = await query.Select(x => new AllAccountsViewModel
+            {
+                UserId = x.Id,
+                FullName = $"{x.FirstName} {x.LastName}",
+                Email = x.Email!,
+                Role = x.Role,
+                IsLocked = x.LockoutEnd != null &&
+           x.LockoutEnd > DateTimeOffset.UtcNow
+            })
+             .ToListAsync();
+            return Result<List<AllAccountsViewModel>>.Success(accounts);
+        }
     }
 }
 

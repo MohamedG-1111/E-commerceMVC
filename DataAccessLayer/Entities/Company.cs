@@ -1,4 +1,4 @@
-﻿namespace E_commerce.DAL.Entities.Users
+﻿namespace E_commerce.DAL.Entities
 {
     public class Company
     {

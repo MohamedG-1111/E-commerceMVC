@@ -21,7 +21,8 @@ namespace E_commerce.DAL.Data
                     Email = adminEmail,
                     FirstName = "System",
                     LastName = "Admin",
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    Role = Roles.Admin
                 };
 
                 var result = await userManager.CreateAsync(
