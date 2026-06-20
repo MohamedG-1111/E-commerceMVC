@@ -434,6 +434,126 @@ namespace E_commerce.BLL.Services.Implementation
             return Result.Success();
 
         }
+
+        public async Task<Result> UpdateAccountAsync(string userId, EditAccountVM model)
+        {
+            if (model is null)
+                return Result.Failure("Invalid Account Data");
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var emailExists = await _userManager.FindByEmailAsync(model.Email);
+
+            if (emailExists != null && emailExists.Id != user.Id)
+            {
+                return Result.Failure(
+                    "User with this email already exists",
+                    errorType: ErrorType.VALIDATION);
+            }
+
+            var oldImage = user.ProfilePicture;
+
+            // update fields
+            user.UserName = model.Email;
+            user.Email = model.Email;
+            user.PhoneNumber = model.Phone;
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.StreetAddress = model.StreetAddress;
+            user.City = model.City;
+            user.PostalCode = model.PostalCode;
+            user.CompanyId = model.CompanyId;
+
+            string? newImage = null;
+
+            try
+            {
+                // 1️⃣ upload image FIRST but keep temp
+                if (model.ProfilePicture != null)
+                {
+                    newImage = await attachmentService.UploadAttachmentAsync(
+                        model.ProfilePicture,
+                        FileSettings.ImagesPathProfiles);
+
+                    user.ProfilePicture = newImage;
+                }
+
+                // 2️⃣ update DB
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    // rollback uploaded image
+                    if (!string.IsNullOrWhiteSpace(newImage))
+                    {
+                        await attachmentService.DeleteAttachmentAsync(
+                            newImage,
+                            FileSettings.ImagesPathProfiles);
+                    }
+
+                    return Result.Failure(
+                        string.Join(", ", result.Errors.Select(e => e.Description)),
+                       errorType: ErrorType.VALIDATION);
+                }
+
+                // 3️⃣ delete old image AFTER success
+                if (!string.IsNullOrWhiteSpace(oldImage) && newImage != null)
+                {
+                    await attachmentService.DeleteAttachmentAsync(
+                        oldImage,
+                        FileSettings.ImagesPathProfiles);
+                }
+
+                return Result.Success();
+            }
+            catch
+            {
+                // rollback new image if something crashes
+                if (!string.IsNullOrWhiteSpace(newImage))
+                {
+                    await attachmentService.DeleteAttachmentAsync(
+                        newImage,
+                        FileSettings.ImagesPathProfiles);
+                }
+
+                return Result.Failure(
+                    "Update failed",
+                    errorType: ErrorType.INTERNAL_ERROR);
+            }
+        }
+        public async Task<Result<EditAccountVM>> GetAccountToEditAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result<EditAccountVM>.Failure("Invalid User Id", errorType: ErrorType.NOT_FOUND);
+
+            var user = await _userManager.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == userId);
+
+            if (user is null)
+                return Result<EditAccountVM>.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var model = new EditAccountVM
+            {
+                UserId = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email!,
+                Phone = user.PhoneNumber!,
+                StreetAddress = user.StreetAddress,
+                City = user.City,
+                PostalCode = user.PostalCode,
+                CompanyId = user.CompanyId,
+                ExistingImage = user.ProfilePicture,
+                Role = user?.Role,
+
+            };
+
+            return Result<EditAccountVM>.Success(model);
+        }
     }
 }
 

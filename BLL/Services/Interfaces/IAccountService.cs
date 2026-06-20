@@ -33,5 +33,8 @@ namespace E_commerce.BLL.Services.Interfaces
         public Task<Result> UnLockAccountAsync(string userId);
 
         public Task<Result> DeleteAccountAsync(string userId);
+
+        public Task<Result> UpdateAccountAsync(string userId, EditAccountVM model);
+        public Task<Result<EditAccountVM>> GetAccountToEditAsync(string userId);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
+using Ecommerce.Utility;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
@@ -134,6 +135,7 @@ namespace E_commece.Controllers
             var result = await accountService.GetAccountByUserId(UserId);
             if (result.IsFailure)
                 HandleResult(result);
+            ViewBag.userId = UserId;
             return View(result.Value);
         }
 
@@ -193,9 +195,48 @@ namespace E_commece.Controllers
         }
 
 
+        [HttpGet]
+        public async Task<IActionResult> Edit(string userId)
+        {
+            var result = await accountService.GetAccountToEditAsync(userId);
+
+            if (!result.IsSuccess || result.Value is null)
+                return HandleResult(result);
+
+            var model = result.Value;
+
+            model.Companies = await companyService.GetAllCategoriesItems();
+
+            return View(model);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public async Task<IActionResult> Edit(EditAccountVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.Companies = await companyService.GetAllCategoriesItems();
+                return View(model);
+            }
+            var result = await accountService.UpdateAccountAsync(model.UserId, model);
+            if (!result.IsSuccess)
+            {
+                model.Companies = await companyService.GetAllCategoriesItems();
+                return HandleResult(result, nameof(Edit), model);
+            }
+
+            TempData["Success"] = "Update Successfully";
+            if (User.IsInRole(Roles.Admin))
+                return RedirectToAction(nameof(Index));
+
+            return RedirectToAction(nameof(Index), "Home");
+        }
+
+
+
     }
-
-
-
 }
+
+
 
