@@ -1,4 +1,5 @@
 ﻿@using E_commerce.Utility.Settings
+@using Ecommerce.Utility
 @model IEnumerable<ProductListVm>
 
 @foreach (var product in Model)
@@ -33,10 +34,21 @@
                 <span class="book-price">
                     <sup>EGP</sup>@product.ListPrice.ToString("N0")
                 </span>
-                <a href="/Product/Details/@product.Id" class="btn-details">
-                    View
-                    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
-                </a>
+                @if (User.IsInRole(Roles.Admin))
+                {
+                    <a href="/Product/Details/@product.Id" class="btn-details">
+                        View
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+                    </a>
+                }
+                else
+                {
+                    <a href="/Home/ProductDetails/@product.Id" class="btn-details">
+                        View
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+                    </a>
+                }
+              
             </div>
         </div>
     </article>
