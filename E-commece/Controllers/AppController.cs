@@ -20,6 +20,12 @@ namespace E_commece.Controllers
                 case ErrorType.NOT_FOUND:
                     return View("NotFound", result.ErrorMessage);
 
+                case ErrorType.UNAUTHORIZED:
+                    TempData["error"] = result.ErrorMessage;
+                    return RedirectToAction("Login", "Auth");
+                case ErrorType.CONFLICT:
+                    TempData["error"] = result.ErrorMessage;
+                    return RedirectToAction("Index", "Cart");
                 default:
                     TempData["error"] = result.ErrorMessage;
                     return RedirectToAction(nameof(Index));

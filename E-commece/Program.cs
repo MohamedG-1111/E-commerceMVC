@@ -39,6 +39,7 @@ namespace E_commece
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IRedisService, RedisService>();
+            builder.Services.AddScoped<ICompanyService, CompanyService>();
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
@@ -47,6 +48,10 @@ namespace E_commece
                 options.SignIn.RequireConfirmedEmail = true;
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(3);
+            });
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Auth/Login";
             });
             builder.Services.Configure<EmailSettings>(
      builder.Configuration.GetSection("EmailSettings"));

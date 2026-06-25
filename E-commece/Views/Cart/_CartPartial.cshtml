@@ -1,0 +1,154 @@
+﻿@using E_commerce.Utility.Settings
+@model CustomerCart
+
+<h2 class="fw-bold mb-4">🛒 Shopping Cart</h2>
+
+@if (Model == null || Model.Items == null || !Model.Items.Any())
+{
+    <div class="text-center py-5">
+        <h4>Your cart is empty</h4>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3">
+            Continue Shopping
+        </a>
+    </div>
+}
+else
+{
+    <div class="row g-4" id="cart-container">
+
+        <!-- LEFT: ITEMS -->
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-0">
+
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="d-flex align-items-center justify-content-between p-3 border-bottom cart-item"
+                             data-id="@item.ProductId">
+
+                            <!-- PRODUCT INFO -->
+                            <div class="d-flex align-items-center gap-3">
+
+                                @if (!string.IsNullOrEmpty(item.Image))
+                                {
+                                    <img src="@($"{FileSettings.ImagesPathProducts}/{item.Image}")"
+                                         class="rounded border"
+                                         style="width:75px;height:75px;object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <div class="bg-light border rounded d-flex align-items-center justify-content-center"
+                                         style="width:75px;height:75px;">
+                                        📦
+                                    </div>
+                                }
+
+                                <div>
+                                    <div class="fw-semibold">@item.Name</div>
+                                    <small class="text-muted">
+                                        Unit: $<span class="unit-price">@item.Price</span>
+                                    </small>
+                                </div>
+
+                            </div>
+
+                            <!-- QUANTITY -->
+                            <div class="d-flex align-items-center gap-2">
+
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary decrease-btn"
+                                        data-id="@item.ProductId">
+                                    -
+                                </button>
+
+                                <span class="fw-bold px-2 item-count">
+                                    @item.Count
+                                </span>
+
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary increase-btn"
+                                        data-id="@item.ProductId">
+                                    +
+                                </button>
+
+                            </div>
+
+                            <!-- LINE TOTAL -->
+                            <div class="fw-bold text-success">
+                                $<span class="line-total">@(@item.Price * item.Count)</span>
+                            </div>
+
+                            <!-- REMOVE -->
+                            <button class="btn btn-sm btn-outline-danger remove-btn"
+                                    data-id="@item.ProductId">
+                                Remove
+                            </button>
+
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT: SUMMARY -->
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm border-0 rounded-4 sticky-top" style="top:20px;">
+
+                <div class="card-body">
+
+                    <h5 class="fw-bold mb-3">Order Summary</h5>
+
+                    <!-- SUBTOTAL -->
+                    <div class="d-flex justify-content-between">
+                        <span>Subtotal</span>
+                        <span id="cart-subtotal">$@Model.SubTotal</span>
+                    </div>
+
+                    <!-- DISCOUNT -->
+                    <div class="d-flex justify-content-between text-danger">
+                        <span>Discount</span>
+                        <span id="cart-discount">-$@Model.Discount</span>
+                    </div>
+
+                    <hr />
+
+                    <!-- TOTAL -->
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Total</span>
+                        <span id="cart-total" class="text-success">
+                            $@Model.Total
+                        </span>
+                    </div>
+
+                   
+
+                    <a asp-action="CheckOut" asp-controller="Order" class="btn btn-success w-100 mt-3">
+                        Checkout
+                    </a>
+
+                    <!-- CLEAR CART -->
+
+                    <button type="button"
+                            id="clear-cart-btn"
+                            class="btn btn-outline-danger w-100 mt-2">
+                        <i class="bi bi-trash3-fill me-2"></i>
+                        Clear Cart
+                    </button>
+
+                    <a asp-controller="Home" asp-action="Index"
+                       class="btn btn-outline-secondary w-100 mt-2">
+                        Continue Shopping
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+}

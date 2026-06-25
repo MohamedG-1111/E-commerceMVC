@@ -4,6 +4,7 @@ using DataAcessLayer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace E_commerce.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260625093740_AddOrderTable")]
+    partial class AddOrderTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -145,9 +148,9 @@ namespace E_commerce.DAL.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasDefaultValue("Pending");
 
-                    b.Property<decimal>("OrderTotal")
+                    b.Property<double>("OrderTotal")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("float(18)");
 
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
@@ -177,28 +180,6 @@ namespace E_commerce.DAL.Migrations
                     b.HasIndex("ApplicationUserId");
 
                     b.ToTable("Order");
-                });
-
-            modelBuilder.Entity("E_commerce.DAL.Entities.OrderDetails", b =>
-                {
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Count")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("OrderId", "ProductId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("OrderDetails");
                 });
 
             modelBuilder.Entity("E_commerce.DAL.Entities.Product", b =>
@@ -648,25 +629,6 @@ namespace E_commerce.DAL.Migrations
                     b.Navigation("ApplicationUser");
                 });
 
-            modelBuilder.Entity("E_commerce.DAL.Entities.OrderDetails", b =>
-                {
-                    b.HasOne("E_commerce.DAL.Entities.Order", "Order")
-                        .WithMany("OrderDetails")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("E_commerce.DAL.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("E_commerce.DAL.Entities.Product", b =>
                 {
                     b.HasOne("DataAcessLayer.Models.Category", "Category")
@@ -741,11 +703,6 @@ namespace E_commerce.DAL.Migrations
             modelBuilder.Entity("DataAcessLayer.Models.Category", b =>
                 {
                     b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("E_commerce.DAL.Entities.Order", b =>
-                {
-                    b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("E_commerce.DAL.Entities.Users.ApplicationUser", b =>

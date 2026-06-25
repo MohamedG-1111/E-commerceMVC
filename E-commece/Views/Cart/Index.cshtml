@@ -1,0 +1,99 @@
+﻿@using E_commerce.BLL.ViewModels
+@using E_commerce.Utility.Settings
+@model CustomerCart
+
+<div class="container py-5">
+
+        <div id="cart-container">
+            <partial name="_CartPartial.cshtml"/>
+        </div>
+    
+
+</div>
+@section Scripts
+{
+    <script>
+        // remove - btn Product
+        $(document).on("click", ".remove-btn", function() {
+
+            let id = $(this).data("id");
+
+            $.ajax({
+                url: "/Cart/RemoveProductFromCart",
+                type: "POST",
+                data: { productId: id },
+                success: function(res) {
+
+                    $("#cart-container").html(res);
+                     $.get("/Cart/GetCartCount", function (count) {
+        $("#cart-count").text(count);
+    });
+
+                },
+                error: function() {
+                    alert("Error removing item");
+                }
+            });
+
+        });
+
+
+        // ------------------------ increase / decrease
+
+   $(document).on("click", ".increase-btn, .decrease-btn", function () {
+
+    let btn = $(this);
+    let productId = btn.data("id");
+    let isIncrease = btn.hasClass("increase-btn");
+    let change = isIncrease ? 1 : -1;
+
+    let row = btn.closest(".cart-item");
+    let countSpan = row.find(".item-count");
+    let price = parseFloat(row.find(".item-price").text().replace("$", ""));
+    let totalSpan = row.find(".item-total");
+
+    $.ajax({
+        url: "/Cart/ChangeQuanatity",
+        type: "Get",
+        data: {
+            productId: productId,
+            change: change
+        },
+        success: function (res) {
+            $("#cart-container").html(res);
+            $.get("/Cart/GetCartCount", function (count) {
+                $("#cart-count").text(count);
+            });
+        },
+        error: function () {
+            alert("Error updating cart");
+        }
+    });
+});
+
+
+// Clear Cart
+
+        $(document).on("click", "#clear-cart-btn", function() {
+
+
+            $.ajax({
+                url: "/Cart/ClearCart",
+                type: "GET",
+                success: function(res) {
+
+                    $("#cart-container").html(res);
+                    $.get("/Cart/GetCartCount", function(count) {
+                        $("#cart-count").text(count);
+                    });
+                },
+                error: function() {
+                    alert("Error Clear Cart");
+                }
+            });
+
+        });
+    </script>
+
+
+}

@@ -5,6 +5,7 @@
         VALIDATION,
         NOT_FOUND,
         INTERNAL_ERROR,
-        UNAUTHORIZED
+        UNAUTHORIZED,
+        CONFLICT
     }
 }
