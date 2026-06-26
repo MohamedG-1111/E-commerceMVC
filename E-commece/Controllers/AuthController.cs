@@ -2,6 +2,7 @@
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using Ecommerce.Utility.Result;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
@@ -11,42 +12,50 @@ namespace E_commece.Controllers
         private readonly IAuthService authService;
         private readonly IAccountService accountService;
 
-        public AuthController(IAuthService authService, IAccountService accountService)
+        public AuthController(
+            IAuthService authService,
+            IAccountService accountService)
         {
             this.authService = authService;
             this.accountService = accountService;
         }
+
         public IActionResult Index()
         {
             return View();
         }
+
+        #region Register
+
         [HttpGet]
-        public async Task<IActionResult> Register()
+        [AllowAnonymous]
+        public IActionResult Register()
         {
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-
+        [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterationViewModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             var result = await authService.RegisterAsync(model);
+
             if (result.IsFailure)
                 return HandleResult(result, nameof(Register), model);
 
+            var emailResult = await EmailConfirmation(result);
 
-            var resultEmailPrepare = await EmailConfirmation(result);
-            if (resultEmailPrepare.IsFailure)
+            if (emailResult.IsFailure)
             {
-                TempData["warning"] =
-                       "Account created successfully, but the confirmation email could not be sent.";
+                TempData["Warning"] =
+                    "Account created successfully, but the confirmation email could not be sent.";
 
                 ViewBag.Email = model.Email;
+
                 return View("EmailConfirmationRequired");
             }
 
@@ -55,41 +64,58 @@ namespace E_commece.Controllers
 
             return RedirectToAction(nameof(Login));
         }
+
+        #endregion
+
+        #region Login
+
         [HttpGet]
-        public async Task<IActionResult> Login()
+        [AllowAnonymous]
+        public IActionResult Login()
         {
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
+
             var result = await authService.LoginAsync(model);
+
             if (result.IsFailure)
                 return HandleResult(result, nameof(Login), model);
 
-
             TempData["Success"] = "Login successful!";
+
             return RedirectToAction("Index", "Home");
         }
+
+        #endregion
+
+        #region Logout
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             var result = await authService.LogOutAsync();
+
             if (result.IsFailure)
-                HandleResult(result);
+                return HandleResult(result);
+
             TempData["Success"] = "Logout successful!";
+
             return RedirectToAction("Index", "Home");
         }
 
-        private async Task<Result> EmailConfirmation(
-      Result<RegisterResultDto> result)
+        #endregion
+
+        private async Task<Result> EmailConfirmation(Result<RegisterResultDto> result)
         {
             var confirmationLink = Url.Action(
                 "ConfirmEmail",

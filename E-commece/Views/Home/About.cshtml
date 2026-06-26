@@ -1,0 +1,622 @@
+﻿@{
+    ViewData["Title"] = "About Us";
+}
+
+<style>
+
+    :root {
+        --primary: #0d6efd;
+        --dark: #212529;
+        --warning: #ffc107;
+    }
+
+    body {
+        background: #f8f9fa;
+    }
+
+    .hero-about {
+        position: relative;
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        color: white;
+        overflow: hidden;
+        background: linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.65)), url("https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=1800&q=80");
+        background-size: cover;
+        background-position: center;
+    }
+
+        .hero-about::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(255,255,255,.15), transparent 45%);
+        }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 800;
+    }
+
+    .hero-subtitle {
+        max-width: 650px;
+        font-size: 1.2rem;
+        opacity: .95;
+    }
+
+    .section-title {
+        font-weight: 700;
+        font-size: 2.5rem;
+    }
+
+    .story-img {
+        border-radius: 25px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,.15);
+    }
+
+        .story-img img {
+            transition: .5s;
+        }
+
+        .story-img:hover img {
+            transform: scale(1.05);
+        }
+
+    .feature-card {
+        border: none;
+        border-radius: 22px;
+        padding: 35px;
+        transition: .3s;
+        box-shadow: 0 10px 25px rgba(0,0,0,.08);
+        height: 100%;
+    }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+        }
+
+    .icon-circle {
+        width: 80px;
+        height: 80px;
+        margin: auto;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 35px;
+        background: #212529;
+        color: #ffc107;
+    }
+
+    .feature-card h4 {
+        margin-top: 25px;
+        margin-bottom: 15px;
+        font-weight: 700;
+    }
+
+</style>
+
+<!-- ================= HERO ================= -->
+
+<section class="hero-about">
+
+    <div class="container hero-content">
+
+        <div class="row">
+
+            <div class="col-lg-7">
+
+                <h1 class="hero-title mb-4">
+
+                    About Our Store
+
+                </h1>
+
+                <p class="hero-subtitle mb-5">
+
+                    We are passionate about creating a modern shopping
+                    experience that is simple, secure, and enjoyable.
+                    Thousands of customers trust us every day.
+
+                </p>
+
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="btn btn-warning btn-lg px-5">
+
+                    Shop Now
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= STORY ================= -->
+
+<section class="py-5">
+
+    <div class="container">
+
+        <div class="row align-items-center g-5">
+
+            <div class="col-lg-6">
+
+                <div class="story-img">
+
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=80"
+                         class="img-fluid">
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-6">
+
+                <span class="text-warning fw-bold">
+                    OUR STORY
+                </span>
+
+                <h2 class="section-title my-3">
+
+                    Shopping Made Easy
+
+                </h2>
+
+                <p class="text-muted fs-5">
+
+                    Founded with a vision to simplify online shopping,
+                    our platform connects customers with high-quality
+                    products from trusted brands.
+
+                </p>
+
+                <p class="text-muted">
+
+                    Whether you're looking for the latest technology,
+                    fashion, books, or everyday essentials,
+                    our goal is to provide the best shopping experience
+                    through fast delivery, secure payments,
+                    and exceptional customer service.
+
+                </p>
+
+                <div class="row mt-4">
+
+                    <div class="col-6">
+
+                        <h3 class="fw-bold text-warning">
+
+                            10K+
+
+                        </h3>
+
+                        <p class="text-muted">
+
+                            Happy Customers
+
+                        </p>
+
+                    </div>
+
+                    <div class="col-6">
+
+                        <h3 class="fw-bold text-warning">
+
+                            2000+
+
+                        </h3>
+
+                        <p class="text-muted">
+
+                            Premium Products
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= WHY US ================= -->
+
+<section class="py-5 bg-white">
+
+    <div class="container">
+
+        <div class="text-center mb-5">
+
+            <span class="text-warning fw-bold">
+
+                WHY CHOOSE US
+
+            </span>
+
+            <h2 class="section-title mt-2">
+
+                Everything You Need In One Place
+
+            </h2>
+
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-3">
+
+                <div class="feature-card text-center">
+
+                    <div class="icon-circle">
+
+                        <i class="bi bi-truck"></i>
+
+                    </div>
+
+                    <h4>
+
+                        Fast Delivery
+
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Receive your orders quickly with
+                        reliable nationwide shipping.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3">
+
+                <div class="feature-card text-center">
+
+                    <div class="icon-circle">
+
+                        <i class="bi bi-credit-card"></i>
+
+                    </div>
+
+                    <h4>
+
+                        Secure Payments
+
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Multiple secure payment methods
+                        to protect every purchase.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3">
+
+                <div class="feature-card text-center">
+
+                    <div class="icon-circle">
+
+                        <i class="bi bi-patch-check"></i>
+
+                    </div>
+
+                    <h4>
+
+                        Trusted Products
+
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Every product is carefully selected
+                        to meet quality standards.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3">
+
+                <div class="feature-card text-center">
+
+                    <div class="icon-circle">
+
+                        <i class="bi bi-headset"></i>
+
+                    </div>
+
+                    <h4>
+
+                        24/7 Support
+
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Friendly customer support whenever
+                        you need assistance.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<!-- ================= STATISTICS ================= -->
+
+<section class="py-5 bg-light">
+
+    <div class="container">
+
+        <div class="text-center mb-5">
+
+            <span class="text-warning fw-bold">
+                OUR ACHIEVEMENTS
+            </span>
+
+            <h2 class="section-title mt-2">
+                Trusted By Thousands
+            </h2>
+
+        </div>
+
+        <div class="row g-4 text-center">
+
+            <div class="col-md-3">
+
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+                    <i class="bi bi-people-fill text-warning display-4 mb-3"></i>
+
+                    <h2 class="fw-bold">10K+</h2>
+
+                    <p class="text-muted mb-0">
+                        Happy Customers
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+                    <i class="bi bi-box-seam text-warning display-4 mb-3"></i>
+
+                    <h2 class="fw-bold">2,000+</h2>
+
+                    <p class="text-muted mb-0">
+                        Products
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+                    <i class="bi bi-star-fill text-warning display-4 mb-3"></i>
+
+                    <h2 class="fw-bold">98%</h2>
+
+                    <p class="text-muted mb-0">
+                        Customer Satisfaction
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+                    <i class="bi bi-globe2 text-warning display-4 mb-3"></i>
+
+                    <h2 class="fw-bold">30+</h2>
+
+                    <p class="text-muted mb-0">
+                        Cities Served
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= TEAM ================= -->
+<!-- ================= TEAM ================= -->
+
+<section class="py-5">
+
+    <div class="container">
+
+        <div class="text-center mb-5">
+
+            <span class="text-warning fw-bold">
+                OUR TEAM
+            </span>
+
+            <h2 class="section-title mt-2">
+                Meet Our Professionals
+            </h2>
+
+            <p class="text-muted">
+                Our experienced team is dedicated to delivering the best shopping experience for every customer.
+            </p>
+
+        </div>
+
+        <div class="row g-4">
+
+            <!-- Team Member 1 -->
+
+            <div class="col-lg-4">
+
+                <div class="card border-0 shadow rounded-4 overflow-hidden h-100">
+
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80"
+                         class="card-img-top"
+                         style="height:350px;object-fit:cover;">
+
+                    <div class="card-body text-center">
+
+                        <h4 class="fw-bold">
+                            James Wilson
+                        </h4>
+
+                        <p class="text-warning fw-semibold">
+                            Chief Executive Officer
+                        </p>
+
+                        <p class="text-muted">
+                            Leading the company's vision and ensuring an outstanding customer experience.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Team Member 2 -->
+
+            <div class="col-lg-4">
+
+                <div class="card border-0 shadow rounded-4 overflow-hidden h-100">
+
+                    <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=900&q=80"
+                         class="card-img-top"
+                         style="height:350px;object-fit:cover;">
+
+                    <div class="card-body text-center">
+
+                        <h4 class="fw-bold">
+                            Michael Brown
+                        </h4>
+
+                        <p class="text-warning fw-semibold">
+                            Operations Manager
+                        </p>
+
+                        <p class="text-muted">
+                            Managing logistics, inventory, and ensuring every order is delivered on time.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Team Member 3 -->
+
+            <div class="col-lg-4">
+
+                <div class="card border-0 shadow rounded-4 overflow-hidden h-100">
+
+                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=900&q=80"
+                         class="card-img-top"
+                         style="height:350px;object-fit:cover;">
+
+                    <div class="card-body text-center">
+
+                        <h4 class="fw-bold">
+                            Daniel Anderson
+                        </h4>
+
+                        <p class="text-warning fw-semibold">
+                            Customer Success Manager
+                        </p>
+
+                        <p class="text-muted">
+                            Helping customers, resolving issues quickly, and maintaining the highest level of satisfaction.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= CTA ================= -->
+
+<section class="py-5">
+
+    <div class="container">
+
+        <div class="rounded-4 p-5 text-center text-white"
+             style="background:linear-gradient(135deg,#0d6efd,#212529);">
+
+            <h2 class="fw-bold display-5 mb-3">
+
+                Ready To Start Shopping?
+
+            </h2>
+
+            <p class="lead mb-4">
+
+                Discover thousands of quality products with secure checkout,
+                fast delivery, and outstanding customer support.
+
+            </p>
+
+            <a asp-controller="Home"
+               asp-action="Index"
+               class="btn btn-warning btn-lg px-5 fw-bold">
+
+                <i class="bi bi-cart-fill me-2"></i>
+
+                Shop Now
+
+            </a>
+
+        </div>
+
+    </div>
+
+</section>

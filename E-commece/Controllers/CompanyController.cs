@@ -21,8 +21,8 @@ namespace E_commece.Controllers
         {
             var result = await companyService.AllCompaniesAsync();
 
-            if (!result.IsSuccess)
-                return View(new List<CompanyVM>());
+            if (result.IsFailure)
+                return HandleResult(result);
 
             return View(result.Value);
         }
@@ -95,7 +95,7 @@ namespace E_commece.Controllers
                 }
                 return HandleResult(result);
             }
-            TempData["success"] = "Category Deleted Successfully";
+            TempData["success"] = "Company Deleted Successfully";
             return RedirectToAction(nameof(Index));
         }
     }

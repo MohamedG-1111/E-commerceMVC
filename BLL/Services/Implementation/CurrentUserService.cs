@@ -36,5 +36,10 @@ namespace E_commerce.BLL.Services.Implementation
             return await context.Users
                 .FirstOrDefaultAsync(u => u.Id == UserId);
         }
+
+        public bool IsInRole(string role)
+        {
+            return User?.IsInRole(role) ?? false;
+        }
     }
 }

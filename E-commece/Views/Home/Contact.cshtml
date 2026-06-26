@@ -1,0 +1,442 @@
+﻿@{
+    ViewData["Title"] = "Contact Us";
+}
+
+<style>
+    .hero-section {
+        position: relative;
+        min-height: 65vh;
+        background: linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.65)), url('https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=1800&q=80');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        color: white;
+    }
+
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(255,255,255,.15), transparent 55%);
+        }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        opacity: .9;
+        max-width: 650px;
+    }
+
+    .glass-card {
+        background: rgba(255,255,255,.9);
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,.1);
+    }
+
+    .info-card {
+        border: none;
+        border-radius: 18px;
+        transition: .3s;
+        box-shadow: 0 10px 25px rgba(0,0,0,.08);
+    }
+
+        .info-card:hover {
+            transform: translateY(-6px);
+        }
+
+    .icon-box {
+        width: 65px;
+        height: 65px;
+        border-radius: 18px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 28px;
+        color: white;
+    }
+
+    .icon-blue {
+        background: #0d6efd;
+    }
+
+    .icon-red {
+        background: #dc3545;
+    }
+
+    .icon-green {
+        background: #198754;
+    }
+
+    .section-title {
+        font-size: 2.3rem;
+        font-weight: 700;
+    }
+
+    .faq-item {
+        border-radius: 15px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+
+    .social-btn {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 22px;
+        transition: .3s;
+    }
+
+        .social-btn:hover {
+            transform: translateY(-5px);
+        }
+
+    .contact-input {
+        border-radius: 12px;
+        padding: 14px;
+    }
+
+    .send-btn {
+        border-radius: 12px;
+        padding: 14px 35px;
+        font-weight: 600;
+    }
+</style>
+
+<!-- HERO -->
+
+<section class="hero-section">
+
+    <div class="container hero-content">
+
+        <div class="row">
+
+            <div class="col-lg-7">
+
+                <h1 class="hero-title mb-4">
+                    Let's Build Something Great Together.
+                </h1>
+
+                <p class="hero-subtitle mb-5">
+                    Have a question, suggestion, or need assistance with an order?
+                    Our team is always happy to help you.
+                </p>
+
+                <a href="#contactForm"
+                   class="btn btn-warning btn-lg px-5 py-3 fw-bold shadow">
+                    Contact Us
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- CONTACT -->
+
+<section class="py-5">
+
+    <div class="container">
+
+        <div class="text-center mb-5">
+
+            <h2 class="section-title">
+                Get In Touch
+            </h2>
+
+            <p class="text-muted">
+                We'd love to hear from you.
+            </p>
+
+        </div>
+
+        <div class="row g-5">
+
+            <!-- FORM -->
+
+            <div class="col-lg-7">
+
+                <div class="glass-card p-5" id="contactForm">
+
+                    <h3 class="fw-bold mb-4">
+                        Send us a message
+                    </h3>
+
+                    <form>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <input class="form-control contact-input"
+                                       placeholder="First Name" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <input class="form-control contact-input"
+                                       placeholder="Last Name" />
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+                            <input type="email"
+                                   class="form-control contact-input"
+                                   placeholder="Email Address" />
+                        </div>
+
+                        <div class="mb-3">
+                            <input class="form-control contact-input"
+                                   placeholder="Subject" />
+                        </div>
+
+                        <div class="mb-4">
+                            <textarea rows="6"
+                                      class="form-control contact-input"
+                                      placeholder="Write your message..."></textarea>
+                        </div>
+
+                        <button class="btn btn-dark send-btn">
+                            <i class="bi bi-send-fill me-2"></i>
+                            Send Message
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            <!-- INFO -->
+
+            <div class="col-lg-5">
+
+                <div class="card info-card mb-4">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex">
+
+                            <div class="icon-box icon-blue me-4">
+                                <i class="bi bi-envelope-fill"></i>
+                            </div>
+
+                            <div>
+
+                                <h5>Email</h5>
+
+                                <p class="text-muted mb-0">
+                                    support@ecommerce.com
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="card info-card mb-4">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex">
+
+                            <div class="icon-box icon-green me-4">
+                                <i class="bi bi-telephone-fill"></i>
+                            </div>
+
+                            <div>
+
+                                <h5>Phone</h5>
+
+                                <p class="text-muted mb-0">
+                                    +20 100 000 0000
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="card info-card">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex">
+
+                            <div class="icon-box icon-red me-4">
+                                <i class="bi bi-clock-fill"></i>
+                            </div>
+
+                            <div>
+
+                                <h5>Working Hours</h5>
+
+                                <p class="mb-1">
+                                    Monday - Friday
+                                </p>
+
+                                <span class="text-muted">
+                                    09:00 AM - 06:00 PM
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="mt-5">
+
+                    <h4 class="fw-bold mb-4">
+                        Follow Us
+                    </h4>
+
+                    <a href="#" class="btn btn-outline-dark social-btn me-2">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+
+                    <a href="#" class="btn btn-outline-dark social-btn me-2">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+
+                    <a href="#" class="btn btn-outline-dark social-btn me-2">
+                        <i class="bi bi-twitter-x"></i>
+                    </a>
+
+                    <a href="#" class="btn btn-outline-dark social-btn">
+                        <i class="bi bi-linkedin"></i>
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- FAQ -->
+
+<section class="py-5 bg-light">
+
+    <div class="container">
+
+        <div class="text-center mb-5">
+
+            <h2 class="section-title">
+                Frequently Asked Questions
+            </h2>
+
+        </div>
+
+        <div class="accordion" id="faq">
+
+            <div class="accordion-item faq-item">
+
+                <h2 class="accordion-header">
+
+                    <button class="accordion-button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#q1">
+
+                        How long does shipping take?
+
+                    </button>
+
+                </h2>
+
+                <div id="q1"
+                     class="accordion-collapse collapse show"
+                     data-bs-parent="#faq">
+
+                    <div class="accordion-body">
+                        Most orders arrive within 2–5 business days.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="accordion-item faq-item">
+
+                <h2 class="accordion-header">
+
+                    <button class="accordion-button collapsed"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#q2">
+
+                        Can I return my order?
+
+                    </button>
+
+                </h2>
+
+                <div id="q2"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#faq">
+
+                    <div class="accordion-body">
+                        Yes. Returns are accepted within 14 days of delivery.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="accordion-item faq-item">
+
+                <h2 class="accordion-header">
+
+                    <button class="accordion-button collapsed"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#q3">
+
+                        How can I track my order?
+
+                    </button>
+
+                </h2>
+
+                <div id="q3"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#faq">
+
+                    <div class="accordion-body">
+                        Visit the My Orders page to track every order in real time.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>

@@ -25,6 +25,7 @@ namespace E_commece.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToCart(AddToCartViewModel model)
         {
             if (!ModelState.IsValid)
@@ -40,6 +41,7 @@ namespace E_commece.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
 
         public async Task<IActionResult> RemoveProductFromCart(int ProductId)
         {

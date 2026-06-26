@@ -14,6 +14,7 @@ namespace E_commece.Controllers
         {
             this.orderService = orderService;
         }
+        [HttpGet]
         public async Task<IActionResult> CheckOut()
         {
             var result = await orderService.GetCheckoutData();
@@ -22,13 +23,15 @@ namespace E_commece.Controllers
             return View(result.Value);
 
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> PlaceOrder()
         {
             var result = await orderService.PlaceOrderAsync();
             if (result.IsFailure)
             {
                 TempData["Error"] = result.ErrorMessage;
-                return RedirectToAction("Checkout");
+                return RedirectToAction(nameof(CheckOut));
             }
 
             TempData["Success"] = "Order placed successfully.";

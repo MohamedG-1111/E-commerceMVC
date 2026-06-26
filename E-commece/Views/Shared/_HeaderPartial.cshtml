@@ -1,4 +1,6 @@
-﻿<header>
+﻿@using Ecommerce.Utility
+
+<header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
         <div class="container">
 
@@ -14,53 +16,129 @@
             <button class="navbar-toggler"
                     type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#mainNavbar">
+                    data-bs-target="#mainNavbar"
+                    aria-controls="mainNavbar"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="mainNavbar">
 
-                <!-- Left Links -->
+                <!-- ================= LEFT ================= -->
                 <ul class="navbar-nav me-auto">
 
+                    <!-- Guest Links -->
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="Index">
+                        <a class="nav-link"
+                           asp-controller="Home"
+                           asp-action="Index">
+                            <i class="bi bi-house-door me-1"></i>
                             Home
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Product" asp-action="Index">
-                            Products
-                        </a>
-                    </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="Contact">
-                            Contact
-                        </a>
-                    </li>
+                    @if (!User.IsInRole(Roles.Admin))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-controller="Home"
+                               asp-action="Contact">
+                                <i class="bi bi-envelope me-1"></i>
+                                Contact
+                            </a>
+                        </li>
+                    }
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        @* ================= Admin ================= *@
+                        @if (User.IsInRole(Roles.Admin))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Category"
+                                   asp-action="Index">
+                                    <i class="bi bi-tags me-1"></i>
+                                    Categories
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Company"
+                                   asp-action="Index">
+                                    <i class="bi bi-buildings me-1"></i>
+                                    Companies
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Account"
+                                   asp-action="Index">
+                                    <i class="bi bi-people me-1"></i>
+                                    Accounts
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Order"
+                                   asp-action="ManageOrders">
+                                    <i class="bi bi-clipboard-check me-1"></i>
+                                    Manage Orders
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            @* Customer / Company / Employee *@
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Order"
+                                   asp-action="MyOrders">
+                                    <i class="bi bi-receipt me-1"></i>
+                                    My Orders
+                                </a>
+                            </li>
+
+                            @if (User.IsInRole(Roles.Employee))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                       asp-controller="Order"
+                                       asp-action="ManageOrders">
+                                        <i class="bi bi-clipboard-check me-1"></i>
+                                        Manage Orders
+                                    </a>
+                                </li>
+                            }
+                        }
+                    }
 
                 </ul>
 
-                <!-- Right Side -->
-                <div class="d-flex align-items-center gap-3">
+                <!-- ================= RIGHT ================= -->
+                <div class="d-flex align-items-center gap-2">
 
-                    <<!-- Cart -->
+                    @if (User.Identity?.IsAuthenticated == true &&
+                        !User.IsInRole(Roles.Admin))
+                    {
                         <div class="position-relative">
                             <a asp-controller="Cart"
                                asp-action="Index"
                                class="btn btn-outline-light">
                                 <i class="bi bi-cart3"></i>
                             </a>
+
                             @await Component.InvokeAsync("CartCount")
                         </div>
+                    }
 
-
-        
-
-                    <!-- User -->
-                    @if (User?.Identity?.IsAuthenticated == true)
+                    @if (User.Identity?.IsAuthenticated == true)
                     {
                         @await Component.InvokeAsync("UserDropdown")
                     }

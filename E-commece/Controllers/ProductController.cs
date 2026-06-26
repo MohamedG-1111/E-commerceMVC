@@ -22,6 +22,9 @@ namespace E_commece.Controllers
         public async Task<IActionResult> Index()
         {
             var Resultproducts = await _productService.AllProductsAsync();
+            if (Resultproducts.IsFailure)
+                return HandleResult(Resultproducts);
+
             return View(Resultproducts.Value);
         }
         [HttpGet]
@@ -102,7 +105,7 @@ namespace E_commece.Controllers
 
         [HttpGet]
         [Authorize(Roles = Roles.Admin)]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var result = await _productService.DeleteProductAsync(id);
             if (result.IsFailure)
@@ -119,7 +122,7 @@ namespace E_commece.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Details(int id)
         {
             var Resultproduct = await _productService.ProductDetailsAsync(id);
@@ -133,6 +136,7 @@ namespace E_commece.Controllers
         }
         [HttpGet]
         [Route("Product/Search")]
+        [Authorize(Roles = $"{Roles.Customer},{Roles.Employee},{Roles.Company}")]
         public async Task<IActionResult> Search(string? searchTerm, string? category)
         {
             var Resultproducts = await _productService.AllProductsAsync(searchTerm, category);
@@ -141,6 +145,7 @@ namespace E_commece.Controllers
 
         [HttpGet]
         [Route("Product/SearchTable")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> SearchTable(string? searchTerm, string? category)
         {
             var result = await _productService.AllProductsAsync(searchTerm, category);

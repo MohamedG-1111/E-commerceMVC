@@ -1,6 +1,7 @@
 ﻿using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using Ecommerce.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
@@ -9,14 +10,20 @@ namespace E_commece.Controllers
     {
         private readonly IAccountService accountService;
         private readonly ICompanyService companyService;
-        private readonly IOrderService orderService;
 
-        public AccountController(IAccountService accountService, ICompanyService companyService, IOrderService orderService)
+
+        public AccountController(
+            IAccountService accountService,
+            ICompanyService companyService)
         {
             this.accountService = accountService;
             this.companyService = companyService;
-            this.orderService = orderService;
+
         }
+
+        #region Public
+
+        [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
             var resultEmail = await accountService.GetUserEmail(userId);
@@ -29,40 +36,51 @@ namespace E_commece.Controllers
             if (result.IsFailure)
                 return HandleResult(result, nameof(ConfirmEmail));
 
-            TempData["success"] = "Email confirmed successfully!";
+            TempData["Success"] = "Email confirmed successfully!";
+
             return View();
         }
-        public async Task<IActionResult> ResendEmailConfirmation(string Email)
+
+        [AllowAnonymous]
+        public async Task<IActionResult> ResendEmailConfirmation(string email)
         {
-            var result = await accountService.ReSendEmailConfirmationAsync(Email);
+            var result = await accountService.ReSendEmailConfirmationAsync(email);
 
-            if (!result.IsSuccess)
+            if (result.IsFailure)
                 return HandleResult(result, nameof(ConfirmEmail));
-            ViewBag.Email = Email;
-            TempData["success"] = "Resend Email Confirmation successfully!";
-            return View();
 
+            ViewBag.Email = email;
+
+            TempData["Success"] = "Resend Email Confirmation successfully!";
+
+            return View();
         }
 
         [HttpGet]
-        public async Task<IActionResult> ForgotPassword()
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
         {
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword(ForgetPasswordViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
+
             var result = await accountService.SendResetPasswordEmailAsync(model.Email);
-            if (!result.IsSuccess)
+
+            if (result.IsFailure)
                 return HandleResult(result, nameof(ForgotPassword), model);
 
             return View("ForgotPasswordConfirmation");
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult ResetPassword(string email, string token)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
@@ -77,43 +95,48 @@ namespace E_commece.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
+
             var result = await accountService.ResetPasswoAsync(model);
-            if (!result.IsSuccess)
+
+            if (result.IsFailure)
                 return HandleResult(result, nameof(ResetPassword), model);
-            TempData["Success"] = "Reset Password Successfuly";
+
+            TempData["Success"] = "Reset Password Successfully";
+
             return RedirectToAction("Login", "Auth");
         }
 
-
         [HttpGet]
-
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> CreateAccount()
         {
-            AccountVM model = new AccountVM()
+            var model = new AccountVM
             {
                 Companies = await companyService.GetAllCompaniesItems()
-
             };
+
             return View(model);
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> CreateAccount(AccountVM model)
         {
             if (!ModelState.IsValid)
             {
                 model.Companies = await companyService.GetAllCompaniesItems();
                 return View(model);
-
             }
+
             var result = await accountService.CreateAccountAsync(model);
-            if (!result.IsSuccess)
+
+            if (result.IsFailure)
             {
                 model.Companies = await companyService.GetAllCompaniesItems();
                 return HandleResult(result, nameof(CreateAccount), model);
@@ -121,29 +144,41 @@ namespace E_commece.Controllers
 
             TempData["Success"] = "Account Created Successfully";
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Login", "Auth");
         }
 
+        #endregion
 
+        #region Admin
 
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Index()
         {
             var result = await accountService.GetAccountsAsync();
-            return View(result.Value);
-        }
 
-        public async Task<IActionResult> Profile(string UserId)
-        {
-            var result = await accountService.GetAccountByUserId(UserId);
             if (result.IsFailure)
-                HandleResult(result);
-            ViewBag.userId = UserId;
+                return HandleResult(result);
+
             return View(result.Value);
         }
 
+        [Authorize(Roles = Roles.Admin)]
+        public async Task<IActionResult> Search(string search)
+        {
+            var result = await accountService.SearchAccountsAsync(search);
+
+            if (result.IsFailure)
+            {
+                return PartialView("_AccountPartial",
+                    Enumerable.Empty<AllAccountsViewModel>());
+            }
+
+            return PartialView("_AccountPartial", result.Value);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> LockAccount(string userId)
         {
             var result = await accountService.LockAccountAsync(userId);
@@ -158,6 +193,7 @@ namespace E_commece.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> UnlockAccount(string userId)
         {
             var result = await accountService.UnLockAccountAsync(userId);
@@ -170,73 +206,84 @@ namespace E_commece.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> Search(string search)
-        {
-            var result = await accountService.SearchAccountsAsync(search);
-
-            if (!result.IsSuccess)
-            {
-                return PartialView("_AccountPartial",
-                    Enumerable.Empty<AllAccountsViewModel>());
-            }
-
-            return PartialView("_AccountPartial", result.Value);
-        }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-
-        public async Task<IActionResult> Delete(string UserId)
+        [Authorize(Roles = Roles.Admin)]
+        public async Task<IActionResult> Delete(string userId)
         {
-            var result = await accountService.DeleteAccountAsync(UserId);
-            if (!result.IsSuccess)
+            var result = await accountService.DeleteAccountAsync(userId);
+
+            if (result.IsFailure)
                 return HandleResult(result);
+
             TempData["Success"] = "Account Deleted Successfully";
 
             return RedirectToAction(nameof(Index));
         }
 
+        #endregion
+
+        #region Authenticated Users
+
+        [Authorize]
+        public async Task<IActionResult> Profile(string userId)
+        {
+            var result = await accountService.GetAccountByUserId(userId);
+
+            if (result.IsFailure)
+                return HandleResult(result);
+
+            ViewBag.UserId = userId;
+
+            return View(result.Value);
+        }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Edit(string userId)
         {
             var result = await accountService.GetAccountToEditAsync(userId);
 
-            if (!result.IsSuccess || result.Value is null)
+            if (result.IsFailure)
                 return HandleResult(result);
 
-            var model = result.Value;
+            result.Value!.Companies = await companyService.GetAllCompaniesItems();
 
-            model.Companies = await companyService.GetAllCompaniesItems();
-
-            return View(model);
+            return View(result.Value);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-
+        [Authorize]
         public async Task<IActionResult> Edit(EditAccountVM model)
         {
+
             if (!ModelState.IsValid)
             {
                 model.Companies = await companyService.GetAllCompaniesItems();
                 return View(model);
             }
+
+
             var result = await accountService.UpdateAccountAsync(model.UserId, model);
-            if (!result.IsSuccess)
+
+            if (result.IsFailure)
             {
                 model.Companies = await companyService.GetAllCompaniesItems();
                 return HandleResult(result, nameof(Edit), model);
             }
 
             TempData["Success"] = "Update Successfully";
+
             if (User.IsInRole(Roles.Admin))
                 return RedirectToAction(nameof(Index));
 
-            return RedirectToAction(nameof(Index), "Home");
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = $"{Roles.Customer},{Roles.Company},{Roles.Employee}")]
         public async Task<IActionResult> UpdateCheckoutInfo(UpdateCheckoutInfoVM model)
         {
             if (!ModelState.IsValid)
@@ -258,8 +305,7 @@ namespace E_commece.Controllers
                     : result.ErrorMessage
             });
         }
+
+        #endregion
     }
 }
-
-
-

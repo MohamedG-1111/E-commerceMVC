@@ -20,6 +20,10 @@ namespace E_commece.Controllers
         public async Task<IActionResult> Index()
         {
             var result = await CategoryService.AllCategoriesAsync();
+
+            if (result.IsFailure)
+                return HandleResult(result);
+
             return View(result.Value);
         }
         [HttpGet]
@@ -65,7 +69,7 @@ namespace E_commece.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
-        public async Task<IActionResult> ConfirmDelete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
 
             var result = await CategoryService.DeleteCategoryAsync(id);

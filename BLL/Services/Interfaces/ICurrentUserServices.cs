@@ -11,6 +11,8 @@ namespace E_commerce.BLL.Services.Interfaces
         public string? Email { get; }
         public Task<ApplicationUser?> GetCurrentUser();
 
+        bool IsInRole(string role);
+
 
     }
 }

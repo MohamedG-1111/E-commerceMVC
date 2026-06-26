@@ -348,6 +348,14 @@ namespace E_commerce.BLL.Services.Implementation
             if (string.IsNullOrWhiteSpace(userId))
                 return Result<AccountVM>.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
 
+            if (!currentUserService.IsInRole(Roles.Admin) &&
+        currentUserService.UserId != userId)
+            {
+                return Result<AccountVM>.Failure(
+                    "Unauthorized",
+                    errorType: ErrorType.UNAUTHORIZED);
+            }
+
             var account = await unitOfWork.Repository<ApplicationUser>().GetAsQuery().FirstOrDefaultAsync(x => x.Id == userId);
             if (account == null)
                 return Result<AccountVM>.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
@@ -444,6 +452,14 @@ namespace E_commerce.BLL.Services.Implementation
             if (model is null)
                 return Result.Failure("Invalid Account Data");
 
+            if (!currentUserService.IsInRole(Roles.Admin) &&
+            currentUserService.UserId != userId)
+            {
+                return Result.Failure(
+                    "Unauthorized",
+                    errorType: ErrorType.UNAUTHORIZED);
+            }
+
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user is null)
@@ -533,6 +549,14 @@ namespace E_commerce.BLL.Services.Implementation
             if (string.IsNullOrWhiteSpace(userId))
                 return Result<EditAccountVM>.Failure("Invalid User Id", errorType: ErrorType.NOT_FOUND);
 
+            if (!currentUserService.IsInRole(Roles.Admin) &&
+            currentUserService.UserId != userId)
+            {
+                return Result<EditAccountVM>.Failure(
+                    "Unauthorized",
+                   errorType: ErrorType.UNAUTHORIZED);
+            }
+
             var user = await _userManager.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == userId);
@@ -564,6 +588,8 @@ namespace E_commerce.BLL.Services.Implementation
             var userId = currentUserService.UserId;
             if (string.IsNullOrWhiteSpace(userId))
                 return Result.Failure("Must be Login First", errorType: ErrorType.UNAUTHORIZED);
+
+
             var user = await _userManager.FindByIdAsync(userId);
             if (user is null)
                 return Result.Failure("User Not Found", errorType: ErrorType.NOT_FOUND);

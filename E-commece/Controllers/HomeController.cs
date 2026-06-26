@@ -1,42 +1,66 @@
 using System.Diagnostics;
 using BLL.Services.Interfaces;
 using E_commece.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
 {
+    [AllowAnonymous]
     public class HomeController : AppController
     {
         private readonly IProductService productService;
 
-        public HomeController(IProductService ProductService)
+        public HomeController(IProductService productService)
         {
-            this.productService = ProductService;
+            this.productService = productService;
         }
+
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var Resultproducts = await productService.AllProductsAsync();
-            return View(Resultproducts.Value);
+            var result = await productService.AllProductsAsync();
+
+            if (result.IsFailure)
+                return HandleResult(result);
+
+            return View(result.Value);
         }
+
+        [HttpGet]
         public async Task<IActionResult> ProductDetails(int id)
         {
-            var Resultproduct = await productService.ProductDetailsAsync(id);
-            if (!Resultproduct.IsSuccess)
-                return HandleResult(Resultproduct);
+            var result = await productService.ProductDetailsAsync(id);
 
-            return View(Resultproduct.Value);
+            if (result.IsFailure)
+                return HandleResult(result);
+
+            return View(result.Value);
         }
 
-        public IActionResult Privacy()
+        [HttpGet]
+        public IActionResult About()
         {
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [HttpGet]
+        public IActionResult Contact()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [ResponseCache(Duration = 0,
+            Location = ResponseCacheLocation.None,
+            NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ??
+                            HttpContext.TraceIdentifier
+            });
         }
     }
 }
