@@ -158,6 +158,7 @@ namespace E_commerce.BLL.Services.Implementation
                 productFromDb.PriceFor50Plus = obj.Product.PriceFor50Plus;
                 productFromDb.PriceFor100Plus = obj.Product.PriceFor100Plus;
                 productFromDb.Author = obj.Product.Author;
+                productFromDb.Stock = obj.Product.Stock;
                 productFromDb.ImageUrl = !string.IsNullOrEmpty(newImage) ? newImage : oldImage;
 
                 _unitOfWork.ProductRepository.Update(productFromDb);

@@ -13,6 +13,7 @@ using E_commerce.DAL.Seeding;
 using Ecommerce.Utility.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 namespace E_commece
 {
@@ -36,16 +37,31 @@ namespace E_commece
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<IRedisService, RedisService>();
             builder.Services.AddScoped<ICompanyService, CompanyService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
             builder.Services.Configure<IdentityOptions>(options =>
             {
                 options.SignIn.RequireConfirmedEmail = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(3);
+            });
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Auth/Login";
             });
             builder.Services.Configure<EmailSettings>(
      builder.Configuration.GetSection("EmailSettings"));
+
+            builder.Services.AddSingleton<IConnectionMultiplexer>(cfg =>
+            {
+                return ConnectionMultiplexer
+                    .Connect(builder.Configuration.GetConnectionString("RedisConnection")!);
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

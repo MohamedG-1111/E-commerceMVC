@@ -1,0 +1,122 @@
+﻿@model IEnumerable<E_commerce.BLL.ViewModels.AllAccountsViewModel>
+
+<div class="card-body">
+
+    <table class="table table-hover table-bordered align-middle">
+
+        <thead class="table-dark">
+            <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th width="260">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @if (Model != null && Model.Any())
+            {
+                foreach (var account in Model)
+                {
+                    <tr>
+
+                        <td>@account.FullName</td>
+
+                        <td>@account.Email</td>
+
+                        <td>
+                            <span class="badge bg-primary">
+                                @account.Role
+                            </span>
+                        </td>
+
+                        <td>
+                            @if (account.IsLocked)
+                            {
+                                <span class="badge bg-danger">Locked</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                        </td>
+
+                        <td class="d-flex gap-1">
+
+                            <a asp-action="Profile"
+                               asp-route-userId="@account.UserId"
+                               class="btn btn-info btn-sm">
+                                Details
+                            </a>
+
+                            <a asp-action="Edit"
+                               asp-route-userId="@account.UserId"
+                               class="btn btn-warning btn-sm">
+                                Edit
+                            </a>
+
+                            @if (account.IsLocked)
+                            {
+                                <form asp-action="UnlockAccount"
+                                      method="post"
+                                      class="d-inline">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="userId"
+                                           value="@account.UserId" />
+
+                                    <button type="submit"
+                                            class="btn btn-success btn-sm">
+                                        Unlock
+                                    </button>
+
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="LockAccount"
+                                      method="post"
+                                      class="d-inline">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="userId"
+                                           value="@account.UserId" />
+
+                                    <button type="submit"
+                                            class="btn btn-warning btn-sm">
+                                        Lock
+                                    </button>
+
+                                </form>
+                            }
+
+                            <button class="btn btn-danger btn-sm"
+                                    onclick="openDeleteModal('@account.FullName','@account.UserId')">
+                                Delete
+                            </button>
+
+                        </td>
+
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center">
+                        No Accounts Found
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</div>

@@ -1,0 +1,328 @@
+﻿@model CheckoutViewModel
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-credit-card me-2 text-success"></i>
+                Checkout
+            </h2>
+            <p class="text-muted mb-0">
+                Review your information and place your order
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- CUSTOMER INFO -->
+        <div class="col-lg-7">
+
+            <form id="checkoutForm">
+
+                @Html.AntiForgeryToken()
+
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+
+                            <h5 class="fw-bold mb-0">
+                                <i class="bi bi-person-circle me-2 text-success"></i>
+                                Customer Information
+                            </h5>
+
+                            <button type="button"
+                                    id="toggleEditBtn"
+                                    class="btn btn-outline-secondary rounded-pill">
+                                <i class="bi bi-pencil-square me-1"></i>
+                                Edit
+                            </button>
+
+                        </div>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label asp-for="UpdateCheckoutInfo.FirstName"
+                                       class="form-label"></label>
+
+                                <input asp-for="UpdateCheckoutInfo.FirstName"
+                                       class="form-control customer-input"
+                                       readonly />
+
+                                <span asp-validation-for="UpdateCheckoutInfo.FirstName"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="UpdateCheckoutInfo.LastName"
+                                       class="form-label"></label>
+
+                                <input asp-for="UpdateCheckoutInfo.LastName"
+                                       class="form-control customer-input"
+                                       readonly />
+
+                                <span asp-validation-for="UpdateCheckoutInfo.LastName"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="UpdateCheckoutInfo.PhoneNumber"
+                                       class="form-label"></label>
+
+                                <input asp-for="UpdateCheckoutInfo.PhoneNumber"
+                                       class="form-control customer-input"
+                                       readonly />
+
+                                <span asp-validation-for="UpdateCheckoutInfo.PhoneNumber"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="UpdateCheckoutInfo.City"
+                                       class="form-label"></label>
+
+                                <input asp-for="UpdateCheckoutInfo.City"
+                                       class="form-control customer-input"
+                                       readonly />
+
+                                <span asp-validation-for="UpdateCheckoutInfo.City"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="UpdateCheckoutInfo.PostalCode"
+                                       class="form-label"></label>
+
+                                <input asp-for="UpdateCheckoutInfo.PostalCode"
+                                       class="form-control customer-input"
+                                       readonly />
+
+                                <span asp-validation-for="UpdateCheckoutInfo.PostalCode"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="UpdateCheckoutInfo.StreetAddress"
+                                       class="form-label"></label>
+
+                                <textarea asp-for="UpdateCheckoutInfo.StreetAddress"
+                                          rows="3"
+                                          class="form-control customer-input"
+                                          readonly></textarea>
+
+                                <span asp-validation-for="UpdateCheckoutInfo.StreetAddress"
+                                      class="text-danger"></span>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </form>
+
+        </div>
+
+        <!-- ORDER SUMMARY -->
+        <div class="col-lg-5">
+
+            <div class="card shadow-sm border-0 rounded-4 sticky-top"
+                 style="top:20px">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-4">
+                        <i class="bi bi-receipt me-2 text-success"></i>
+                        Order Summary
+                    </h5>
+
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="d-flex justify-content-between align-items-start mb-3 pb-3 border-bottom">
+
+                            <div>
+                                <div class="fw-semibold">
+                                    @item.Name
+                                </div>
+
+                                <small class="text-muted">
+                                    Qty: @item.Count
+                                </small>
+                            </div>
+
+                            <span class="fw-semibold">
+                                @((item.Price * item.Count).ToString("0.00")) $
+                            </span>
+
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span>@Model.SubTotal.ToString("0.00") $</span>
+                    </div>
+
+                    @if (Model.Discount > 0)
+                    {
+                        <div class="d-flex justify-content-between text-danger mb-2">
+                            <span>Discount</span>
+                            <span>-@Model.Discount.ToString("0.00") $</span>
+                        </div>
+                    }
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between fw-bold fs-5 mb-4">
+                        <span>Total</span>
+
+                        <span class="text-success">
+                            @Model.Total.ToString("0.00") $
+                        </span>
+                    </div>
+
+                    <form asp-controller="Order"
+                          asp-action="PlaceOrder"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="btn btn-success btn-lg w-100 rounded-pill">
+                            <i class="bi bi-bag-check-fill me-2"></i>
+                            Place Order
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+
+    .customer-input[readonly] {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        cursor: default;
+    }
+
+    .customer-input:not([readonly]) {
+        background-color: white;
+        border-color: #198754;
+        box-shadow: 0 0 0 .15rem rgba(25,135,84,.15);
+    }
+
+</style>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        const editBtn = document.getElementById("toggleEditBtn");
+        const inputs = document.querySelectorAll(".customer-input");
+
+        let editMode = false;
+
+        editBtn.addEventListener("click", function () {
+
+            if (!editMode)
+            {
+                editMode = true;
+
+                inputs.forEach(x => x.readOnly = false);
+
+                editBtn.innerHTML =
+                    '<i class="bi bi-check-lg me-1"></i>Done';
+
+                editBtn.classList.remove("btn-outline-secondary");
+                editBtn.classList.add("btn-success");
+
+                return;
+            }
+
+            if (!$("#checkoutForm").valid())
+                return;
+
+            editBtn.disabled = true;
+
+            editBtn.innerHTML =
+                '<span class="spinner-border spinner-border-sm me-1"></span>Saving';
+
+            $.ajax({
+
+                url: '/Account/UpdateCheckoutInfo',
+                type: 'POST',
+
+                data: {
+
+                    __RequestVerificationToken:
+                        $('input[name="__RequestVerificationToken"]').val(),
+
+                    FirstName:
+                        $("#UpdateCheckoutInfo_FirstName").val(),
+
+                    LastName:
+                        $("#UpdateCheckoutInfo_LastName").val(),
+
+                    PhoneNumber:
+                        $("#UpdateCheckoutInfo_PhoneNumber").val(),
+
+                    City:
+                        $("#UpdateCheckoutInfo_City").val(),
+
+                    PostalCode:
+                        $("#UpdateCheckoutInfo_PostalCode").val(),
+
+                    StreetAddress:
+                        $("#UpdateCheckoutInfo_StreetAddress").val()
+                },
+
+                success: function (result) {
+
+                    if (result.success)
+                    {
+                        inputs.forEach(x => x.readOnly = true);
+
+                        editMode = false;
+
+                        editBtn.innerHTML =
+                            '<i class="bi bi-pencil-square me-1"></i>Edit';
+
+                        editBtn.classList.remove("btn-success");
+                        editBtn.classList.add("btn-outline-secondary");
+                    }
+                    else
+                    {
+                        alert(result.message);
+                    }
+                },
+
+                error: function (xhr) {
+
+                    console.log(xhr.responseText);
+
+                    alert("Something went wrong");
+                },
+
+                complete: function () {
+
+                    editBtn.disabled = false;
+                }
+
+            });
+
+        });
+
+    </script>
+}

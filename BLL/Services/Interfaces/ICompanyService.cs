@@ -14,7 +14,7 @@ namespace E_commerce.BLL.Services.Interfaces
         public Task<Result> UpdateCompanyAsync(int id, CompanyInfoVM Obj);
         public Task<Result> DeleteCompanyAsync(int id);
 
-        public Task<IEnumerable<SelectListItem>> GetAllCategoriesItems();
+        public Task<IEnumerable<SelectListItem>> GetAllCompaniesItems();
 
         public Task<Result<IEnumerable<CompanyVM>?>> SearchAsync(string? search);
     }

@@ -15,6 +15,7 @@ namespace E_commerce.DAL.Entities.Users
             get; set;
         }
 
+        public string Role { get; set; } = string.Empty;
         public string? ProfilePicture { get; set; }
 
 
@@ -22,5 +23,8 @@ namespace E_commerce.DAL.Entities.Users
         public Company Company { get; set; } = null!;
 
         public int? CompanyId { get; set; }
+
+        [ValidateNever]
+        public List<Order> Orders { get; set; } = new List<Order>();
     }
 }

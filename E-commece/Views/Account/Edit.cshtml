@@ -1,0 +1,277 @@
+﻿@using E_commerce.Utility.Settings
+@using Ecommerce.Utility
+@model EditAccountVM
+
+@{
+    ViewData["Title"] = "Edit Account";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow-lg border-0">
+
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Edit Account</h4>
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="UserId" />
+                <input type="hidden" asp-for="Role" />
+
+                <div class="row">
+
+                    <!-- LEFT SIDE -->
+                    <div class="col-md-8">
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="FirstName" class="form-label"></label>
+                                <input asp-for="FirstName" class="form-control" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="LastName" class="form-label"></label>
+                                <input asp-for="LastName" class="form-control" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Phone" class="form-label"></label>
+                                <input asp-for="Phone" class="form-control" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="City" class="form-label"></label>
+                                <input asp-for="City" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="PostalCode" class="form-label"></label>
+                                <input asp-for="PostalCode" class="form-control" />
+                                <span asp-validation-for="PostalCode" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="StreetAddress" class="form-label"></label>
+                                <textarea asp-for="StreetAddress" class="form-control"></textarea>
+                            </div>
+
+                            <!-- COMPANY -->
+                            <div class="col-md-6 mb-3"
+                                 style="@(Model.Role != Roles.Company ? "display:none;" : "")">
+
+                                <label asp-for="CompanyId" class="form-label">Company</label>
+
+                                <select asp-for="CompanyId"
+                                        asp-items="Model.Companies"
+                                        class="form-select">
+                                    <option value="">-- Select Company --</option>
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT SIDE -->
+                    <div class="col-md-4 text-center">
+
+                        <label class="form-label d-block mb-2">Profile Picture</label>
+
+                        <!-- PROFILE PICTURE PICKER -->
+                        <div class="profile-pic-wrapper" onclick="document.getElementById('profilePictureInput').click()">
+
+                            <!-- OLD / CURRENT IMAGE -->
+                            <img id="oldImage"
+                                 class="profile-img"
+                                 src="@(
+                                 string.IsNullOrEmpty(Model?.ExistingImage)
+                                 ? $"/{FileSettings.ImagesPathProfiles}/default-user.png"
+                                 : $"/{FileSettings.ImagesPathProfiles}/{Model.ExistingImage}"
+                                                                                                 )"
+                                 alt="Profile Image" />
+
+                            <!-- NEW PREVIEW -->
+                            <img id="previewImage"
+                                 class="profile-img"
+                                 style="display:none;" />
+
+                            <!-- Stores the original image URL so Reset can restore it -->
+                            <input type="hidden" id="originalImageSrc" />
+
+                            <!-- HOVER OVERLAY -->
+                            <div class="profile-pic-overlay">
+                                <i class="bi bi-camera-fill"></i>
+                                <span>Change photo</span>
+                            </div>
+
+                        </div>
+
+                        <input id="profilePictureInput"
+                               asp-for="ProfilePicture"
+                               type="file"
+                               accept="image/*"
+                               class="d-none"
+                               onchange="previewFile(event)" />
+
+                        <div class="form-text mt-2">Click the picture to upload a new one</div>
+
+                        <button type="button"
+                                id="resetImageBtn"
+                                class="btn btn-sm btn-outline-secondary mt-2 d-none"
+                                onclick="resetProfilePicture()">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                            Reset
+                        </button>
+
+                        <span asp-validation-for="ProfilePicture" class="text-danger d-block"></span>
+
+                    </div>
+
+                </div>
+
+                <!-- BUTTONS -->
+                <div class="mt-4 d-flex justify-content-between">
+
+                    <a asp-action="Index" class="btn btn-secondary">
+                        Cancel
+                    </a>
+
+                    <button type="submit" class="btn btn-success">
+                        Save Changes
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <style>
+        .profile-pic-wrapper {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+            border: 3px solid #fff;
+            outline: 1px solid #e9ecef;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .profile-pic-wrapper:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            }
+
+            .profile-pic-wrapper .profile-img {
+                width: 150px;
+                height: 150px;
+                object-fit: cover;
+                display: block;
+            }
+
+        .profile-pic-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+            .profile-pic-overlay i {
+                font-size: 1.4rem;
+            }
+
+        .profile-pic-wrapper:hover .profile-pic-overlay {
+            opacity: 1;
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var oldImage = document.getElementById("oldImage");
+            document.getElementById("originalImageSrc").value = oldImage.src;
+        });
+
+        function previewFile(event) {
+
+            var input = event.target;
+            var resetBtn = document.getElementById("resetImageBtn");
+
+            if (input.files && input.files[0]) {
+
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+
+                    document.getElementById("oldImage").style.display = "none";
+
+                    var preview = document.getElementById("previewImage");
+                    preview.src = e.target.result;
+                    preview.style.display = "block";
+
+                    resetBtn.classList.remove("d-none");
+                };
+
+                reader.readAsDataURL(input.files[0]);
+
+            } else {
+
+                // No file selected (e.g. user cancelled the file dialog) -> keep current state as-is
+            }
+        }
+
+        function resetProfilePicture() {
+
+            var input = document.getElementById("profilePictureInput");
+            var preview = document.getElementById("previewImage");
+            var oldImage = document.getElementById("oldImage");
+            var resetBtn = document.getElementById("resetImageBtn");
+
+            // Clear the selected file
+            input.value = "";
+
+            // Hide the preview, restore the original image
+            preview.style.display = "none";
+            preview.src = "";
+
+            oldImage.src = document.getElementById("originalImageSrc").value;
+            oldImage.style.display = "block";
+
+            resetBtn.classList.add("d-none");
+        }
+    </script>
+}

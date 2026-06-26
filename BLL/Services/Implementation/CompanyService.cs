@@ -1,6 +1,7 @@
 ﻿using DataAccessLayer.Repositories.Interfaces;
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
+using E_commerce.DAL.Entities;
 using E_commerce.DAL.Entities.Users;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
@@ -116,7 +117,7 @@ namespace E_commerce.BLL.Services.Implementation
 
 
 
-        public async Task<IEnumerable<SelectListItem>> GetAllCategoriesItems()
+        public async Task<IEnumerable<SelectListItem>> GetAllCompaniesItems()
         {
             var categories = await unitOfWork.Repository<Company>().GetAllAsync();
             return categories.Select(c => new SelectListItem

@@ -1,11 +1,14 @@
 ﻿using BLL.Services.Interfaces;
 using BLL.ViewModels;
+using Ecommerce.Utility;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
 {
+    [Authorize(Roles = Roles.Admin)]
     public class CategoryController : AppController
     {
         private readonly ICategoryService CategoryService;

@@ -1,6 +1,8 @@
 ﻿using BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
+using Ecommerce.Utility;
 using Ecommerce.Utility.ResultPattern;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
@@ -16,12 +18,14 @@ namespace E_commece.Controllers
             _categoryService = categoryService;
         }
         [HttpGet]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Index()
         {
             var Resultproducts = await _productService.AllProductsAsync();
             return View(Resultproducts.Value);
         }
         [HttpGet]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Create()
         {
             CreateOrUpdateProductViewModel model = new()
@@ -32,6 +36,7 @@ namespace E_commece.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Create(CreateOrUpdateProductViewModel model)
         {
             ModelState.Remove("Product.Id");
@@ -49,6 +54,7 @@ namespace E_commece.Controllers
 
         }
         [HttpGet]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int id)
         {
             var Resultproduct = await _productService.ProductDetailsAsync(id);
@@ -66,6 +72,7 @@ namespace E_commece.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int id, CreateOrUpdateProductViewModel model)
         {
             if (id != model.Product.Id)
@@ -94,6 +101,7 @@ namespace E_commece.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var result = await _productService.DeleteProductAsync(id);

@@ -38,6 +38,13 @@ namespace E_commerce.BLL.Services.Implementation
 
             if (!user.EmailConfirmed)
                 return Result.Failure("Please confirm your email first", errorType: ErrorType.VALIDATION);
+            if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow)
+            {
+                return Result.Failure(
+                    "Your account is locked. Try again later.",
+                    errorType: ErrorType.VALIDATION);
+            }
+
 
             if (model == null)
                 return Result.Failure("Invalid login credentials", errorType: ErrorType.VALIDATION);
@@ -45,7 +52,7 @@ namespace E_commerce.BLL.Services.Implementation
                 model.Email,
                 model.Password,
                 model.RememberMe,
-                false
+                true
             );
             if (!result.Succeeded)
                 return Result.Failure("Invalid login credentials", errorType: ErrorType.VALIDATION);

@@ -4,6 +4,8 @@
     {
         VALIDATION,
         NOT_FOUND,
-        INTERNAL_ERROR
+        INTERNAL_ERROR,
+        UNAUTHORIZED,
+        CONFLICT
     }
 }

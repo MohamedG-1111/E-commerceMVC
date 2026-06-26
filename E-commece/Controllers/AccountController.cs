@@ -1,5 +1,6 @@
 ﻿using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
+using Ecommerce.Utility;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
@@ -7,10 +8,14 @@ namespace E_commece.Controllers
     public class AccountController : AppController
     {
         private readonly IAccountService accountService;
+        private readonly ICompanyService companyService;
+        private readonly IOrderService orderService;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, ICompanyService companyService, IOrderService orderService)
         {
             this.accountService = accountService;
+            this.companyService = companyService;
+            this.orderService = orderService;
         }
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
@@ -82,5 +87,179 @@ namespace E_commece.Controllers
             TempData["Success"] = "Reset Password Successfuly";
             return RedirectToAction("Login", "Auth");
         }
+
+
+        [HttpGet]
+
+        public async Task<IActionResult> CreateAccount()
+        {
+            AccountVM model = new AccountVM()
+            {
+                Companies = await companyService.GetAllCompaniesItems()
+
+            };
+            return View(model);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateAccount(AccountVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.Companies = await companyService.GetAllCompaniesItems();
+                return View(model);
+
+            }
+            var result = await accountService.CreateAccountAsync(model);
+            if (!result.IsSuccess)
+            {
+                model.Companies = await companyService.GetAllCompaniesItems();
+                return HandleResult(result, nameof(CreateAccount), model);
+            }
+
+            TempData["Success"] = "Account Created Successfully";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
+        public async Task<IActionResult> Index()
+        {
+            var result = await accountService.GetAccountsAsync();
+            return View(result.Value);
+        }
+
+        public async Task<IActionResult> Profile(string UserId)
+        {
+            var result = await accountService.GetAccountByUserId(UserId);
+            if (result.IsFailure)
+                HandleResult(result);
+            ViewBag.userId = UserId;
+            return View(result.Value);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LockAccount(string userId)
+        {
+            var result = await accountService.LockAccountAsync(userId);
+
+            if (result.IsFailure)
+                return HandleResult(result);
+
+            TempData["Success"] = "Account locked successfully";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnlockAccount(string userId)
+        {
+            var result = await accountService.UnLockAccountAsync(userId);
+
+            if (result.IsFailure)
+                return HandleResult(result);
+
+            TempData["Success"] = "Account unlocked successfully";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Search(string search)
+        {
+            var result = await accountService.SearchAccountsAsync(search);
+
+            if (!result.IsSuccess)
+            {
+                return PartialView("_AccountPartial",
+                    Enumerable.Empty<AllAccountsViewModel>());
+            }
+
+            return PartialView("_AccountPartial", result.Value);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public async Task<IActionResult> Delete(string UserId)
+        {
+            var result = await accountService.DeleteAccountAsync(UserId);
+            if (!result.IsSuccess)
+                return HandleResult(result);
+            TempData["Success"] = "Account Deleted Successfully";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(string userId)
+        {
+            var result = await accountService.GetAccountToEditAsync(userId);
+
+            if (!result.IsSuccess || result.Value is null)
+                return HandleResult(result);
+
+            var model = result.Value;
+
+            model.Companies = await companyService.GetAllCompaniesItems();
+
+            return View(model);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public async Task<IActionResult> Edit(EditAccountVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.Companies = await companyService.GetAllCompaniesItems();
+                return View(model);
+            }
+            var result = await accountService.UpdateAccountAsync(model.UserId, model);
+            if (!result.IsSuccess)
+            {
+                model.Companies = await companyService.GetAllCompaniesItems();
+                return HandleResult(result, nameof(Edit), model);
+            }
+
+            TempData["Success"] = "Update Successfully";
+            if (User.IsInRole(Roles.Admin))
+                return RedirectToAction(nameof(Index));
+
+            return RedirectToAction(nameof(Index), "Home");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateCheckoutInfo(UpdateCheckoutInfoVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Invalid data"
+                });
+            }
+
+            var result = await accountService.UpdateCheckoutInfo(model);
+
+            return Json(new
+            {
+                success = result.IsSuccess,
+                message = result.IsSuccess
+                    ? "Information updated successfully"
+                    : result.ErrorMessage
+            });
+        }
     }
 }
+
+
+

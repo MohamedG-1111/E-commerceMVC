@@ -1,25 +1,42 @@
-﻿using E_commerce.BLL.Dto;
+﻿using DataAccessLayer.Repositories.Interfaces;
+using E_commerce.BLL.Dto;
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
+using E_commerce.DAL.Entities;
 using E_commerce.DAL.Entities.Users;
+using E_commerce.Utility.Settings;
 using Ecommerce.Utility;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-
+using Microsoft.EntityFrameworkCore;
 namespace E_commerce.BLL.Services.Implementation
 {
     public class AccountService : IAccountService
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailService emailService;
+        private readonly IAttachmentService attachmentService;
+        private readonly IUnitOfWork unitOfWork;
+        private readonly ICurrentUserService currentUserService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AccountService(UserManager<ApplicationUser> _userManager, IHttpContextAccessor httpContextAccessor, IEmailService emailService)
+
+
+
+        public AccountService(UserManager<ApplicationUser> _userManager,
+            IHttpContextAccessor httpContextAccessor,
+            IEmailService emailService,
+            IAttachmentService attachmentService,
+            IUnitOfWork unitOfWork,
+            ICurrentUserService CurrentUserService)
         {
             this._userManager = _userManager;
             this.emailService = emailService;
+            this.attachmentService = attachmentService;
+            this.unitOfWork = unitOfWork;
+            currentUserService = CurrentUserService;
             _httpContextAccessor = httpContextAccessor;
 
         }
@@ -190,29 +207,387 @@ namespace E_commerce.BLL.Services.Implementation
                  : Result.Failure("Failed to send email", errorType: ErrorType.INTERNAL_ERROR);
         }
 
-        //public async Task<Result> ValidateResetPasswordTokenAsync(string email, string token)
-        //{
-        //    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
-        //        return Result.Failure("Invalid reset link", errorType: ErrorType.VALIDATION);
 
-        //    var user = await _userManager.FindByEmailAsync(email);
+        public async Task<Result> CreateAccountAsync(AccountVM model)
+        {
+            if (model is null)
+                return Result.Failure("Invalid Account Data");
 
-        //    if (user == null)
-        //        return Result.Failure("Invalid request");
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
 
-        //    var decodedToken = Uri.UnescapeDataString(token);
+            if (existingUser != null)
+                return Result.Failure(
+                    "User with this email already exists",
+                    errorType: ErrorType.VALIDATION);
 
-        //    var isValid = await _userManager.VerifyUserTokenAsync(
-        //        user,
-        //        TokenOptions.DefaultProvider,
-        //        "ResetPassword",
-        //        decodedToken);
+            var user = new ApplicationUser
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                PhoneNumber = model.Phone,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                StreetAddress = model.StreetAddress,
+                City = model.City,
+                PostalCode = model.PostalCode,
+                Role = model.Role,
+                CompanyId = model.CompanyId,
+                EmailConfirmed = true
+            };
 
-        //    return isValid
-        //        ? Result.Success()
-        //        : Result.Failure("Invalid or expired reset link", errorType: ErrorType.VALIDATION);
-        //}
+            try
+            {
+                if (model.ProfilePicture != null)
+                {
+                    user.ProfilePicture =
+                        await attachmentService.UploadAttachmentAsync(
+                            model.ProfilePicture,
+                            FileSettings.ImagesPathProfiles);
+                }
+
+                var createResult =
+                    await _userManager.CreateAsync(user, model.Password);
+
+                if (!createResult.Succeeded)
+                {
+                    if (user.ProfilePicture != null)
+                    {
+                        await attachmentService.DeleteAttachmentAsync(
+                            user.ProfilePicture,
+                            FileSettings.ImagesPathProfiles);
+                    }
+
+                    return Result.Failure(
+                        string.Join(", ",
+                            createResult.Errors.Select(e => e.Description)),
+                        errorType: ErrorType.VALIDATION);
+                }
+
+                var roleResult =
+                    await _userManager.AddToRoleAsync(user, model.Role);
+
+                if (!roleResult.Succeeded)
+                {
+                    if (user.Id != null)
+                        await _userManager.DeleteAsync(user);
+
+                    if (user.ProfilePicture != null)
+                    {
+                        await attachmentService.DeleteAttachmentAsync(
+                            user.ProfilePicture,
+                            FileSettings.ImagesPathProfiles);
+                    }
+
+                    return Result.Failure(
+                        "Failed to assign role",
+                        errorType: ErrorType.INTERNAL_ERROR);
+                }
+
+                return Result.Success();
+            }
+            catch
+            {
+                if (user.ProfilePicture != null)
+                {
+                    await attachmentService.DeleteAttachmentAsync(
+                        user.ProfilePicture,
+                        FileSettings.ImagesPathProfiles);
+                }
+
+                return Result.Failure(
+                    "Registration failed",
+                    errorType: ErrorType.INTERNAL_ERROR);
+            }
+        }
+
+        public async Task<Result<List<AllAccountsViewModel>>> GetAccountsAsync()
+        {
+            var accounts = await unitOfWork.Repository<ApplicationUser>().GetAsQuery()
+                 .Select(x => new AllAccountsViewModel
+                 {
+                     UserId = x.Id,
+                     FullName = $"{x.FirstName} {x.LastName}",
+                     Email = x.Email!,
+                     Role = x.Role,
+                     IsLocked = x.LockoutEnd != null &&
+           x.LockoutEnd > DateTimeOffset.UtcNow
+                 })
+                  .ToListAsync();
+            return Result<List<AllAccountsViewModel>>.Success(accounts);
+        }
+
+        public async Task<Result<List<AllAccountsViewModel>>> SearchAccountsAsync(string Search)
+        {
+            var query = unitOfWork.Repository<ApplicationUser>().GetAsQuery();
+            if (!string.IsNullOrWhiteSpace(Search))
+            {
+                query = query.Where(
+                    x => x.Email!.Contains(Search)
+                    || x.Role!.Contains(Search)
+                    || x.FirstName.Contains(Search)
+                    || x.LastName.Contains(Search)
+
+                    );
+            }
+
+            var accounts = await query.Select(x => new AllAccountsViewModel
+            {
+                UserId = x.Id,
+                FullName = $"{x.FirstName} {x.LastName}",
+                Email = x.Email!,
+                Role = x.Role,
+                IsLocked = x.LockoutEnd != null &&
+           x.LockoutEnd > DateTimeOffset.UtcNow
+            })
+             .ToListAsync();
+            return Result<List<AllAccountsViewModel>>.Success(accounts);
+        }
+
+        public async Task<Result<AccountVM>?> GetAccountByUserId(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result<AccountVM>.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var account = await unitOfWork.Repository<ApplicationUser>().GetAsQuery().FirstOrDefaultAsync(x => x.Id == userId);
+            if (account == null)
+                return Result<AccountVM>.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var company = await unitOfWork.Repository<Company>().GetAsQuery()
+                .FirstOrDefaultAsync(x => x.Id == account.CompanyId);
+
+
+
+            var result = new AccountVM
+            {
+                FirstName = account.FirstName,
+                LastName = account.LastName,
+                Email = account.Email!,
+                Phone = account.PhoneNumber!,
+                StreetAddress = account.StreetAddress,
+                City = account.City,
+                PostalCode = account.PostalCode,
+                CompanyId = account.CompanyId,
+                Role = account.Role,
+                Image = account.ProfilePicture,
+                CompanyName = company?.Name ?? null
+            };
+
+            return Result<AccountVM>.Success(result);
+        }
+
+        public async Task<Result> LockAccountAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            await _userManager.SetLockoutEndDateAsync(
+                user,
+                DateTimeOffset.MaxValue
+            );
+            await _userManager.ResetAccessFailedCountAsync(user);
+
+
+            return Result.Success();
+        }
+        public async Task<Result> UnLockAccountAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            await _userManager.SetLockoutEndDateAsync(
+                user,
+                DateTimeOffset.UtcNow
+            );
+            await _userManager.ResetAccessFailedCountAsync(user);
+
+            return Result.Success();
+        }
+
+        public async Task<Result> DeleteAccountAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+
+            var result = await _userManager.DeleteAsync(user);
+
+            if (!result.Succeeded)
+                return Result.Failure("Can not delete account");
+
+
+            if (!string.IsNullOrWhiteSpace(user.ProfilePicture))
+            {
+                await attachmentService.DeleteAttachmentAsync(user.ProfilePicture!, FileSettings.ImagesPathProfiles);
+            }
+
+            return Result.Success();
+
+        }
+
+        public async Task<Result> UpdateAccountAsync(string userId, EditAccountVM model)
+        {
+            if (model is null)
+                return Result.Failure("Invalid Account Data");
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+                return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var emailExists = await _userManager.FindByEmailAsync(model.Email);
+
+            if (emailExists != null && emailExists.Id != user.Id)
+            {
+                return Result.Failure(
+                    "User with this email already exists",
+                    errorType: ErrorType.VALIDATION);
+            }
+
+            var oldImage = user.ProfilePicture;
+
+            // update fields
+            user.UserName = model.Email;
+            user.Email = model.Email;
+            user.PhoneNumber = model.Phone;
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.StreetAddress = model.StreetAddress;
+            user.City = model.City;
+            user.PostalCode = model.PostalCode;
+            user.CompanyId = model.CompanyId;
+
+            string? newImage = null;
+
+            try
+            {
+                // 1️⃣ upload image FIRST but keep temp
+                if (model.ProfilePicture != null)
+                {
+                    newImage = await attachmentService.UploadAttachmentAsync(
+                        model.ProfilePicture,
+                        FileSettings.ImagesPathProfiles);
+
+                    user.ProfilePicture = newImage;
+                }
+
+                // 2️⃣ update DB
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    // rollback uploaded image
+                    if (!string.IsNullOrWhiteSpace(newImage))
+                    {
+                        await attachmentService.DeleteAttachmentAsync(
+                            newImage,
+                            FileSettings.ImagesPathProfiles);
+                    }
+
+                    return Result.Failure(
+                        string.Join(", ", result.Errors.Select(e => e.Description)),
+                       errorType: ErrorType.VALIDATION);
+                }
+
+                // 3️⃣ delete old image AFTER success
+                if (!string.IsNullOrWhiteSpace(oldImage) && newImage != null)
+                {
+                    await attachmentService.DeleteAttachmentAsync(
+                        oldImage,
+                        FileSettings.ImagesPathProfiles);
+                }
+
+                return Result.Success();
+            }
+            catch
+            {
+                // rollback new image if something crashes
+                if (!string.IsNullOrWhiteSpace(newImage))
+                {
+                    await attachmentService.DeleteAttachmentAsync(
+                        newImage,
+                        FileSettings.ImagesPathProfiles);
+                }
+
+                return Result.Failure(
+                    "Update failed",
+                    errorType: ErrorType.INTERNAL_ERROR);
+            }
+        }
+        public async Task<Result<EditAccountVM>> GetAccountToEditAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result<EditAccountVM>.Failure("Invalid User Id", errorType: ErrorType.NOT_FOUND);
+
+            var user = await _userManager.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == userId);
+
+            if (user is null)
+                return Result<EditAccountVM>.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+
+            var model = new EditAccountVM
+            {
+                UserId = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email!,
+                Phone = user.PhoneNumber!,
+                StreetAddress = user.StreetAddress,
+                City = user.City,
+                PostalCode = user.PostalCode,
+                CompanyId = user.CompanyId,
+                ExistingImage = user.ProfilePicture,
+                Role = user?.Role,
+
+            };
+
+            return Result<EditAccountVM>.Success(model);
+        }
+
+        public async Task<Result> UpdateCheckoutInfo(UpdateCheckoutInfoVM model)
+        {
+            var userId = currentUserService.UserId;
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result.Failure("Must be Login First", errorType: ErrorType.UNAUTHORIZED);
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return Result.Failure("User Not Found", errorType: ErrorType.NOT_FOUND);
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.City = model.City;
+            user.PostalCode = model.PostalCode;
+            user.StreetAddress = model.StreetAddress;
+            user.PhoneNumber = model.PhoneNumber;
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return Result.Failure("Can not Update CheckoutInfo ", errorType: ErrorType.INTERNAL_ERROR);
+
+            }
+
+            return Result.Success();
+
+        }
     }
 }
+
+
+
 
 

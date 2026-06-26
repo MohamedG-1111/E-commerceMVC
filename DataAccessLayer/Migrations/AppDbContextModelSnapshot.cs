@@ -74,6 +74,133 @@ namespace E_commerce.DAL.Migrations
                         });
                 });
 
+            modelBuilder.Entity("E_commerce.DAL.Entities.Company", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("DiscountPercentage")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PostalCode")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Company");
+                });
+
+            modelBuilder.Entity("E_commerce.DAL.Entities.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Carrier")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("Pending");
+
+                    b.Property<decimal>("OrderTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly>("PaymentDueDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("PaymentIntentId")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("Pending");
+
+                    b.Property<DateTime>("ShippingDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TrackingNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("E_commerce.DAL.Entities.OrderDetails", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("OrderId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderDetails");
+                });
+
             modelBuilder.Entity("E_commerce.DAL.Entities.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -115,6 +242,9 @@ namespace E_commerce.DAL.Migrations
                     b.Property<int>("PriceFor50Plus")
                         .HasColumnType("int");
 
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -139,6 +269,7 @@ namespace E_commerce.DAL.Migrations
                             PriceFor100Plus = 45,
                             PriceFor1To50 = 55,
                             PriceFor50Plus = 50,
+                            Stock = 0,
                             Title = "Clean Code"
                         },
                         new
@@ -153,6 +284,7 @@ namespace E_commerce.DAL.Migrations
                             PriceFor100Plus = 50,
                             PriceFor1To50 = 60,
                             PriceFor50Plus = 55,
+                            Stock = 0,
                             Title = "The Pragmatic Programmer"
                         },
                         new
@@ -167,6 +299,7 @@ namespace E_commerce.DAL.Migrations
                             PriceFor100Plus = 55,
                             PriceFor1To50 = 65,
                             PriceFor50Plus = 60,
+                            Stock = 0,
                             Title = "Design Patterns"
                         },
                         new
@@ -181,6 +314,7 @@ namespace E_commerce.DAL.Migrations
                             PriceFor100Plus = 40,
                             PriceFor1To50 = 50,
                             PriceFor50Plus = 45,
+                            Stock = 0,
                             Title = "C# in Depth"
                         },
                         new
@@ -195,6 +329,7 @@ namespace E_commerce.DAL.Migrations
                             PriceFor100Plus = 60,
                             PriceFor1To50 = 70,
                             PriceFor50Plus = 65,
+                            Stock = 0,
                             Title = "ASP.NET Core"
                         },
                         new
@@ -209,6 +344,7 @@ namespace E_commerce.DAL.Migrations
                             PriceFor100Plus = 35,
                             PriceFor1To50 = 45,
                             PriceFor50Plus = 40,
+                            Stock = 0,
                             Title = "SQL Server"
                         },
                         new
@@ -223,6 +359,7 @@ namespace E_commerce.DAL.Migrations
                             PriceFor100Plus = 30,
                             PriceFor1To50 = 40,
                             PriceFor50Plus = 35,
+                            Stock = 0,
                             Title = "Python Crash"
                         },
                         new
@@ -237,6 +374,7 @@ namespace E_commerce.DAL.Migrations
                             PriceFor100Plus = 65,
                             PriceFor1To50 = 75,
                             PriceFor50Plus = 70,
+                            Stock = 0,
                             Title = "Deep Learning"
                         },
                         new
@@ -251,6 +389,7 @@ namespace E_commerce.DAL.Migrations
                             PriceFor100Plus = 70,
                             PriceFor1To50 = 80,
                             PriceFor50Plus = 75,
+                            Stock = 0,
                             Title = "Hands On ML"
                         },
                         new
@@ -265,6 +404,7 @@ namespace E_commerce.DAL.Migrations
                             PriceFor100Plus = 45,
                             PriceFor1To50 = 55,
                             PriceFor50Plus = 50,
+                            Stock = 0,
                             Title = "JavaScript Guide"
                         });
                 });
@@ -335,6 +475,10 @@ namespace E_commerce.DAL.Migrations
                     b.Property<string>("ProfilePicture")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -371,52 +515,6 @@ namespace E_commerce.DAL.Migrations
 
                             t.HasCheckConstraint("CHK_Users_PostalCode", "[PostalCode] IS NULL OR [PostalCode] LIKE '[0-9]%'");
                         });
-                });
-
-            modelBuilder.Entity("E_commerce.DAL.Entities.Users.Company", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("City")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("DiscountPercentage")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5,2)")
-                        .HasDefaultValue(0m);
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("PostalCode")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Company");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -552,6 +650,36 @@ namespace E_commerce.DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("E_commerce.DAL.Entities.Order", b =>
+                {
+                    b.HasOne("E_commerce.DAL.Entities.Users.ApplicationUser", "ApplicationUser")
+                        .WithMany("Orders")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("E_commerce.DAL.Entities.OrderDetails", b =>
+                {
+                    b.HasOne("E_commerce.DAL.Entities.Order", "Order")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("E_commerce.DAL.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("E_commerce.DAL.Entities.Product", b =>
                 {
                     b.HasOne("DataAcessLayer.Models.Category", "Category")
@@ -565,7 +693,7 @@ namespace E_commerce.DAL.Migrations
 
             modelBuilder.Entity("E_commerce.DAL.Entities.Users.ApplicationUser", b =>
                 {
-                    b.HasOne("E_commerce.DAL.Entities.Users.Company", "Company")
+                    b.HasOne("E_commerce.DAL.Entities.Company", "Company")
                         .WithMany()
                         .HasForeignKey("CompanyId");
 
@@ -626,6 +754,16 @@ namespace E_commerce.DAL.Migrations
             modelBuilder.Entity("DataAcessLayer.Models.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("E_commerce.DAL.Entities.Order", b =>
+                {
+                    b.Navigation("OrderDetails");
+                });
+
+            modelBuilder.Entity("E_commerce.DAL.Entities.Users.ApplicationUser", b =>
+                {
+                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }
