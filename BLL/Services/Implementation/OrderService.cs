@@ -5,7 +5,7 @@ using E_commerce.DAL.Entities;
 using E_commerce.DAL.Entities.enums;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
-
+using Microsoft.EntityFrameworkCore;
 namespace E_commerce.BLL.Services.Implementation
 {
     public class OrderService : IOrderService
@@ -65,6 +65,35 @@ namespace E_commerce.BLL.Services.Implementation
             return Result<CheckoutViewModel>.Success(checkoutVm);
         }
 
+        public async Task<Result<IEnumerable<OrderVM>>> GetMyOrdersAsync()
+        {
+            var userId = currentUserService.UserId;
+            if (userId == null)
+                return Result<IEnumerable<OrderVM>?>.Failure(
+                    "Must be logged in", errorType: ErrorType.UNAUTHORIZED);
+
+            var orders = await unitOfWork.Repository<Order>()
+                .GetAsQuery()
+                .Where(x => x.ApplicationUserId == userId).
+                OrderByDescending(x => x.OrderDate)
+                .Select(x => new OrderVM
+                {
+                    Id = x.Id,
+                    OrderTotal = x.OrderTotal,
+                    OrderDate = x.OrderDate,
+                    OrderStatus = x.OrderStatus.ToString(),
+                    PaymentStatus = x.PaymentStatus.ToString(),
+                    ItemsCount = x.OrderDetails.Sum(d => d.Count)
+                })
+                .ToListAsync();
+
+            if (!orders.Any())
+                return Result<IEnumerable<OrderVM>>.Failure(
+                    "There are no orders yet",
+                    errorType: ErrorType.NOT_FOUND);
+
+            return Result<IEnumerable<OrderVM>?>.Success(orders);
+        }
         public async Task<Result> PlaceOrderAsync()
         {
             var currentUser = await currentUserService.GetCurrentUser();
@@ -87,11 +116,11 @@ namespace E_commerce.BLL.Services.Implementation
             {
                 ApplicationUserId = currentUser.Id,
                 OrderTotal = customerCart.Value.Total,
-                PaymentStatus = currentUser.CompanyId != 0
+                PaymentStatus = currentUser.CompanyId != null
                     ? PaymentStatus.ApprovedForDelayedPayment
                     : PaymentStatus.Pending,
 
-                OrderStatus = currentUser.CompanyId != 0
+                OrderStatus = currentUser.CompanyId != null
                     ? OrderStatus.Approved
                     : OrderStatus.Pending
             };

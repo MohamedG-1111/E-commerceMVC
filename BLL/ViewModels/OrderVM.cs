@@ -1,6 +1,4 @@
-﻿using E_commerce.DAL.Entities.enums;
-
-namespace E_commerce.BLL.ViewModels
+﻿namespace E_commerce.BLL.ViewModels
 {
     public class OrderVM
     {
@@ -10,9 +8,9 @@ namespace E_commerce.BLL.ViewModels
 
         public decimal OrderTotal { get; set; }
 
-        public OrderStatus OrderStatus { get; set; }
+        public string OrderStatus { get; set; }
 
-        public PaymentStatus PaymentStatus { get; set; }
+        public string PaymentStatus { get; set; }
 
         public int ItemsCount { get; set; }
     }
