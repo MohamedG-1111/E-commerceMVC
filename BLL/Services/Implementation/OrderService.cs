@@ -6,6 +6,7 @@ using E_commerce.DAL.Entities.enums;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
 using Microsoft.EntityFrameworkCore;
+using Order = E_commerce.DAL.Entities.Order;
 namespace E_commerce.BLL.Services.Implementation
 {
     public class OrderService : IOrderService
@@ -93,6 +94,52 @@ namespace E_commerce.BLL.Services.Implementation
                     errorType: ErrorType.NOT_FOUND);
 
             return Result<IEnumerable<OrderVM>?>.Success(orders);
+        }
+
+        public async Task<Result<OrderDetailsVM>> GetOrderDetails(int orderId)
+        {
+            if (orderId <= 0)
+                return Result<OrderDetailsVM>.Failure(
+                    "Order Not Found",
+                    errorType: ErrorType.NOT_FOUND);
+
+            var userId = currentUserService.UserId;
+
+            if (userId == null)
+                return Result<OrderDetailsVM>.Failure(
+                    "Must be Login",
+                    errorType: ErrorType.UNAUTHORIZED);
+
+            var orderDetails = await unitOfWork.Repository<Order>()
+                .GetAsQuery()
+                .Where(x => x.Id == orderId && x.ApplicationUserId == userId)
+                .Select(x => new OrderDetailsVM
+                {
+                    Id = x.Id,
+                    OrderTotal = x.OrderTotal,
+                    OrderDate = x.OrderDate,
+                    OrderStatus = x.OrderStatus.ToString(),
+                    PaymentStatus = x.PaymentStatus.ToString(),
+
+                    Items = x.OrderDetails
+                        .Select(d => new OrderDetailsItemVM
+                        {
+                            ProductId = d.ProductId,
+                            ProductName = d.Product.Title,
+                            Image = d.Product.ImageUrl,
+                            Price = d.Price,
+                            Count = d.Count
+                        })
+                        .ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (orderDetails == null)
+                return Result<OrderDetailsVM>.Failure(
+                    "Order Not Found",
+                    errorType: ErrorType.NOT_FOUND);
+
+            return Result<OrderDetailsVM>.Success(orderDetails);
         }
         public async Task<Result> PlaceOrderAsync()
         {

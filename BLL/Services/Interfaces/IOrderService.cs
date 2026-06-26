@@ -10,5 +10,6 @@ namespace E_commerce.BLL.Services.Interfaces
         public Task<Result> PlaceOrderAsync();
 
         public Task<Result<IEnumerable<OrderVM>>> GetMyOrdersAsync();
+        public Task<Result<OrderDetailsVM>> GetOrderDetails(int OrderId);
     }
 }

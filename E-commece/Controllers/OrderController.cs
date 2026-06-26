@@ -35,7 +35,7 @@ namespace E_commece.Controllers
             }
 
             TempData["Success"] = "Order placed successfully.";
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("MyOrders");
         }
 
 
@@ -47,5 +47,14 @@ namespace E_commece.Controllers
 
             return View(result.Value);
         }
+
+        public async Task<IActionResult> GetOrderDetails(int orderId)
+        {
+            var result = await orderService.GetOrderDetails(orderId);
+            if (result.IsFailure)
+                return HandleResult(result);
+            return View(result.Value);
+        }
     }
 }
+
