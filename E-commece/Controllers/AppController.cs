@@ -14,8 +14,14 @@ namespace E_commece.Controllers
             switch (result.ErrorType)
             {
                 case ErrorType.VALIDATION:
-                    ModelState.AddModelError("", result.ErrorMessage!);
-                    return View(viewName, model);
+                    if (viewName != null)
+                    {
+                        ModelState.AddModelError(string.Empty, result.ErrorMessage!);
+                        return View(viewName, model);
+                    }
+
+                    TempData["Error"] = result.ErrorMessage;
+                    return RedirectToAction("Index");
 
                 case ErrorType.NOT_FOUND:
                     return View("NotFound", result.ErrorMessage);

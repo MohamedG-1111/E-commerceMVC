@@ -12,7 +12,7 @@ namespace E_commerce.DAL.Entities
 
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
 
-        public DateTime ShippingDate { get; set; } = DateTime.UtcNow;
+        public DateTime ShippingDate { get; set; }
 
         public decimal OrderTotal { get; set; }
 

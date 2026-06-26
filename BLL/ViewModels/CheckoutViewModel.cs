@@ -1,15 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace E_commerce.BLL.ViewModels
+﻿namespace E_commerce.BLL.ViewModels
 {
     public class CheckoutViewModel
     {
-        public string FullName { get; set; } = null;
-        public string PhoneNumber { get; set; } = null!;
-        public string Address { get; set; } = string.Empty;
-
-        [StringLength(10)]
-        public string? PostalCode { get; set; }
+        public UpdateCheckoutInfoVM UpdateCheckoutInfo { get; set; } = new();
         public List<CartItem> Items { get; set; } = new();
 
         public decimal SubTotal { get; set; }

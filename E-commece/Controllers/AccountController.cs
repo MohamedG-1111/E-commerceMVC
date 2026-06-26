@@ -9,11 +9,13 @@ namespace E_commece.Controllers
     {
         private readonly IAccountService accountService;
         private readonly ICompanyService companyService;
+        private readonly IOrderService orderService;
 
-        public AccountController(IAccountService accountService, ICompanyService companyService)
+        public AccountController(IAccountService accountService, ICompanyService companyService, IOrderService orderService)
         {
             this.accountService = accountService;
             this.companyService = companyService;
+            this.orderService = orderService;
         }
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
@@ -93,7 +95,7 @@ namespace E_commece.Controllers
         {
             AccountVM model = new AccountVM()
             {
-                Companies = await companyService.GetAllCategoriesItems()
+                Companies = await companyService.GetAllCompaniesItems()
 
             };
             return View(model);
@@ -106,14 +108,14 @@ namespace E_commece.Controllers
         {
             if (!ModelState.IsValid)
             {
-                model.Companies = await companyService.GetAllCategoriesItems();
+                model.Companies = await companyService.GetAllCompaniesItems();
                 return View(model);
 
             }
             var result = await accountService.CreateAccountAsync(model);
             if (!result.IsSuccess)
             {
-                model.Companies = await companyService.GetAllCategoriesItems();
+                model.Companies = await companyService.GetAllCompaniesItems();
                 return HandleResult(result, nameof(CreateAccount), model);
             }
 
@@ -205,7 +207,7 @@ namespace E_commece.Controllers
 
             var model = result.Value;
 
-            model.Companies = await companyService.GetAllCategoriesItems();
+            model.Companies = await companyService.GetAllCompaniesItems();
 
             return View(model);
         }
@@ -216,13 +218,13 @@ namespace E_commece.Controllers
         {
             if (!ModelState.IsValid)
             {
-                model.Companies = await companyService.GetAllCategoriesItems();
+                model.Companies = await companyService.GetAllCompaniesItems();
                 return View(model);
             }
             var result = await accountService.UpdateAccountAsync(model.UserId, model);
             if (!result.IsSuccess)
             {
-                model.Companies = await companyService.GetAllCategoriesItems();
+                model.Companies = await companyService.GetAllCompaniesItems();
                 return HandleResult(result, nameof(Edit), model);
             }
 
@@ -233,8 +235,29 @@ namespace E_commece.Controllers
             return RedirectToAction(nameof(Index), "Home");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateCheckoutInfo(UpdateCheckoutInfoVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Invalid data"
+                });
+            }
 
+            var result = await accountService.UpdateCheckoutInfo(model);
 
+            return Json(new
+            {
+                success = result.IsSuccess,
+                message = result.IsSuccess
+                    ? "Information updated successfully"
+                    : result.ErrorMessage
+            });
+        }
     }
 }
 

@@ -36,5 +36,7 @@ namespace E_commerce.BLL.Services.Interfaces
 
         public Task<Result> UpdateAccountAsync(string userId, EditAccountVM model);
         public Task<Result<EditAccountVM>> GetAccountToEditAsync(string userId);
+
+        public Task<Result> UpdateCheckoutInfo(UpdateCheckoutInfoVM model);
     }
 }

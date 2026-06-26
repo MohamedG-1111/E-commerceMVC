@@ -36,6 +36,8 @@ namespace E_commerce.DAL.Entities
         [Required]
         [Display(Name = "Price for 100+")]
         public int PriceFor100Plus { get; set; }
+        [Required]
+        public int Stock { get; set; }
 
 
         public string ImageUrl { get; set; } = string.Empty;

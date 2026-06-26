@@ -19,7 +19,9 @@ namespace E_commerce.BLL.Services.Implementation
         private readonly IEmailService emailService;
         private readonly IAttachmentService attachmentService;
         private readonly IUnitOfWork unitOfWork;
+        private readonly ICurrentUserService currentUserService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+
 
 
 
@@ -27,12 +29,14 @@ namespace E_commerce.BLL.Services.Implementation
             IHttpContextAccessor httpContextAccessor,
             IEmailService emailService,
             IAttachmentService attachmentService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ICurrentUserService CurrentUserService)
         {
             this._userManager = _userManager;
             this.emailService = emailService;
             this.attachmentService = attachmentService;
             this.unitOfWork = unitOfWork;
+            currentUserService = CurrentUserService;
             _httpContextAccessor = httpContextAccessor;
 
         }
@@ -553,6 +557,32 @@ namespace E_commerce.BLL.Services.Implementation
             };
 
             return Result<EditAccountVM>.Success(model);
+        }
+
+        public async Task<Result> UpdateCheckoutInfo(UpdateCheckoutInfoVM model)
+        {
+            var userId = currentUserService.UserId;
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result.Failure("Must be Login First", errorType: ErrorType.UNAUTHORIZED);
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return Result.Failure("User Not Found", errorType: ErrorType.NOT_FOUND);
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.City = model.City;
+            user.PostalCode = model.PostalCode;
+            user.StreetAddress = model.StreetAddress;
+            user.PhoneNumber = model.PhoneNumber;
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return Result.Failure("Can not Update CheckoutInfo ", errorType: ErrorType.INTERNAL_ERROR);
+
+            }
+
+            return Result.Success();
+
         }
     }
 }

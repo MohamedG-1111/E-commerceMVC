@@ -117,7 +117,7 @@ namespace E_commerce.BLL.Services.Implementation
 
 
 
-        public async Task<IEnumerable<SelectListItem>> GetAllCategoriesItems()
+        public async Task<IEnumerable<SelectListItem>> GetAllCompaniesItems()
         {
             var categories = await unitOfWork.Repository<Company>().GetAllAsync();
             return categories.Select(c => new SelectListItem

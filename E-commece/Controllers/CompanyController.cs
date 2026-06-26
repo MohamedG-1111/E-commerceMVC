@@ -1,10 +1,13 @@
 ﻿using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
+using Ecommerce.Utility;
 using Ecommerce.Utility.ResultPattern;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
 {
+    [Authorize(Roles = Roles.Admin)]
     public class CompanyController : AppController
     {
         private readonly ICompanyService companyService;

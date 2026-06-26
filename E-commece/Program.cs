@@ -40,6 +40,7 @@ namespace E_commece
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IRedisService, RedisService>();
             builder.Services.AddScoped<ICompanyService, CompanyService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
