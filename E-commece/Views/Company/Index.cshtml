@@ -1,4 +1,5 @@
-﻿@model IEnumerable<CompanyVM>
+﻿@using Ecommerce.Utility.Pagination
+@model PaginatedResult<CompanyVM>
 
 @{
     ViewData["Title"] = "Companies";
@@ -29,14 +30,17 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-    function getCompanies() {
+
+    function getCompanies(page = 1) {
 
         $.ajax({
             url: "/Company/Search",
             type: "GET",
             data: {
-                search: $("#searchInput").val()
-            },
+                search: $("#searchInput").val(),
+                pageNumber: page,
+                pageSize: @Model.PageSize
+                },
             success: function(data) {
                 $("#tableContainer").html(data);
             },
@@ -46,8 +50,20 @@
         });
     }
 
-    // live search
+    // Search
     $("#searchInput").on("keyup", function() {
         getCompanies();
     });
+
+    // Pagination
+    $(document).on("click", ".pagination-link", function(e) {
+
+        e.preventDefault();
+
+        let page = $(this).data("page");
+
+        getCompanies(page);
+
+    });
+
 </script>

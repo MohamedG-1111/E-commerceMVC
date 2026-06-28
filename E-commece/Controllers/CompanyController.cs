@@ -1,6 +1,7 @@
 ﻿using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using Ecommerce.Utility;
+using Ecommerce.Utility.Pagination;
 using Ecommerce.Utility.ResultPattern;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,9 +18,9 @@ namespace E_commece.Controllers
             this.companyService = companyService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(PaginationParameters parameter)
         {
-            var result = await companyService.AllCompaniesAsync();
+            var result = await companyService.AllCompaniesAsync(parameter);
 
             if (result.IsFailure)
                 return HandleResult(result);
@@ -45,18 +46,19 @@ namespace E_commece.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int id, string? returnUrl)
         {
             var result = await companyService.CompanyDetailsAsync(id);
             if (result.IsFailure)
                 return HandleResult(result);
+            ViewBag.returnUrl = returnUrl;
             return View(result.Value);
 
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
 
-        public async Task<IActionResult> Edit(int id, CompanyInfoVM obj)
+        public async Task<IActionResult> Edit(int id, CompanyInfoVM obj, string? returnUrl)
         {
             if (id != obj.Id)
                 return BadRequest();
@@ -67,12 +69,14 @@ namespace E_commece.Controllers
             if (result.IsFailure)
                 return HandleResult(result, nameof(Edit), obj);
             TempData["success"] = "Company Updated Successfully";
+            if (!string.IsNullOrEmpty(returnUrl))
+                return Redirect(returnUrl);
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> Search(string? search)
+        public async Task<IActionResult> Search(PaginationParameters parameter, string? search)
         {
-            var result = await companyService.SearchAsync(search);
+            var result = await companyService.AllCompaniesAsync(parameter, search);
             return PartialView("_CompanyTable", result.Value);
         }
 

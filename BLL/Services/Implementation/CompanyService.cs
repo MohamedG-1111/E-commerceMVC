@@ -3,6 +3,7 @@ using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities;
 using E_commerce.DAL.Entities.Users;
+using Ecommerce.Utility.Pagination;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -18,20 +19,6 @@ namespace E_commerce.BLL.Services.Implementation
         {
             unitOfWork = UnitOfWork;
         }
-        public async Task<Result<IEnumerable<CompanyVM>?>> AllCompaniesAsync()
-        {
-
-            var result = await unitOfWork.Repository<Company>().GetAsQuery()
-                .Select(x => new CompanyVM
-                {
-                    Name = x.Name,
-                    City = x.City,
-                    Email = x.Email,
-                    Id = x.Id
-                }).ToListAsync();
-            return Result<IEnumerable<CompanyVM>?>.Success(result);
-        }
-
 
 
         public async Task<Result> CreateCompanyAsync(CompanyInfoVM obj)
@@ -166,14 +153,20 @@ namespace E_commerce.BLL.Services.Implementation
                 Result.Success() : Result.Failure("Failed to update Company.", errorType: ErrorType.INTERNAL_ERROR);
         }
 
-        public async Task<Result<IEnumerable<CompanyVM>?>> SearchAsync(string? search)
+        public async Task<Result<PaginatedResult<CompanyVM>?>> AllCompaniesAsync(PaginationParameters parameter, string? search = null)
         {
             var query = unitOfWork.Repository<Company>()
                 .GetAsQuery();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                query = query.Where(x => x.Name.Contains(search));
+                query = query.Where(x =>
+                 x.Name.Contains(search) ||
+                   x.Email.Contains(search) ||
+                  (x.City ?? "").Contains(search) ||
+              (x.PostalCode ?? "").Contains(search) ||
+             x.Phone.Contains(search)
+  );
             }
 
             var data = await query.Select(x => new CompanyVM
@@ -182,9 +175,9 @@ namespace E_commerce.BLL.Services.Implementation
                 Name = x.Name,
                 City = x.City,
                 Email = x.Email
-            }).ToListAsync();
+            }).ToPagedResultAsync(parameter);
 
-            return Result<IEnumerable<CompanyVM>?>.Success(data);
+            return Result<PaginatedResult<CompanyVM>?>.Success(data);
         }
     }
 }

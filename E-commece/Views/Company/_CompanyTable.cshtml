@@ -1,6 +1,7 @@
-﻿@model IEnumerable<CompanyVM>
+﻿@using Ecommerce.Utility.Pagination
+@model PaginatedResult<CompanyVM>
 
-@if (Model != null && Model.Any())
+@if (Model != null && Model.Items.Any())
 {
     <div class="table-responsive">
         <table class="table table-hover align-middle">
@@ -15,7 +16,7 @@
             </thead>
 
             <tbody>
-                @foreach (var item in Model)
+                @foreach (var item in Model.Items)
                 {
                     <tr>
                         <td class="fw-semibold">@item.Name</td>
@@ -33,6 +34,11 @@
 
                             <a asp-action="Edit"
                                asp-route-id="@item.Id"
+                               asp-route-returnUrl="@Url.Action("Index","Company",new {
+                                     PageSize=Model.PageSize,
+                                     PageNumber=Model.PageNumber
+
+                                    })"
                                class="btn btn-warning btn-sm">
                                 <i class="bi bi-pencil-square"></i>
                                 Edit
@@ -117,6 +123,8 @@ else
 
 </div>
 
+<partial name="~/Views/Shared/_PaginationPagePartial.cshtml"
+         model="Model" />
 <script>
 
     function openDeleteModal(name, url) {
