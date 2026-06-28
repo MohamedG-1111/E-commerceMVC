@@ -8,7 +8,7 @@
                 <div class="card-header border-0 py-3">
                     <h5 class="mb-0 fw-bold">
                         <i class="bi bi-tag-fill text-warning me-2"></i>
-                        Create Category
+                       Edit Category
                     </h5>
                 </div>
 
@@ -17,6 +17,7 @@
 
                     <form asp-action="Edit" asp-controller="Category" method="post">
 
+                        <input type="hidden" name="returnUrl" value="@ViewBag.returnUrl" />
                         @Html.AntiForgeryToken()
 
                         <div class="mb-3">
@@ -48,7 +49,7 @@
                                 <i class="bi bi-x-lg me-1"></i>Cancel
                             </a>
                             <button type="submit" class="btn btn-warning fw-semibold">
-                                <i class="bi bi-plus-lg me-1"></i>Create
+                                <i class="bi bi-plus-lg me-1"></i>Save
                             </button>
                         </div>
 

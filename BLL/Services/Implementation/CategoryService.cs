@@ -3,10 +3,10 @@ using BLL.ViewModels;
 using DataAccessLayer.Repositories.Interfaces;
 using DataAcessLayer.Models;
 using E_commerce.DAL.Entities;
+using Ecommerce.Utility.Pagination;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 namespace BLL.Services.Implementation
 {
     public class CategoryService : ICategoryService
@@ -17,18 +17,6 @@ namespace BLL.Services.Implementation
         {
             unitOfWork = _unitOfWork;
         }
-
-        public async Task<Result<IEnumerable<Category>?>> AllCategoriesAsync()
-        {
-            var categories = await unitOfWork.Repository<Category>().GetAllAsync();
-
-            var sorted = categories?
-                .OrderBy(c => c.DisplayOrder)
-                ?? Enumerable.Empty<Category>();
-
-            return Result<IEnumerable<Category>?>.Success(sorted);
-        }
-
         public async Task<Result<CategoryVM?>> CategoryDetailsAsync(int Id)
         {
             if (Id <= 0)
@@ -127,17 +115,24 @@ namespace BLL.Services.Implementation
             });
         }
 
-        public async Task<Result<IEnumerable<Category>>> SearchAsync(string? searchItem)
+        public async Task<Result<PaginatedResult<Category>>> AllCategoriesAsync(PaginationParameters parameters, string? searchItem = null)
         {
             var query = unitOfWork.Repository<Category>()
                 .GetAsQuery();
+
+
 
             if (!string.IsNullOrWhiteSpace(searchItem))
             {
                 searchItem = searchItem.Trim();
 
-                query = query.Where(c => c.Name.Contains(searchItem));
+                int.TryParse(searchItem, out int displayOrder);
+
+                query = query.Where(c =>
+                    c.Name.Contains(searchItem) ||
+                    c.DisplayOrder == displayOrder);
             }
+
 
             var categories = await query
                 .Select(x => new Category
@@ -146,9 +141,9 @@ namespace BLL.Services.Implementation
                     Name = x.Name,
                     DisplayOrder = x.DisplayOrder
                 })
-                .ToListAsync();
+                .ToPagedResultAsync(parameters);
 
-            return Result<IEnumerable<Category>>.Success(categories);
+            return Result<PaginatedResult<Category>>.Success(categories);
         }
 
     }

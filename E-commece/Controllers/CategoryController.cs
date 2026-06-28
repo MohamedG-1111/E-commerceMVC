@@ -1,6 +1,7 @@
 ﻿using BLL.Services.Interfaces;
 using BLL.ViewModels;
 using Ecommerce.Utility;
+using Ecommerce.Utility.Pagination;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
 using Microsoft.AspNetCore.Authorization;
@@ -17,9 +18,9 @@ namespace E_commece.Controllers
         {
             CategoryService = _CategoryService;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(PaginationParameters parameters)
         {
-            var result = await CategoryService.AllCategoriesAsync();
+            var result = await CategoryService.AllCategoriesAsync(parameters);
 
             if (result.IsFailure)
                 return HandleResult(result);
@@ -46,11 +47,12 @@ namespace E_commece.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int id, string? returnUrl)
         {
             var result = await CategoryService.CategoryDetailsAsync(id);
             if (result.IsFailure)
                 return HandleResult(result);
+            ViewBag.ReturnUrl = returnUrl;
             return View(result.Value);
 
         }
@@ -58,7 +60,7 @@ namespace E_commece.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
 
-        public async Task<IActionResult> Edit(int id, CategoryVM obj)
+        public async Task<IActionResult> Edit(int id, CategoryVM obj, string returnUrl)
         {
             if (!ModelState.IsValid)
                 return View(obj);
@@ -66,7 +68,7 @@ namespace E_commece.Controllers
             if (result.IsFailure)
                 return HandleResult(result, nameof(Edit), obj);
             TempData["success"] = "Category Updated Successfully";
-            return RedirectToAction(nameof(Index));
+            return Redirect(returnUrl);
         }
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
@@ -95,9 +97,9 @@ namespace E_commece.Controllers
 
         }
         [HttpGet]
-        public async Task<IActionResult> Search(string? searchTerm)
+        public async Task<IActionResult> Search(PaginationParameters parameters, string? searchTerm)
         {
-            var result = await CategoryService.SearchAsync(searchTerm);
+            var result = await CategoryService.AllCategoriesAsync(parameters, searchTerm);
             return PartialView("_CategoryPartial", result.Value);
         }
 

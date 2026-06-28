@@ -1,4 +1,7 @@
-﻿<div class="card-body">
+﻿@using DataAcessLayer.Models
+@using Ecommerce.Utility.Pagination
+@model PaginatedResult<Category>
+<div class="card-body">
     <table class="table table-bordered table-striped table-hover align-middle">
         <thead class="table-dark">
             <tr>
@@ -8,14 +11,22 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var category in Model)
+            @foreach (var category in Model.Items)
             {
                 <tr>
                     <td>@category.Name</td>
                     <td class="text-center">@category.DisplayOrder</td>
                     <td class="text-center">
                         <a asp-action="Details" asp-route-id="@category.Id" class="btn btn-sm btn-primary">Show</a>
-                        <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-warning">Edit</a>
+                        <a asp-action="Edit" 
+                        asp-route-id="@category.Id" 
+                        asp-route-returnUrl="@Url.Action("Index","Category",new {
+                              PageNumber=Model.PageNumber,
+                              PageSize=Model.PageSize
+
+                             })"
+                        
+                        class="btn btn-sm btn-warning">Edit</a>
                         <button class="btn btn-sm btn-danger"
                                 onclick="openDeleteModal('@category.Name', '@Url.Action("ConfirmDelete", "Category", new { id = category.Id })')">
                             Delete
@@ -26,3 +37,6 @@
         </tbody>
     </table>
 </div>
+
+<partial name="~/Views/Shared/_PaginationPagePartial.cshtml"
+         model="Model" />

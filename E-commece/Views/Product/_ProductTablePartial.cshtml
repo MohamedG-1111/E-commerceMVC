@@ -1,4 +1,4 @@
-﻿@using BLL.ViewModels
+﻿﻿@using BLL.ViewModels
 @using Ecommerce.Utility.Pagination
 @using E_commerce.Utility.Settings
 
@@ -45,11 +45,12 @@
 
                             <a asp-action="Edit"
                                asp-route-id="@item.Id"
-                               asp-route-returnUrl="@Url.Action("Index", "Product", new{
+                               asp-route-returnUrl="@Url.Action("Index", "Product", new
+                               {
                                    pageNumber = Model.PageNumber,
                                    pageSize = Model.PageSize,
-                                   
-                                })"
+
+                               })"
                                class="btn btn-sm btn-warning">
                                 Edit
                             </a>
@@ -89,4 +90,5 @@
 
 <partial name="~/Views/Shared/_PaginationPagePartial.cshtml"
          model="Model" />
+
      
