@@ -1,4 +1,5 @@
-﻿@model IEnumerable<E_commerce.BLL.ViewModels.AllAccountsViewModel>
+﻿@using Ecommerce.Utility.Pagination
+@model PaginatedResult<AllAccountsViewModel>
 
 @{
     ViewData["Title"] = "Accounts";
@@ -87,27 +88,109 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
+        $(document).on("click", ".lock-btn", function() {
 
-        function getAccounts() {
+            let userId = $(this).data("id");
+            let row = $("#row-" + userId);
+            let btn = $(this);
 
             $.ajax({
-                url: "/Account/Search",
+                url: "/Account/LockAccount",  
+                type: "POST",
+                data: {
+                    userId: userId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(res) {
+
+                    if (res.success) {
+
+                        row.find(".status").html('<span class="badge bg-danger">Locked</span>');
+
+                        btn.replaceWith(`
+                            <button class="btn btn-success unlock-btn" data-id="${userId}">
+                                Unlock
+                            </button>
+                        `);
+
+                        toastr.success(res.message);
+                    }
+                    else {
+                        toastr.error(res.message);
+                    }
+                },
+                error: function() {
+                    toastr.error("Something went wrong");
+                }
+            });
+        });
+        $(document).on("click", ".unlock-btn", function() {
+
+            let userId = $(this).data("id");
+            let row = $("#row-" + userId);
+            let btn = $(this);
+
+            $.ajax({
+                url: "/Account/UnlockAccount",   
+                type: "POST",
+                data: {
+                    userId: userId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(res) {
+
+                    if (res.success) {
+
+                        row.find(".status").html('<span class="badge bg-success">Active</span>');
+
+                        btn.replaceWith(`
+                            <button class="btn btn-danger lock-btn" data-id="${userId}">
+                                Lock
+                            </button>
+                        `);
+
+                        toastr.success(res.message);
+                    }
+                    else {
+                        toastr.error(res.message);
+                    }
+                },
+                error: function() {
+                    toastr.error("Something went wrong");
+                }
+            });
+        });
+        function getAccounts(page = 1 ) {
+
+            let search = $("#searchInput").val().trim();
+
+            let url = "/Account/FilterAccounts"
+            $.ajax({
+                url: url,
                 type: "GET",
                 data: {
-                    search: $("#searchInput").val()
+                    search: search,
+                    pageNumber: page,
+                    pageSize: @Model.PageSize
                 },
                 success: function(data) {
                     $("#tableContainer").html(data);
-                },
-                error: function() {
-                    console.log("Error occurred");
                 }
             });
-
         }
 
         $("#searchInput").on("keyup", function() {
             getAccounts();
+        });
+        // pagination
+        $(document).on("click", ".pagination-link", function(e) {
+
+            e.preventDefault();
+
+            let page = $(this).data("page");
+
+            getAccounts(page);
+
         });
 
         function openDeleteModal(name, userId) {

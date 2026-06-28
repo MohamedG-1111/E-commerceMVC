@@ -6,6 +6,7 @@ using E_commerce.DAL.Entities;
 using E_commerce.DAL.Entities.Users;
 using E_commerce.Utility.Settings;
 using Ecommerce.Utility;
+using Ecommerce.Utility.Pagination;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
 using Microsoft.AspNetCore.Http;
@@ -300,34 +301,20 @@ namespace E_commerce.BLL.Services.Implementation
             }
         }
 
-        public async Task<Result<List<AllAccountsViewModel>>> GetAccountsAsync()
-        {
-            var accounts = await unitOfWork.Repository<ApplicationUser>().GetAsQuery()
-                 .Select(x => new AllAccountsViewModel
-                 {
-                     UserId = x.Id,
-                     FullName = $"{x.FirstName} {x.LastName}",
-                     Email = x.Email!,
-                     Role = x.Role,
-                     IsLocked = x.LockoutEnd != null &&
-           x.LockoutEnd > DateTimeOffset.UtcNow
-                 })
-                  .ToListAsync();
-            return Result<List<AllAccountsViewModel>>.Success(accounts);
-        }
 
-        public async Task<Result<List<AllAccountsViewModel>>> SearchAccountsAsync(string Search)
+        public async Task<Result<PaginatedResult<AllAccountsViewModel>>> GetAccountsAsync(
+       PaginationParameters parameter,
+       string? search = null)
         {
             var query = unitOfWork.Repository<ApplicationUser>().GetAsQuery();
-            if (!string.IsNullOrWhiteSpace(Search))
-            {
-                query = query.Where(
-                    x => x.Email!.Contains(Search)
-                    || x.Role!.Contains(Search)
-                    || x.FirstName.Contains(Search)
-                    || x.LastName.Contains(Search)
 
-                    );
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(x =>
+                    x.Email!.Contains(search) ||
+                    x.Role!.Contains(search) ||
+                    x.FirstName.Contains(search) ||
+                    x.LastName.Contains(search));
             }
 
             var accounts = await query.Select(x => new AllAccountsViewModel
@@ -337,10 +324,11 @@ namespace E_commerce.BLL.Services.Implementation
                 Email = x.Email!,
                 Role = x.Role,
                 IsLocked = x.LockoutEnd != null &&
-           x.LockoutEnd > DateTimeOffset.UtcNow
-            })
-             .ToListAsync();
-            return Result<List<AllAccountsViewModel>>.Success(accounts);
+                           x.LockoutEnd > DateTimeOffset.UtcNow
+            }).ToPagedResultAsync(parameter);
+
+            return Result<PaginatedResult<AllAccountsViewModel>>
+                .Success(accounts);
         }
 
         public async Task<Result<AccountVM>?> GetAccountByUserId(string userId)
@@ -430,7 +418,13 @@ namespace E_commerce.BLL.Services.Implementation
 
             if (user is null)
                 return Result.Failure("Account Not Found", errorType: ErrorType.NOT_FOUND);
+            var hasOrders = await unitOfWork.Repository<Order>()
+              .AnyAsync(o => o.ApplicationUserId == userId);
 
+            if (hasOrders)
+            {
+                return Result.Failure("Cannot delete user with existing orders");
+            }
 
             var result = await _userManager.DeleteAsync(user);
 
@@ -610,6 +604,10 @@ namespace E_commerce.BLL.Services.Implementation
             return Result.Success();
 
         }
+
+
+
+
     }
 }
 

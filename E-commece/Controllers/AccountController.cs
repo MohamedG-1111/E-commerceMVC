@@ -1,6 +1,7 @@
 ﻿using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using Ecommerce.Utility;
+using Ecommerce.Utility.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -152,9 +153,9 @@ namespace E_commece.Controllers
         #region Admin
 
         [Authorize(Roles = Roles.Admin)]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(PaginationParameters paramater)
         {
-            var result = await accountService.GetAccountsAsync();
+            var result = await accountService.GetAccountsAsync(paramater);
 
             if (result.IsFailure)
                 return HandleResult(result);
@@ -163,9 +164,9 @@ namespace E_commece.Controllers
         }
 
         [Authorize(Roles = Roles.Admin)]
-        public async Task<IActionResult> Search(string search)
+        public async Task<IActionResult> FilterAccounts(PaginationParameters parameter, string search)
         {
-            var result = await accountService.SearchAccountsAsync(search);
+            var result = await accountService.GetAccountsAsync(parameter, search);
 
             if (result.IsFailure)
             {
@@ -184,11 +185,17 @@ namespace E_commece.Controllers
             var result = await accountService.LockAccountAsync(userId);
 
             if (result.IsFailure)
-                return HandleResult(result);
+                return Json(new
+                {
+                    success = false,
+                    message = result.ErrorMessage
+                });
 
-            TempData["Success"] = "Account locked successfully";
-
-            return RedirectToAction(nameof(Index));
+            return Json(new
+            {
+                success = true,
+                message = "Account locked successfully"
+            });
         }
 
         [HttpPost]
@@ -199,11 +206,17 @@ namespace E_commece.Controllers
             var result = await accountService.UnLockAccountAsync(userId);
 
             if (result.IsFailure)
-                return HandleResult(result);
+                return Json(new
+                {
+                    success = false,
+                    message = result.ErrorMessage
+                });
 
-            TempData["Success"] = "Account unlocked successfully";
-
-            return RedirectToAction(nameof(Index));
+            return Json(new
+            {
+                success = true,
+                message = "Account Unlocked successfully"
+            });
         }
 
         [HttpPost]
@@ -240,7 +253,7 @@ namespace E_commece.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> Edit(string userId)
+        public async Task<IActionResult> Edit(string userId, string? returnUrl)
         {
             var result = await accountService.GetAccountToEditAsync(userId);
 
@@ -248,6 +261,7 @@ namespace E_commece.Controllers
                 return HandleResult(result);
 
             result.Value!.Companies = await companyService.GetAllCompaniesItems();
+            ViewBag.ReturnUrl = returnUrl;
 
             return View(result.Value);
         }
@@ -255,7 +269,7 @@ namespace E_commece.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Edit(EditAccountVM model)
+        public async Task<IActionResult> Edit(EditAccountVM model, string? returnUrl)
         {
 
             if (!ModelState.IsValid)
@@ -276,7 +290,13 @@ namespace E_commece.Controllers
             TempData["Success"] = "Update Successfully";
 
             if (User.IsInRole(Roles.Admin))
-                return RedirectToAction(nameof(Index));
+            {
+                if (!string.IsNullOrWhiteSpace(returnUrl))
+                {
+                    return Redirect(returnUrl);
+
+                }
+            }
 
             return RedirectToAction("Index", "Home");
         }

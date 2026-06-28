@@ -1,4 +1,5 @@
-﻿@model IEnumerable<E_commerce.BLL.ViewModels.AllAccountsViewModel>
+﻿@using Ecommerce.Utility.Pagination
+@model PaginatedResult<AllAccountsViewModel>
 
 <div class="card-body">
 
@@ -16,11 +17,11 @@
 
         <tbody>
 
-            @if (Model != null && Model.Any())
+            @if (Model.Items.Any())
             {
-                foreach (var account in Model)
+                @foreach (var account in Model.Items)
                 {
-                    <tr>
+                    <tr id="row-@account.UserId">
 
                         <td>@account.FullName</td>
 
@@ -32,16 +33,17 @@
                             </span>
                         </td>
 
-                        <td>
-                            @if (account.IsLocked)
-                            {
-                                <span class="badge bg-danger">Locked</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-success">Active</span>
-                            }
-                        </td>
+                            <td class="status">
+                                @if (account.IsLocked)
+                                {
+                                    <span class="badge bg-danger">Locked</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                            </td>
+                       
 
                         <td class="d-flex gap-1">
 
@@ -52,48 +54,27 @@
                             </a>
 
                             <a asp-action="Edit"
-                               asp-route-userId="@account.UserId"
-                               class="btn btn-warning btn-sm">
+                              asp-route-userId="@account.UserId"
+                               asp-route-returnUrl="@Url.Action("Index", "Account", new
+                               {
+                                   pageNumber = Model.PageNumber,
+                                   pageSize = Model.PageSize,
+                                   search = Context.Request.Query["search"]
+                               })" class="btn btn-warning btn-sm">
                                 Edit
                             </a>
 
                             @if (account.IsLocked)
                             {
-                                <form asp-action="UnlockAccount"
-                                      method="post"
-                                      class="d-inline">
-
-                                    @Html.AntiForgeryToken()
-
-                                    <input type="hidden"
-                                           name="userId"
-                                           value="@account.UserId" />
-
-                                    <button type="submit"
-                                            class="btn btn-success btn-sm">
-                                        Unlock
-                                    </button>
-
-                                </form>
+                                <button class="btn btn-success unlock-btn" data-id="@account.UserId">
+                                    Unlock
+                                </button>
                             }
                             else
                             {
-                                <form asp-action="LockAccount"
-                                      method="post"
-                                      class="d-inline">
-
-                                    @Html.AntiForgeryToken()
-
-                                    <input type="hidden"
-                                           name="userId"
-                                           value="@account.UserId" />
-
-                                    <button type="submit"
-                                            class="btn btn-warning btn-sm">
-                                        Lock
-                                    </button>
-
-                                </form>
+                                <button class="btn btn-danger lock-btn" data-id="@account.UserId">
+                                    Lock
+                                </button>
                             }
 
                             <button class="btn btn-danger btn-sm"
@@ -109,7 +90,7 @@
             else
             {
                 <tr>
-                    <td colspan="5" class="text-center">
+                    <td colspan="5" class="text-center py-4">
                         No Accounts Found
                     </td>
                 </tr>
@@ -118,5 +99,12 @@
         </tbody>
 
     </table>
+
+</div>
+
+<div class="d-flex justify-content-center mt-3">
+
+    <partial name="~/Views/Shared/_PaginationPagePartial.cshtml"
+             model="Model" />
 
 </div>
