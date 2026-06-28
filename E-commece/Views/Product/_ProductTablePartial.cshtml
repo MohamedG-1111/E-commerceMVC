@@ -45,6 +45,11 @@
 
                             <a asp-action="Edit"
                                asp-route-id="@item.Id"
+                               asp-route-returnUrl="@Url.Action("Index", "Product", new{
+                                   pageNumber = Model.PageNumber,
+                                   pageSize = Model.PageSize,
+                                   
+                                })"
                                class="btn btn-sm btn-warning">
                                 Edit
                             </a>

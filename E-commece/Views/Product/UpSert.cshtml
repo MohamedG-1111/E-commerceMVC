@@ -35,6 +35,7 @@
                                 <div class="row g-3">
 
                                     <input asp-for="Product.Id" type="hidden" />
+                                    <input type="hidden" name="returnUrl" value="@ViewBag.returnUrl" />
 
                                     <div class="col-md-6">
                                         <label asp-for="Product.Title" class="form-label">

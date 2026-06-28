@@ -59,7 +59,7 @@ namespace E_commece.Controllers
         }
         [HttpGet]
         [Authorize(Roles = Roles.Admin)]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int id, string? returnUrl)
         {
             var Resultproduct = await _productService.ProductDetailsAsync(id);
             if (Resultproduct.IsFailure)
@@ -70,14 +70,14 @@ namespace E_commece.Controllers
                 Product = Resultproduct.Value,
                 Categories = await _categoryService.GetAllCategoriesItems()
             };
-
+            ViewBag.ReturnUrl = returnUrl;
             return View("UpSert", model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = Roles.Admin)]
-        public async Task<IActionResult> Edit(int id, CreateOrUpdateProductViewModel model)
+        public async Task<IActionResult> Edit(int id, CreateOrUpdateProductViewModel model, string? returnUrl)
         {
             if (id != model.Product.Id)
                 return BadRequest();
@@ -101,7 +101,7 @@ namespace E_commece.Controllers
             }
             else
                 TempData["Success"] = "Product Updated Successfully";
-            return RedirectToAction(nameof(Index));
+            return Redirect(returnUrl!);
         }
 
         [HttpGet]
