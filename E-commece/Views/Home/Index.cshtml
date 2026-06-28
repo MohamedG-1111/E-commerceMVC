@@ -1,5 +1,6 @@
 ﻿@using E_commerce.Utility.Settings
-@model IEnumerable<ProductListVm>
+@using Ecommerce.Utility.Pagination
+@model PaginatedResult<ProductListVm>
 
 @{
     ViewData["Title"] = "Home";
@@ -14,7 +15,7 @@
 
     <h1>
         Every book you
-        <br>
+        <br />
         could ever need.
     </h1>
 
@@ -44,9 +45,7 @@
         All
     </button>
 
-    @foreach (var cat in Model.Select(p => p.CategoryName)
-                              .Distinct()
-                              .OrderBy(c => c))
+    @foreach (var cat in Model.Items.Select(x => x.CategoryName).Distinct().OrderBy(x => x))
     {
         <button class="filter-chip"
                 onclick="setCategory(this,'@cat')">
@@ -61,15 +60,17 @@
 
     <div class="catalogue-header">
         <h2>All Books</h2>
-        <span id="count-label">@Model.Count() titles</span>
+        <span id="count-label">@Model.TotalCount titles</span>
     </div>
 
-    <div class="book-grid" id="bookGrid">
-        <partial name="~/Views/Product/_BooksPartial.cshtml" model="Model" />
+    <!-- سيتم استبدال هذا كله بالـ Ajax -->
+    <div id="bookGrid">
+        <partial name="~/Views/Product/_BooksPartial.cshtml"
+                 model="Model" />
     </div>
 
-    <div class="empty-state"
-         id="emptyState"
+    <div id="emptyState"
+         class="empty-state"
          style="display:none;">
         <p>No books match your search.</p>
     </div>
@@ -78,67 +79,84 @@
 
 @section Scripts
 {
-    <script>
+<script>
 
-        let activeCategory = '';
-        let searchTerm = '';
+let activeCategory = '';
+let searchTerm = '';
 
-        // Search while typing
-        $("#searchInput").on("input", function() {
+$("#searchInput").on("input", function () {
 
-            searchTerm = $(this).val().trim();
+    searchTerm = $(this).val().trim();
 
-            applyFilters();
-        });
+    applyFilters(1);
 
-        // Search button
-        function filterBooks() {
-            searchTerm = $("#searchInput").val().trim();
-            applyFilters();
+});
+
+function filterBooks() {
+
+    searchTerm = $("#searchInput").val().trim();
+
+    applyFilters(1);
+
+}
+
+function setCategory(btn, category) {
+
+    $(".filter-chip").removeClass("active");
+
+    $(btn).addClass("active");
+
+    activeCategory = category;
+
+    applyFilters(1);
+
+}
+
+function applyFilters(page) {
+
+    $.ajax({
+
+        url: "/Product/Search",
+
+        type: "GET",
+
+        data: {
+
+            pageNumber: page,
+            pageSize: @Model.PageSize,
+            searchTerm: searchTerm,
+            category: activeCategory
+
+        },
+
+        success: function (result) {
+
+            $("#bookGrid").html(result);
+
+            let count = $("#bookGrid .book-card").length;
+
+            $("#count-label").text(count + " titles");
+
+            if (count == 0)
+                $("#emptyState").show();
+            else
+                $("#emptyState").hide();
+
         }
 
-        // Category filter
-        function setCategory(btn, category) {
+    });
 
-            $(".filter-chip").removeClass("active");
+}
 
-            $(btn).addClass("active");
+$(document).on("click", ".pagination-link", function (e) {
 
-            activeCategory = category;
+    e.preventDefault();
 
-            applyFilters();
-        }
+    const page = $(this).data("page");
 
-        // Ajax Search + Category Filter
-        function applyFilters() {
+    applyFilters(page);
 
-            $.ajax({
-                url: '/Product/Search',
-                type: 'GET',
-                data: {
-                    searchTerm: searchTerm,
-                    category: activeCategory
-                },
-                success: function(result) {
+});
 
-                    $("#bookGrid").html(result);
-
-                    let count = $("#bookGrid .book-card").length;
-
-                    $("#count-label").text(count + " titles");
-
-                    if (count === 0) {
-                        $("#emptyState").show();
-                    }
-                    else {
-                        $("#emptyState").hide();
-                    }
-                },
-                error: function(xhr) {
-                    console.log(xhr.responseText);
-                }
-            });
-        }
-
-    </script>
+</script>
 }

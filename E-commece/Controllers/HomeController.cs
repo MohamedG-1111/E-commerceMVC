@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using BLL.Services.Interfaces;
 using E_commece.Models;
+using Ecommerce.Utility.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,9 +18,9 @@ namespace E_commece.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(PaginationParameters parameter)
         {
-            var result = await productService.AllProductsAsync();
+            var result = await productService.AllProductsAsync(parameter);
 
             if (result.IsFailure)
                 return HandleResult(result);

@@ -1,17 +1,21 @@
 ﻿@using BLL.ViewModels
-@using E_commerce.Utility.Settings
-@model IEnumerable<ProductListVm>
+@using Ecommerce.Utility.Pagination
+
+@model PaginatedResult<ProductListVm>
 
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 <link href="~/css/product/producttableindex.css" rel="stylesheet" />
+
 <div class="admin-wrapper">
 
     <!-- HEADER -->
     <div class="admin-header">
 
         <div class="admin-title">
-            <i class="bi bi-box-seam"></i> Products Management
+            <i class="bi bi-box-seam"></i>
+            Products Management
         </div>
 
         <div class="admin-search">
@@ -24,10 +28,11 @@
 
                 <option value="">All Categories</option>
 
-                @foreach (var cat in Model.Select(p => p.CategoryName)
-                                          .Where(c => !string.IsNullOrEmpty(c))
-                                          .Distinct()
-                                          .OrderBy(c => c))
+                @foreach (var cat in Model.Items
+                    .Select(x => x.CategoryName)
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct()
+                    .OrderBy(x => x))
                 {
                     <option value="@cat">@cat</option>
                 }
@@ -44,12 +49,14 @@
 
     </div>
 
-    <!-- TABLE -->
+    <!-- TABLE + PAGINATION -->
     <div class="card">
 
-        <div id="productsTableContainer">
-            <partial name="~/Views/Product/_ProductTablePartial.cshtml"
+        <div id="productsContainer">
+
+            <partial name="_ProductTablePartial"
                      model="Model" />
+
         </div>
 
     </div>
@@ -57,17 +64,22 @@
 </div>
 
 <!-- DELETE MODAL -->
-<div id="deleteOverlay"
-     onclick="handleOverlayClick(event)">
+
+<div id="deleteOverlay" onclick="handleOverlayClick(event)">
 
     <div class="modal-box">
 
-        <i class="bi bi-trash" style="font-size:40px;color:#dc3545;"></i>
+        <i class="bi bi-trash"
+           style="font-size:40px;color:#dc3545;"></i>
 
-        <h5 class="mt-2">Confirm Delete</h5>
+        <h5 class="mt-2">
+            Confirm Delete
+        </h5>
 
         <p class="text-muted">
-            Delete <strong id="productName"></strong> ?
+            Delete
+            <strong id="productName"></strong>
+            ?
         </p>
 
         <div class="d-flex justify-content-center gap-2">
@@ -88,56 +100,85 @@
 
 </div>
 
-<!-- SCRIPT -->
 @section Scripts
 {
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<script>
+    <script>
 
-    $(document).ready(function () {
+        function loadProducts(page = 1) {
+            $.ajax({
 
-        $("#searchInput").on("keyup", function () {
-            loadProducts();
-        });
+                url: "/Product/SearchTable",
 
-        $("#categoryFilter").on("change", function () {
-            loadProducts();
-        });
+                type: "GET",
 
-    });
+                data: {
 
-    function loadProducts() {
+                    pageNumber: page,
 
-        $.ajax({
-            url: "/Product/SearchTable",
-            type: "GET",
-            data: {
-                searchTerm: $("#searchInput").val(),
-                category: $("#categoryFilter").val()
-            },
-            success: function (result) {
-                $("#productsTableContainer").html(result);
-            }
-        });
+                    pageSize: @Model.PageSize,
 
-    }
+                    searchTerm: $("#searchInput").val(),
 
-    function openDeleteModal(name, url) {
-        $("#productName").text(name);
-        $("#confirmDeleteBtn").attr("href", url);
-        $("#deleteOverlay").css("display", "flex");
-    }
+                    category: $("#categoryFilter").val()
 
-    function closeDeleteModal() {
-        $("#deleteOverlay").hide();
-    }
+                },
 
-    function handleOverlayClick(e) {
-        if (e.target.id === "deleteOverlay") {
-            closeDeleteModal();
+                success: function(result) {
+                    $("#productsContainer").html(result);
+                }
+
+            });
         }
-    }
 
-</script>
+        // Search
+
+        $("#searchInput").on("keyup", function() {
+
+            loadProducts(1);
+
+        });
+
+        // Category
+
+        $("#categoryFilter").on("change", function() {
+
+            loadProducts(1);
+
+        });
+
+        // Pagination
+
+        $(document).on("click", ".pagination-link", function(e) {
+
+            e.preventDefault();
+
+            let page = $(this).data("page");
+
+            loadProducts(page);
+
+        });
+
+        // Delete Modal
+
+        function openDeleteModal(name, url) {
+            $("#productName").text(name);
+
+            $("#confirmDeleteBtn").attr("href", url);
+
+            $("#deleteOverlay").css("display", "flex");
+        }
+
+        function closeDeleteModal() {
+            $("#deleteOverlay").hide();
+        }
+
+        function handleOverlayClick(e) {
+            if (e.target.id === "deleteOverlay") {
+                closeDeleteModal();
+            }
+        }
+
+    </script>
 }

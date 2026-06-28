@@ -1,6 +1,7 @@
 ﻿using BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using Ecommerce.Utility;
+using Ecommerce.Utility.Pagination;
 using Ecommerce.Utility.ResultPattern;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,9 +20,9 @@ namespace E_commece.Controllers
         }
         [HttpGet]
         [Authorize(Roles = Roles.Admin)]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(PaginationParameters parameters)
         {
-            var Resultproducts = await _productService.AllProductsAsync();
+            var Resultproducts = await _productService.AllProductsAsync(parameters);
             if (Resultproducts.IsFailure)
                 return HandleResult(Resultproducts);
 
@@ -136,19 +137,19 @@ namespace E_commece.Controllers
         }
         [HttpGet]
         [Route("Product/Search")]
-        [Authorize(Roles = $"{Roles.Customer},{Roles.Employee},{Roles.Company}")]
-        public async Task<IActionResult> Search(string? searchTerm, string? category)
+        [AllowAnonymous]
+        public async Task<IActionResult> Search(PaginationParameters parameter, string? searchTerm, string? category)
         {
-            var Resultproducts = await _productService.AllProductsAsync(searchTerm, category);
+            var Resultproducts = await _productService.AllProductsAsync(parameter, searchTerm, category);
             return PartialView("~/Views/Product/_BooksPartial.cshtml", Resultproducts.Value);
         }
 
         [HttpGet]
         [Route("Product/SearchTable")]
         [Authorize(Roles = Roles.Admin)]
-        public async Task<IActionResult> SearchTable(string? searchTerm, string? category)
+        public async Task<IActionResult> SearchTable(PaginationParameters parameter, string? searchTerm, string? category)
         {
-            var result = await _productService.AllProductsAsync(searchTerm, category);
+            var result = await _productService.AllProductsAsync(parameter, searchTerm, category);
 
             return PartialView("~/Views/Product/_ProductTablePartial.cshtml", result.Value);
         }

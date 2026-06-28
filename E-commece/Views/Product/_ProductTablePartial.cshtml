@@ -1,10 +1,13 @@
 ﻿@using BLL.ViewModels
+@using Ecommerce.Utility.Pagination
 @using E_commerce.Utility.Settings
-@model IEnumerable<ProductListVm>
+
+@model PaginatedResult<ProductListVm>
 
 <div class="card-body p-0">
 
     <table class="table table-hover align-middle mb-0">
+
         <thead class="table-dark">
             <tr>
                 <th>Image</th>
@@ -17,11 +20,13 @@
         </thead>
 
         <tbody>
-            @if (Model != null && Model.Any())
+
+            @if (Model.Items != null && Model.Items.Any())
             {
-                foreach (var item in Model)
+                foreach (var item in Model.Items)
                 {
                     <tr>
+
                         <td>
                             <img src="@($"{FileSettings.ImagesPathProducts}/{item.ImageUrl}")"
                                  alt="product"
@@ -29,11 +34,15 @@
                         </td>
 
                         <td>@item.Title</td>
+
                         <td>@item.Author</td>
+
                         <td>@item.ISBN</td>
+
                         <td>@item.CategoryName</td>
 
                         <td class="text-center">
+
                             <a asp-action="Edit"
                                asp-route-id="@item.Id"
                                class="btn btn-sm btn-warning">
@@ -47,23 +56,32 @@
                             </a>
 
                             <button class="btn btn-sm btn-danger"
-                                    onclick="openDeleteModal('@item.Title', '@Url.Action("DeleteConfirmed", "Product", new { id = item.Id })')">
+                                    onclick="openDeleteModal(
+                                '@item.Title',
+                                '@Url.Action("DeleteConfirmed", "Product", new { id = item.Id })')">
                                 Delete
                             </button>
+
                         </td>
+
                     </tr>
                 }
             }
             else
             {
                 <tr>
-                    <td colspan="6" class="text-center text-muted py-4">
-                        No products found
+                    <td colspan="6" class="text-center py-5">
+                        <h5>No products found.</h5>
                     </td>
                 </tr>
             }
+
         </tbody>
 
     </table>
 
 </div>
+
+<partial name="~/Views/Shared/_PaginationPagePartial.cshtml"
+         model="Model" />
+     

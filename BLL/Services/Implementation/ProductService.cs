@@ -4,6 +4,7 @@ using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities;
 using E_commerce.Utility.Settings;
+using Ecommerce.Utility.Pagination;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,9 @@ namespace E_commerce.BLL.Services.Implementation
         }
 
 
-        public async Task<Result<IEnumerable<ProductListVm>?>> AllProductsAsync(string? searchTerm = null, string? category = null)
+
+        public async Task<Result<PaginatedResult<ProductListVm>?>> AllProductsAsync(PaginationParameters parameters,
+            string? searchTerm = null, string? category = null)
         {
             var query = (string.IsNullOrWhiteSpace(searchTerm) && string.IsNullOrWhiteSpace(category))
                 ? _unitOfWork.ProductRepository.GetAsQuery()
@@ -38,9 +41,9 @@ namespace E_commerce.BLL.Services.Implementation
                 ListPrice = x.ListPrice,
                 CategoryName = x.Category.Name,
                 ImageUrl = x.ImageUrl
-            }).ToListAsync();
+            }).ToPagedResultAsync(parameters);
 
-            return Result<IEnumerable<ProductListVm>?>.Success(products);
+            return Result<PaginatedResult<ProductListVm>>.Success(products);
         }
 
 

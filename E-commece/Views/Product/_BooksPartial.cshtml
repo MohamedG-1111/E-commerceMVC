@@ -1,89 +1,99 @@
 ﻿@using E_commerce.Utility.Settings
 @using Ecommerce.Utility
-@model IEnumerable<ProductListVm>
+@using Ecommerce.Utility.Pagination
+@model PaginatedResult<ProductListVm>
 
-@foreach (var product in Model)
-{
-    <article class="book-card"
-             data-title="@product.Title.ToLower()"
-             data-author="@product.Author.ToLower()"
-             data-isbn="@product.ISBN.ToLower()"
-             data-category="@product.CategoryName">
+<div class="row g-4">
 
-        <div class="book-cover">
-            @if (!string.IsNullOrEmpty(product.ImageUrl))
-            {
-                <img src="@($"{FileSettings.ImagesPathProducts}/{product.ImageUrl}")" alt="Cover of @product.Title" loading="lazy" />
-            }
-            else
-            {
-                <div class="book-cover-placeholder">
-                    📖
-                    <span>No cover</span>
+    @foreach (var product in Model.Items)
+    {
+        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
+
+            <article class="book-card"
+                     data-title="@product.Title.ToLowerInvariant()"
+                     data-author="@product.Author.ToLowerInvariant()"
+                     data-isbn="@product.ISBN.ToLowerInvariant()"
+                     data-category="@product.CategoryName">
+
+                <div class="book-cover">
+
+                    @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                    {
+                        <img src="@($"{FileSettings.ImagesPathProducts}/{product.ImageUrl}")"
+                             alt="@product.Title"
+                             loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="book-cover-placeholder">
+                            📖
+                            <span>No cover</span>
+                        </div>
+                    }
+
+                    <span class="category-badge">
+                        @product.CategoryName
+                    </span>
+
                 </div>
-            }
-            <span class="category-badge">@product.CategoryName</span>
+
+                <div class="book-info">
+
+                    <h3 class="book-title">
+                        @product.Title
+                    </h3>
+
+                    <p class="book-author">
+                        @product.Author
+                    </p>
+
+                    <p class="book-isbn">
+                        @product.ISBN
+                    </p>
+
+                    <div class="book-footer">
+
+                        <span class="book-price">
+                            <sup>EGP</sup>@product.ListPrice.ToString("N0")
+                        </span>
+
+                        @if (User.IsInRole(Roles.Admin))
+                        {
+                            <a asp-controller="Product"
+                               asp-action="Details"
+                               asp-route-id="@product.Id"
+                               class="btn-details">
+                                View
+                                <svg viewBox="0 0 24 24">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Home"
+                               asp-action="ProductDetails"
+                               asp-route-id="@product.Id"
+                               class="btn-details">
+                                View
+                                <svg viewBox="0 0 24 24">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </a>
+                        }
+
+                    </div>
+
+                </div>
+
+            </article>
+
         </div>
+    }
 
-        <div class="book-info">
-            <p class="book-title">@product.Title</p>
-            <p class="book-author">@product.Author</p>
-            <p class="book-isbn">@product.ISBN</p>
+</div>
 
-            <div class="book-footer">
-                <span class="book-price">
-                    <sup>EGP</sup>@product.ListPrice.ToString("N0")
-                </span>
-                @if (User.IsInRole(Roles.Admin))
-                {
-                    <a href="/Product/Details/@product.Id" class="btn-details">
-                        View
-                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
-                    </a>
-                }
-                else
-                {
-                    <a href="/Home/ProductDetails/@product.Id" class="btn-details">
-                        View
-                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
-                    </a>
-                }
-              
-            </div>
-        </div>
-    </article>
-}
-
-<div id="deleteOverlay" onclick="handleOverlayClick(event)"
-     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1050; align-items:center; justify-content:center;">
-
-    <div style="background:#fff; border-radius:12px; padding:2rem; max-width:400px; width:90%; text-align:center;">
-
-        <div style="font-size:2.5rem; color:#dc3545; margin-bottom:1rem;">
-            <i class="bi bi-trash"></i>
-        </div>
-
-        <h5 class="fw-bold mb-2">Confirm Delete</h5>
-
-        <p class="text-muted mb-4">
-            Are you sure you want to delete
-            <strong id="productName"></strong> ?
-            <br />
-            This action cannot be undone.
-        </p>
-
-        <div class="d-flex justify-content-center gap-2">
-            <button class="btn btn-secondary btn-sm"
-                    onclick="closeDeleteModal()">
-                Cancel
-            </button>
-
-            <a id="confirmDeleteBtn"
-               href="#"
-               class="btn btn-danger btn-sm">
-                Delete
-            </a>
-        </div>
-
-    </div>
+<div class="mt-4 d-flex justify-content-center">
+    <partial name="~/Views/Shared/_PaginationPagePartial.cshtml"
+             model="Model" />
 </div>

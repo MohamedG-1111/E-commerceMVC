@@ -29,3 +29,44 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+.pagination-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+}
+
+.custom-pagination {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+    .custom-pagination .page-link {
+        min-width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        color: #1f2d5c;
+        background: #fff;
+        transition: .2s;
+    }
+
+        .custom-pagination .page-link:hover {
+            background: #1f2d5c;
+            color: #fff;
+        }
+
+    .custom-pagination .page-item.active .page-link {
+        background: #1f2d5c;
+        color: #fff;
+        border-color: #1f2d5c;
+    }
+
+    .custom-pagination .page-item.disabled .page-link {
+        opacity: .5;
+        pointer-events: none;
+    }

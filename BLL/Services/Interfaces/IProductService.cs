@@ -1,5 +1,6 @@
 ﻿using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities;
+using Ecommerce.Utility.Pagination;
 using Ecommerce.Utility.Result;
 
 namespace BLL.Services.Interfaces
@@ -9,7 +10,8 @@ namespace BLL.Services.Interfaces
         public Task<Result> CreateProductAsync(CreateOrUpdateProductViewModel obj);
         public Task<Result<Product?>> ProductDetailsAsync(int Id);
 
-        public Task<Result<IEnumerable<ProductListVm>?>> AllProductsAsync(string? searchTerm = null, string? category = null);
+        public Task<Result<PaginatedResult<ProductListVm>?>>
+            AllProductsAsync(PaginationParameters parameters, string? searchTerm = null, string? category = null);
 
         public Task<Result> UpdateProductAsync(CreateOrUpdateProductViewModel Obj);
         public Task<Result> DeleteProductAsync(int id);
