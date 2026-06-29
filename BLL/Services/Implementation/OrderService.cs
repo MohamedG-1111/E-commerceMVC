@@ -3,6 +3,7 @@ using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities;
 using E_commerce.DAL.Entities.enums;
+using Ecommerce.Utility.Pagination;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
 using Microsoft.EntityFrameworkCore;
@@ -66,34 +67,48 @@ namespace E_commerce.BLL.Services.Implementation
             return Result<CheckoutViewModel>.Success(checkoutVm);
         }
 
-        public async Task<Result<IEnumerable<OrderVM>>> GetMyOrdersAsync()
+        public async Task<Result<PaginatedResult<OrderVM>>> GetMyOrdersAsync(PaginationParameters parameters, OrderFilter? filter = null)
         {
             var userId = currentUserService.UserId;
             if (userId == null)
-                return Result<IEnumerable<OrderVM>?>.Failure(
+                return Result<PaginatedResult<OrderVM>>.Failure(
                     "Must be logged in", errorType: ErrorType.UNAUTHORIZED);
 
-            var orders = await unitOfWork.Repository<Order>()
+            var query = unitOfWork.Repository<Order>()
                 .GetAsQuery()
-                .Where(x => x.ApplicationUserId == userId).
-                OrderByDescending(x => x.OrderDate)
-                .Select(x => new OrderVM
-                {
-                    Id = x.Id,
-                    OrderTotal = x.OrderTotal,
-                    OrderDate = x.OrderDate,
-                    OrderStatus = x.OrderStatus.ToString(),
-                    PaymentStatus = x.PaymentStatus.ToString(),
-                    ItemsCount = x.OrderDetails.Sum(d => d.Count)
-                })
-                .ToListAsync();
+                .Where(x => x.ApplicationUserId == userId);
+            if (filter is not null)
+            {
 
-            if (!orders.Any())
-                return Result<IEnumerable<OrderVM>>.Failure(
-                    "There are no orders yet",
-                    errorType: ErrorType.NOT_FOUND);
+                if (!string.IsNullOrWhiteSpace(filter.Search))
+                    query = query.Where(x => x.Id.ToString().Contains(filter.Search));
 
-            return Result<IEnumerable<OrderVM>?>.Success(orders);
+                if (filter.Status.HasValue)
+                    query = query.Where(x => x.OrderStatus == filter.Status);
+
+                if (filter.PaymentStatus.HasValue)
+                    query = query.Where(x => x.PaymentStatus == filter.PaymentStatus);
+
+                if (filter.From.HasValue)
+                    query = query.Where(x => x.OrderDate >= filter.From);
+
+                if (filter.To.HasValue)
+                    query = query.Where(x => x.OrderDate <= filter.To);
+            }
+            parameters.PageSize = 3;
+            var orders = await query.OrderByDescending(x => x.OrderDate).
+             Select(x => new OrderVM
+             {
+                 Id = x.Id,
+                 OrderTotal = x.OrderTotal,
+                 OrderDate = x.OrderDate,
+                 OrderStatus = x.OrderStatus.ToString(),
+                 PaymentStatus = x.PaymentStatus.ToString(),
+                 ItemsCount = x.OrderDetails.Sum(d => d.Count)
+             })
+             .ToPagedResultAsync(parameters);
+
+            return Result<PaginatedResult<OrderVM>?>.Success(orders);
         }
 
         public async Task<Result<OrderDetailsVM>> GetOrderDetails(int orderId)

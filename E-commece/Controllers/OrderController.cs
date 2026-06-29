@@ -1,5 +1,7 @@
 ﻿using E_commerce.BLL.Services.Interfaces;
+using E_commerce.BLL.ViewModels;
 using Ecommerce.Utility;
+using Ecommerce.Utility.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,13 +41,22 @@ namespace E_commece.Controllers
         }
 
 
-        public async Task<IActionResult> MyOrders()
+        public async Task<IActionResult> MyOrders(PaginationParameters Parameters)
         {
-            var result = await orderService.GetMyOrdersAsync();
+            var result = await orderService.GetMyOrdersAsync(Parameters);
             if (result.IsFailure)
                 return HandleResult(result);
 
             return View(result.Value);
+        }
+
+        public async Task<IActionResult> FilterOrders(PaginationParameters Parameters, OrderFilter Filter)
+        {
+            var result = await orderService.GetMyOrdersAsync(Parameters, Filter);
+            if (result.IsFailure)
+                return HandleResult(result);
+
+            return PartialView("_MyOrderPartial", result.Value);
         }
 
         public async Task<IActionResult> GetOrderDetails(int orderId)

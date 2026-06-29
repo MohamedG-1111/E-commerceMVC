@@ -1,0 +1,83 @@
+﻿@using Ecommerce.Utility.Pagination
+@model PaginatedResult<OrderVM>
+<div id="orders-container">
+<div class="card border-0 shadow-sm overflow-hidden ">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light text-uppercase fs-7 fw-bold text-muted">
+                <tr>
+                    <th style="width: 15%;">Date</th>
+                    <th style="width: 15%;">Status</th>
+                    <th style="width: 15%;">Payment</th>
+                    <th class="text-center" style="width: 10%;">Items</th>
+                    <th style="width: 15%;">Total</th>
+                    <th class="text-end pe-4" style="width: 18%;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model.Items)
+                {
+                    <tr>
+                        
+
+                        <td class="text-secondary">
+                            @order.OrderDate.ToString("MMM dd, yyyy")
+                        </td>
+
+                        <td>
+                            @{
+                                var statusClass = order.OrderStatus?.ToString().ToLower() switch
+                                {
+                                    "pending" => "bg-warning-subtle text-warning-emphasis",
+                                    "processing" => "bg-info-subtle text-info-emphasis",
+                                    "shipped" => "bg-primary-subtle text-primary-emphasis",
+                                    "completed" => "bg-success-subtle text-success-emphasis",
+                                    "cancelled" => "bg-danger-subtle text-danger-emphasis",
+                                    _ => "bg-secondary-subtle text-secondary-emphasis"
+                                };
+                            }
+                            <span class="badge rounded-pill px-2.5 py-1.5 fw-medium @statusClass">
+                                @order.OrderStatus
+                            </span>
+                        </td>
+
+                        <td>
+                            @{
+                                var paymentClass = order.PaymentStatus?.ToString().ToLower() switch
+                                {
+                                    "paid" => "bg-success-subtle text-success-emphasis",
+                                    "pending" => "bg-warning-subtle text-warning-emphasis",
+                                    "failed" => "bg-danger-subtle text-danger-emphasis",
+                                    _ => "bg-secondary-subtle text-secondary-emphasis"
+                                };
+                            }
+                            <span class="badge rounded-pill px-2.5 py-1.5 fw-medium @paymentClass">
+                                @order.PaymentStatus
+                            </span>
+                        </td>
+
+                        <td class="text-center text-secondary">
+                            @order.ItemsCount
+                        </td>
+
+                        <td class="fw-bold text-dark">
+                            @order.OrderTotal  <span class="fs-7 fw-normal text-muted">$</span>
+                        </td>
+
+                        <td class="text-end pe-4">
+                            <a asp-controller="Order"
+                               asp-action="GetOrderDetails"
+                               asp-route-orderId="@order.Id"
+                               class="btn btn-sm btn-outline-dark px-3 fw-medium">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+<partial name="~/Views/Shared/_PaginationPagePartial.cshtml"
+         model="Model" />
