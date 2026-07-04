@@ -7,7 +7,7 @@
 
         public string? PaymentIntentId { get; set; }
 
-        public string? ClientSecretId { get; set; }
+        public string? ClientSecret { get; set; }
 
 
         public decimal SubTotal { get; set; }
