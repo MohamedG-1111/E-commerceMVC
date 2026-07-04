@@ -38,6 +38,28 @@
         });
 
 
+        // Refresh - btn Product
+        $(document).on("click", "#refresh-cart-btn", function() {
+
+            $.ajax({
+                url: "/Cart/RefreshCart",
+                type: "GET",
+                success: function(res) {
+
+                    $("#cart-container").html(res);
+                    $.get("/Cart/GetCartCount", function(count) {
+                        $("#cart-count").text(count);
+                    });
+
+                },
+                error: function() {
+                    alert("Error removing item");
+                }
+            });
+
+        });
+
+
         // ------------------------ increase / decrease
 
    $(document).on("click", ".increase-btn, .decrease-btn", function () {

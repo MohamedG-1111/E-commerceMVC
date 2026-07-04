@@ -50,61 +50,60 @@ namespace E_commerce.BLL.Services.Implementation
                     "Product Not Found",
                     errorType: ErrorType.NOT_FOUND);
 
-            var cartItem = new CartItem
-            {
-                ProductId = product.Value.Id,
-                Name = product.Value.Title,
-                Image = product.Value.ImageUrl,
-                Count = model.quantity,
-                Price = GetPrice(model.quantity, product.Value)
-            };
-
-            return await CreateCartItemAsync(userId, cartItem);
-        }
-
-        // ================= CREATE  =================
-        public async Task<Result<CustomerCart>> CreateCartItemAsync(string key, CartItem item, TimeSpan? TTL = null)
-        {
-            if (string.IsNullOrEmpty(key))
-                return Result<CustomerCart>.Failure(
-                    "Invalid cart key",
-                    errorType: ErrorType.VALIDATION);
-
-            if (item.Count <= 0)
-                return Result<CustomerCart>.Failure(
-                    "Invalid quantity",
-                    errorType: ErrorType.VALIDATION);
-
-            var cart = await redisService.GetAsync<CustomerCart>(key);
+            var cart = await redisService.GetAsync<CustomerCart>(userId);
 
             if (cart is null)
             {
                 cart = new CustomerCart
                 {
-                    UserId = key,
+                    UserId = userId,
                     Items = new List<CartItem>()
                 };
             }
 
-            var existingItem = cart.Items.FirstOrDefault(x => x.ProductId == item.ProductId);
-
-            if (existingItem is not null)
+            if (cart.Items.Any(x => x.ProductId == model.ProductId))
                 return Result<CustomerCart>.Failure(
                     "Product already exists in cart",
                     errorType: ErrorType.CONFLICT);
 
-            cart.Items.Add(item);
+            cart.Items.Add(new CartItem
+            {
+                ProductId = product.Value.Id,
+                Name = product.Value.Title,
+                Image = product.Value.ImageUrl,
+                Count = model.quantity,
+                Price = await PriceForProductAsync(model.quantity, product.Value)
+            });
+
+            return await CreateOrUpdateCartAsync(cart);
+        }
+
+        // ================= CreateOrUpdateCartAsync  =================
+        public async Task<Result<CustomerCart>> CreateOrUpdateCartAsync(
+            CustomerCart cart,
+            TimeSpan? ttl = null)
+        {
+            if (cart is null)
+                return Result<CustomerCart>.Failure(
+                    "Cart is null",
+                    errorType: ErrorType.VALIDATION);
+
+            if (string.IsNullOrEmpty(cart.UserId))
+                return Result<CustomerCart>.Failure(
+                    "Invalid cart key",
+                    errorType: ErrorType.VALIDATION);
+
+            cart.Items ??= new List<CartItem>();
 
             cart = await CalculateCartAsync(cart);
 
             var result = await redisService.SetAsync(
-                key,
+                cart.UserId,
                 cart,
-                TTL ?? DefaultTTL);
+                ttl ?? DefaultTTL);
 
             return Result<CustomerCart>.Success(result);
         }
-
         // ================= DELETE PRODUCT =================
         public async Task<Result<CustomerCart>> DeleteProductFromCartAsync(int productId)
         {
@@ -252,11 +251,41 @@ namespace E_commerce.BLL.Services.Implementation
         }
 
 
+        public async Task<Result<CustomerCart>> RefreshCartAsync()
+        {
+            var cartResult = await GetAsync();
 
+            if (!cartResult.IsSuccess)
+                return cartResult;
+
+            var cart = cartResult.Value;
+
+            foreach (var item in cart.Items)
+            {
+                if (item.Count <= 0)
+                    return Result<CustomerCart>.Failure(
+                        $"Invalid quantity for product {item.Name}",
+                        errorType: ErrorType.VALIDATION);
+
+                var product = await unitOfWork.Repository<Product>()
+                    .GetByIdAsync(item.ProductId);
+
+                if (product == null)
+                    return Result<CustomerCart>.Failure(
+                        $"Product {item.Name} not found",
+                        errorType: ErrorType.NOT_FOUND);
+
+                item.Price = await PriceForProductAsync(item.Count, product);
+                item.Name = product.Title;
+                item.Image = product.ImageUrl;
+            }
+
+            return await CreateOrUpdateCartAsync(cart);
+        }
 
 
         // ================= PRICE =================
-        private int GetPrice(int quantity, Product product)
+        private async Task<int> PriceForProductAsync(int quantity, Product product)
         {
             return quantity switch
             {

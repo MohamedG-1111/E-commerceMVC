@@ -79,6 +79,16 @@ namespace E_commece.Controllers
             return PartialView("_CartPartial", result.Value);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> RefreshCart()
+        {
+            var result = await cartService.RefreshCartAsync();
+            if (result.IsFailure)
+                return HandleResult(result);
+            return PartialView("_CartPartial", result.Value);
+        }
+
+
 
 
     }

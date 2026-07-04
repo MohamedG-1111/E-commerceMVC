@@ -5,6 +5,10 @@
         public string UserId { get; set; } = null!;
         public List<CartItem> Items { get; set; } = new();
 
+        public string? PaymentIntentId { get; set; }
+
+        public string? ClientSecretId { get; set; }
+
 
         public decimal SubTotal { get; set; }
 

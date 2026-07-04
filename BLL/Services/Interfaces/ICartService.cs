@@ -7,10 +7,9 @@ namespace E_commerce.BLL.Services.Interfaces
     {
         Task<Result<CustomerCart>> AddProductToCart(AddToCartViewModel model);
 
-        Task<Result<CustomerCart>> CreateCartItemAsync(
-            string key,
-            CartItem item,
-            TimeSpan? TTL = null);
+        Task<Result<CustomerCart>> CreateOrUpdateCartAsync(
+            CustomerCart cart,
+            TimeSpan? ttl = null);
 
         Task<Result<CustomerCart>> DeleteProductFromCartAsync(int productId);
 
@@ -19,5 +18,9 @@ namespace E_commerce.BLL.Services.Interfaces
         Task<Result<CustomerCart>> UpdateQuantityAsync(int productId, int change);
 
         public Task<Result<CustomerCart>> ClearCartAsync();
+
+
+        public Task<Result<CustomerCart>> RefreshCartAsync();
+
     }
 }
