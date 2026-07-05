@@ -5,6 +5,6 @@ namespace E_commerce.BLL.Services.Interfaces
 {
     public interface IPaymentService
     {
-        public Task<Result<CustomerCart>> CreateOrUpdatePaymentIntent();
+        public Task<Result<CustomerCart>> CreateOrUpdatePaymentIntentAsync();
     }
 }

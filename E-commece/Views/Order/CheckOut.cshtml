@@ -183,19 +183,15 @@
                         </span>
                     </div>
 
-                    <form asp-controller="Order"
-                          asp-action="PlaceOrder"
-                          method="post">
-
-                        @Html.AntiForgeryToken()
-
-                        <button type="submit"
-                                class="btn btn-success btn-lg w-100 rounded-pill">
-                            <i class="bi bi-bag-check-fill me-2"></i>
-                            Place Order
-                        </button>
-
-                    </form>
+                    
+                    <div class="d-grid">
+    <a asp-controller="Payments" asp-action="CreateOrUpdatePaymentIntent" 
+    id="payNow"
+            class="btn btn-success btn-lg">
+        <i class="bi bi-credit-card"></i>
+        Pay Now
+    </a>
+</div>
 
                 </div>
 

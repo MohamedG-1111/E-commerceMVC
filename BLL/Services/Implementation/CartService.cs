@@ -6,7 +6,7 @@ using E_commerce.DAL.Entities;
 using Ecommerce.Utility;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
-
+using Microsoft.EntityFrameworkCore;
 namespace E_commerce.BLL.Services.Implementation
 {
     public class CartService : ICartService
@@ -255,29 +255,45 @@ namespace E_commerce.BLL.Services.Implementation
         {
             var cartResult = await GetAsync();
 
-            if (!cartResult.IsSuccess)
+            if (cartResult.IsFailure)
                 return cartResult;
 
             var cart = cartResult.Value;
 
+            if (cart.Items == null || !cart.Items.Any())
+            {
+                return Result<CustomerCart>.Failure(
+                    "Cart is empty",
+                    errorType: ErrorType.VALIDATION);
+            }
+
+            var productIds = cart.Items
+                .Select(x => x.ProductId)
+                .ToList();
+
+            var products = await unitOfWork.Repository<Product>()
+         .GetAsQuery()
+         .Where(x => productIds.Contains(x.Id))
+         .ToDictionaryAsync(x => x.Id);
             foreach (var item in cart.Items)
             {
-                if (item.Count <= 0)
+                if (!products.TryGetValue(item.ProductId, out var product))
+                {
                     return Result<CustomerCart>.Failure(
-                        $"Invalid quantity for product {item.Name}",
-                        errorType: ErrorType.VALIDATION);
-
-                var product = await unitOfWork.Repository<Product>()
-                    .GetByIdAsync(item.ProductId);
-
-                if (product == null)
-                    return Result<CustomerCart>.Failure(
-                        $"Product {item.Name} not found",
+                        $"Product ({item.Name}) not found",
                         errorType: ErrorType.NOT_FOUND);
+                }
 
-                item.Price = await PriceForProductAsync(item.Count, product);
+                if (product.Stock < item.Count)
+                {
+                    return Result<CustomerCart>.Failure(
+                        $"{product.Title} doesn't have enough stock.",
+                        errorType: ErrorType.VALIDATION);
+                }
+
                 item.Name = product.Title;
                 item.Image = product.ImageUrl;
+                item.Price = await PriceForProductAsync(item.Count, product);
             }
 
             return await CreateOrUpdateCartAsync(cart);
@@ -285,7 +301,7 @@ namespace E_commerce.BLL.Services.Implementation
 
 
         // ================= PRICE =================
-        private async Task<int> PriceForProductAsync(int quantity, Product product)
+        public async Task<int> PriceForProductAsync(int quantity, Product product)
         {
             return quantity switch
             {
@@ -295,7 +311,7 @@ namespace E_commerce.BLL.Services.Implementation
             };
         }
 
-        private async Task<CustomerCart> CalculateCartAsync(CustomerCart cart)
+        public async Task<CustomerCart> CalculateCartAsync(CustomerCart cart)
         {
             if (cart?.Items == null || !cart.Items.Any())
                 return cart;

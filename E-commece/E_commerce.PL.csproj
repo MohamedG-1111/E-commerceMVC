@@ -24,4 +24,8 @@
 	  <Folder Include="wwwroot\assets\Images\Products\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Include="wwwroot\css\_Layout.css" />
+	</ItemGroup>
+
 </Project>

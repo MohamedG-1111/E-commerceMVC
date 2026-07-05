@@ -164,15 +164,11 @@ namespace E_commerce.BLL.Services.Implementation
                 return Result.Failure("Must Login First",
                     errorType: ErrorType.UNAUTHORIZED);
 
-            var customerCart = await cartService.GetAsync();
+            var customerCart = await cartService.RefreshCartAsync();
 
             if (customerCart.IsFailure)
                 return Result.Failure(customerCart.ErrorMessage!,
                     errorType: customerCart.ErrorType);
-
-            if (!customerCart.Value.Items.Any())
-                return Result.Failure("Cart is empty",
-                    errorType: ErrorType.VALIDATION);
 
             var order = new Order
             {
@@ -184,41 +180,25 @@ namespace E_commerce.BLL.Services.Implementation
 
                 OrderStatus = currentUser.CompanyId != null
                     ? OrderStatus.Approved
-                    : OrderStatus.Pending
+                    : OrderStatus.Pending,
+
+                OrderDetails = customerCart.Value.Items
+        .Select(item => new OrderDetails
+        {
+            ProductId = item.ProductId,
+            Count = item.Count,
+            Price = item.Price
+        })
+        .ToList(),
+                PaymentIntentId = customerCart.Value.PaymentIntentId,
             };
 
             await unitOfWork.Repository<Order>().AddAsync(order);
-
-            foreach (var item in customerCart.Value.Items)
-            {
-                var product = await unitOfWork.Repository<Product>()
-                                              .GetByIdAsync(item.ProductId);
-
-                if (product == null)
-                    return Result.Failure("Product not found",
-                        errorType: ErrorType.NOT_FOUND);
-
-                if (product.Stock < item.Count)
-                    return Result.Failure($"{product.Title} doesn't have enough stock.",
-                        errorType: ErrorType.VALIDATION);
-
-                product.Stock -= item.Count;
-
-                order.OrderDetails.Add(new OrderDetails
-                {
-                    ProductId = item.ProductId,
-                    Count = item.Count,
-                    Price = item.Price
-                });
-            }
-
             int result = await unitOfWork.SaveChangesAsync();
 
             if (result <= 0)
                 return Result.Failure("Failed to place order",
                     errorType: ErrorType.INTERNAL_ERROR);
-
-            await cartService.ClearCartAsync();
 
             return Result.Success();
         }

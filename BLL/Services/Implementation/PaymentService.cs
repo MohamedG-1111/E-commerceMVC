@@ -16,7 +16,7 @@ namespace E_commerce.BLL.Services.Implementation
             _cartService = cartService;
             this.config = config;
         }
-        public async Task<Result<CustomerCart>> CreateOrUpdatePaymentIntent()
+        public async Task<Result<CustomerCart>> CreateOrUpdatePaymentIntentAsync()
         {
             // 0] Install stripe nuget package
             // 1] Configure stripe settings in appsettings.json
