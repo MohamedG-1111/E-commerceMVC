@@ -3,7 +3,7 @@
     public enum PaymentStatus
     {
         Pending,
-        Approved,
+        Paid,
         Rejected,
         ApprovedForDelayedPayment,
         Refunded

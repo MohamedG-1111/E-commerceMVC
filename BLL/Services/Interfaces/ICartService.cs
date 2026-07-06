@@ -18,12 +18,10 @@ namespace E_commerce.BLL.Services.Interfaces
 
         Task<Result<CustomerCart>> UpdateQuantityAsync(int productId, int change);
 
-        public Task<Result<CustomerCart>> ClearCartAsync();
 
 
         public Task<Result<CustomerCart>> RefreshCartAsync();
         public Task<int> PriceForProductAsync(int quantity, Product product);
-        public Task<CustomerCart> CalculateCartAsync(CustomerCart cart);
-
+        public Task<Result<CustomerCart>> ClearCartAsync(string? UserId = null);
     }
 }

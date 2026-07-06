@@ -30,8 +30,7 @@ namespace E_commece.Controllers
                     TempData["error"] = result.ErrorMessage;
                     return RedirectToAction("Login", "Auth");
                 case ErrorType.CONFLICT:
-                    TempData["error"] = result.ErrorMessage;
-                    return RedirectToAction("Index", "Cart");
+                    return View("Conflict", result.ErrorMessage);
                 default:
                     TempData["error"] = result.ErrorMessage;
                     return RedirectToAction(nameof(Index));

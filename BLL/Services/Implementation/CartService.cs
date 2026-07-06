@@ -220,9 +220,9 @@ namespace E_commerce.BLL.Services.Implementation
         }
 
 
-        public async Task<Result<CustomerCart>> ClearCartAsync()
+        public async Task<Result<CustomerCart>> ClearCartAsync(string? UserId = null)
         {
-            var userId = currentUser.UserId;
+            var userId = UserId ?? currentUser.UserId;
 
             if (string.IsNullOrEmpty(userId))
                 return Result<CustomerCart>.Failure(
@@ -287,8 +287,8 @@ namespace E_commerce.BLL.Services.Implementation
                 if (product.Stock < item.Count)
                 {
                     return Result<CustomerCart>.Failure(
-                        $"{product.Title} doesn't have enough stock.",
-                        errorType: ErrorType.VALIDATION);
+                        $"{product.Title} doesn't have enough stock. Available Book {product.Stock}",
+                        errorType: ErrorType.CONFLICT);
                 }
 
                 item.Name = product.Title;

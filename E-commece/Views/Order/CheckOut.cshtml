@@ -149,7 +149,7 @@
                                 </div>
 
                                 <small class="text-muted">
-                                    Qty: @item.Count
+                                    Qty: @item.Count , Price Per Unit @item.Price
                                 </small>
                             </div>
 
@@ -185,7 +185,7 @@
 
                     
                     <div class="d-grid">
-    <a asp-controller="Payments" asp-action="CreateOrUpdatePaymentIntent" 
+                        <a asp-controller="Payments" asp-action="Index"
     id="payNow"
             class="btn btn-success btn-lg">
         <i class="bi bi-credit-card"></i>

@@ -15,13 +15,16 @@
     <script>
         // remove - btn Product
         $(document).on("click", ".remove-btn", function() {
-
+                    var token = $('input[name="__RequestVerificationToken"]').val();
             let id = $(this).data("id");
 
             $.ajax({
                 url: "/Cart/RemoveProductFromCart",
                 type: "POST",
                 data: { productId: id },
+                headers: {
+        RequestVerificationToken: token
+    },
                 success: function(res) {
 
                     $("#cart-container").html(res);

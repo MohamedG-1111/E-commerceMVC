@@ -5,6 +5,9 @@ namespace E_commerce.BLL.Services.Interfaces
 {
     public interface IPaymentService
     {
-        public Task<Result<CustomerCart>> CreateOrUpdatePaymentIntentAsync();
+        Task<Result<CustomerCart>> CreateOrUpdatePaymentIntentAsync();
+        Task RefundPaymentAsync(string paymentIntentId);
+        Task HandleWebhookAsync(string json, string stripeSignature);
+        Task RetryPaymentAsync(int orderId);
     }
 }

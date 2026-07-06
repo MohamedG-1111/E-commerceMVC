@@ -1,5 +1,4 @@
 ﻿using E_commerce.BLL.Services.Interfaces;
-using E_commerce.BLL.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_commece.Controllers
@@ -21,18 +20,25 @@ namespace E_commece.Controllers
         }
 
 
-        public async Task<IActionResult> CreateOrUpdatePaymentIntent()
+        public async Task<IActionResult> Index()
         {
             var result = await paymentService.CreateOrUpdatePaymentIntentAsync();
             if (!result.IsSuccess)
             {
                 return HandleResult(result);
             }
-            return View("Payment", new PaymentViewModel()
-            {
-                PublishableKey = _configuration["StripeSettings:PublishableKey"],
-                ClientSecret = result.Value.ClientSecret
-            });
+            return View(result.Value);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> webhook()
+        {
+            var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+            var stripeSignature = Request.Headers["Stripe-Signature"];
+
+            await paymentService.HandleWebhookAsync(json, stripeSignature);
+
+            return Ok();
         }
     }
 }

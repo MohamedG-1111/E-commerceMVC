@@ -33,7 +33,7 @@ namespace E_commerce.BLL.Services.Implementation
                     "Must Login First",
                     errorType: ErrorType.UNAUTHORIZED);
 
-            var customerCart = await cartService.GetAsync();
+            var customerCart = await cartService.RefreshCartAsync();
 
             if (customerCart.IsFailure)
                 return Result<CheckoutViewModel>.Failure(
@@ -169,6 +169,16 @@ namespace E_commerce.BLL.Services.Implementation
             if (customerCart.IsFailure)
                 return Result.Failure(customerCart.ErrorMessage!,
                     errorType: customerCart.ErrorType);
+
+            var orders = await unitOfWork.Repository<Order>().GetAsQuery(false)
+               .Where(x => x.PaymentIntentId == customerCart.Value.PaymentIntentId)
+             .ToListAsync();
+
+            if (orders.Any())
+            {
+                unitOfWork.Repository<Order>().DeleteRange(orders);
+            }
+
 
             var order = new Order
             {
