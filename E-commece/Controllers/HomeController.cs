@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using BLL.Services.Interfaces;
-using E_commece.Models;
 using Ecommerce.Utility.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -57,11 +55,7 @@ namespace E_commece.Controllers
             NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel
-            {
-                RequestId = Activity.Current?.Id ??
-                            HttpContext.TraceIdentifier
-            });
+            return View();
         }
     }
 }

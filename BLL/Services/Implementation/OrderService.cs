@@ -209,7 +209,7 @@ namespace E_commerce.BLL.Services.Implementation
             if (result <= 0)
                 return Result.Failure("Failed to place order",
                     errorType: ErrorType.INTERNAL_ERROR);
-
+            await cartService.ClearCartAsync(order.ApplicationUserId);
             return Result.Success();
         }
     }

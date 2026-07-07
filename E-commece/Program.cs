@@ -3,6 +3,7 @@ using BLL.Services.Interfaces;
 using DataAccessLayer.Repositories.Implementation;
 using DataAccessLayer.Repositories.Interfaces;
 using DataAcessLayer.Data;
+using E_commece.Middlewares;
 using E_commerce.BLL.Services.Implementation;
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.DAL.Data;
@@ -14,7 +15,6 @@ using Ecommerce.Utility.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
-
 namespace E_commece
 {
     public class Program
@@ -42,6 +42,7 @@ namespace E_commece
             builder.Services.AddScoped<ICompanyService, CompanyService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<IPricingService, PricingService>();
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
@@ -80,6 +81,7 @@ namespace E_commece
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             await AdminSeeder.SeedAdminAsync(userManager);
             #endregion
+            app.UseExceptionHandlingMiddleware();
             app.UseHttpsRedirection();
             app.UseRouting();
 

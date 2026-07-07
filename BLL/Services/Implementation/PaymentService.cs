@@ -3,6 +3,7 @@ using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities.enums;
 using Ecommerce.Utility.Result;
+using Ecommerce.Utility.ResultPattern;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Stripe;
@@ -16,15 +17,20 @@ namespace E_commerce.BLL.Services.Implementation
         private readonly ICartService _cartService;
         private readonly IConfiguration _config;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentUserService currentUserService;
+        private readonly IPricingService pricingService;
 
         public PaymentService(
             ICartService cartService,
             IConfiguration config,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUserService, IPricingService pricingService)
         {
             _cartService = cartService;
             _config = config;
             _unitOfWork = unitOfWork;
+            this.currentUserService = currentUserService;
+            this.pricingService = pricingService;
         }
 
         // =========================
@@ -132,7 +138,7 @@ namespace E_commerce.BLL.Services.Implementation
 
             var refund = await refundService.CreateAsync(new RefundCreateOptions
             {
-                Charge = intent.LatestCharge.Id,
+                Charge = intent.LatestChargeId,
                 Reason = RefundReasons.RequestedByCustomer
             });
 
@@ -150,9 +156,14 @@ namespace E_commerce.BLL.Services.Implementation
                 .Include(o => o.OrderDetails)
                 .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId);
 
-            if (order == null || order.PaymentStatus == PaymentStatus.Paid)
+            if (order == null)
                 return;
 
+            if (order.PaymentStatus == PaymentStatus.Paid ||
+                order.PaymentStatus == PaymentStatus.Refunded)
+            {
+                return;
+            }
             await using var transaction = await _unitOfWork.BeginTransactionAsync();
 
             try
@@ -168,14 +179,10 @@ namespace E_commerce.BLL.Services.Implementation
 
                     if (updated == 0)
                     {
-                        order.PaymentStatus = PaymentStatus.Rejected;
+                        await transaction.RollbackAsync();
                         order.OrderStatus = OrderStatus.Cancelled;
-
                         _unitOfWork.Repository<OrderEntity>().Update(order);
                         await _unitOfWork.SaveChangesAsync();
-
-                        await transaction.RollbackAsync();
-
                         if (!string.IsNullOrEmpty(order.PaymentIntentId))
                             await RefundPaymentAsync(order.PaymentIntentId);
 
@@ -196,7 +203,6 @@ namespace E_commerce.BLL.Services.Implementation
             {
                 await transaction.RollbackAsync();
 
-                order.PaymentStatus = PaymentStatus.Rejected;
                 order.OrderStatus = OrderStatus.Cancelled;
 
                 _unitOfWork.Repository<OrderEntity>().Update(order);
@@ -208,7 +214,6 @@ namespace E_commerce.BLL.Services.Implementation
                 return;
             }
 
-            await _cartService.ClearCartAsync(order.ApplicationUserId);
         }
         // =========================
         // PAYMENT FAILED
@@ -226,8 +231,6 @@ namespace E_commerce.BLL.Services.Implementation
                 return;
 
             order.PaymentStatus = PaymentStatus.Rejected;
-            order.OrderStatus = OrderStatus.Cancelled;
-
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -237,21 +240,151 @@ namespace E_commerce.BLL.Services.Implementation
         private async Task HandleChargeRefundedAsync(string paymentIntentId)
         {
             var order = await _unitOfWork.Repository<OrderEntity>()
-                .GetAsQuery(false)
+                .GetAsQuery()
+                .Include(o => o.OrderDetails)
                 .FirstOrDefaultAsync(x => x.PaymentIntentId == paymentIntentId);
 
             if (order == null)
                 return;
 
-            order.PaymentStatus = PaymentStatus.Refunded;
-            order.OrderStatus = OrderStatus.Cancelled;
+            if (order.PaymentStatus == PaymentStatus.Refunded)
+                return;
+
+            await using var transaction = await _unitOfWork.BeginTransactionAsync();
+
+            try
+            {
+                foreach (var item in order.OrderDetails)
+                {
+                    await _unitOfWork.Repository<ProductEntity>()
+                        .GetAsQuery(false)
+                        .Where(p => p.Id == item.ProductId)
+                        .ExecuteUpdateAsync(x => x.SetProperty(
+                            p => p.Stock,
+                            p => p.Stock + item.Count));
+                }
+
+                order.PaymentStatus = PaymentStatus.Refunded;
+                order.OrderStatus = OrderStatus.Cancelled;
+
+                _unitOfWork.Repository<OrderEntity>().Update(order);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+        public async Task<Result<OrderPaymentVM>> RetryPaymentAsync(int orderId)
+        {
+            var userId = currentUserService.UserId;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Result<OrderPaymentVM>.Failure(
+                    "Must login first",
+                    errorType: ErrorType.UNAUTHORIZED);
+            }
+
+            var order = await _unitOfWork.Repository<OrderEntity>()
+                .GetAsQuery(false)
+                .Include(x => x.OrderDetails)
+                .ThenInclude(x => x.Product)
+                .FirstOrDefaultAsync(x =>
+                    x.Id == orderId &&
+                    x.ApplicationUserId == userId);
+
+            if (order == null)
+                return Result<OrderPaymentVM>.Failure("Order not found", errorType: ErrorType.NOT_FOUND);
+
+            if (order.PaymentStatus == PaymentStatus.Paid)
+                return Result<OrderPaymentVM>.Failure("Order already paid", errorType: ErrorType.CONFLICT);
+
+            if (order.OrderStatus != OrderStatus.Pending)
+                return Result<OrderPaymentVM>.Failure("Order cannot be paid", errorType: ErrorType.CONFLICT);
+
+            foreach (var item in order.OrderDetails)
+            {
+                if (item.Product.Stock < item.Count)
+                {
+                    return Result<OrderPaymentVM>.Failure(
+                        $"{item.Product.Title} doesn't have enough stock.",
+                        errorType: ErrorType.CONFLICT);
+                }
+
+                item.Price = await pricingService.PriceForProductAsync(item.Count, item.Product);
+            }
+
+            var subTotal = order.OrderDetails.Sum(x => x.Price * x.Count);
+
+            var (discountAmount, total) =
+                await pricingService.CalculatePricingAsync(subTotal);
+
+            order.OrderTotal = total;
 
             await _unitOfWork.SaveChangesAsync();
+
+            return Result<OrderPaymentVM>.Success(new OrderPaymentVM
+            {
+                OrderId = order.Id,
+                OrderTotal = total,
+                Discount = discountAmount,
+                Items = order.OrderDetails.Select(x => new OrderPaymentItemVM
+                {
+                    ProductId = x.ProductId,
+                    ProductName = x.Product.Title,
+                    Image = x.Product.ImageUrl,
+                    Price = x.Price,
+                    Count = x.Count
+                }).ToList()
+            });
         }
 
-        public Task RetryPaymentAsync(int orderId)
+
+        public async Task<Result<RetryPaymentClientSecretVM>> CreateRetryPaymentAsync(int orderId)
         {
-            throw new NotImplementedException();
+            var userId = currentUserService.UserId;
+            if (userId == null)
+                return Result<RetryPaymentClientSecretVM>.Failure(
+                    "Must login first",
+                    errorType: ErrorType.UNAUTHORIZED);
+            StripeConfiguration.ApiKey = _config["StripeSettings:SecretKey"];
+
+            var result = await RetryPaymentAsync(orderId);
+
+            if (!result.IsSuccess)
+            {
+                return Result<RetryPaymentClientSecretVM>.Failure(
+                    result.ErrorMessage,
+                    errorType: result.ErrorType);
+            }
+
+            var order = await _unitOfWork.Repository<OrderEntity>()
+                .GetAsQuery(false)
+                .FirstAsync(x => x.Id == orderId && x.ApplicationUserId == userId);
+
+            var paymentIntentService = new PaymentIntentService();
+
+            var paymentIntent = await paymentIntentService.CreateAsync(
+                new PaymentIntentCreateOptions
+                {
+                    Amount = (long)(order.OrderTotal * 100),
+                    Currency = "usd",
+                    PaymentMethodTypes = new List<string> { "card" }
+                });
+
+            order.PaymentIntentId = paymentIntent.Id;
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return Result<RetryPaymentClientSecretVM>.Success(new RetryPaymentClientSecretVM
+            {
+                ClientSecret = paymentIntent.ClientSecret
+            });
         }
     }
 }

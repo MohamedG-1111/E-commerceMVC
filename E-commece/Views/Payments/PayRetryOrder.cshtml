@@ -1,0 +1,79 @@
+﻿@model RetryPaymentClientSecretVM
+
+@{
+    ViewData["Title"] = "PayRetryOrder";
+}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-6">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    <h4 class="mb-0">Complete Payment</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <div id="payment-element"></div>
+
+                    <div id="payment-message"
+                         class="text-danger mt-3">
+                    </div>
+
+                    <button id="submit"
+                            class="btn btn-success w-100 mt-4">
+                        Pay Now
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+
+<script>
+    const stripe = Stripe("pk_test_51TogX1HdvlOk3mpffT5ldPJ6h2As18w6yWvHhQeL1k6rVnCkmOnSLFzmI4sVBlg3lU8A5v2lZE0MgqfbV36f9mPv00Swh2T6Zp");
+    const clientSecret = '@Model.ClientSecret';
+    const elements = stripe.elements({
+        clientSecret: clientSecret
+    });
+
+    const paymentElement = elements.create("payment");
+
+    paymentElement.mount("#payment-element");
+
+    document.getElementById("submit").addEventListener("click", async () => {
+
+        document.getElementById("submit").disabled = true;
+
+        const { error } = await stripe.confirmPayment({
+
+            elements,
+
+            confirmParams: {
+                return_url: "@Url.Action("Success", "Payments", null, Context.Request.Scheme)"
+            }
+
+
+        });
+
+        if (error) {
+
+            document.getElementById("payment-message").innerText = error.message;
+
+            document.getElementById("submit").disabled = false;
+        }
+
+    });
+
+</script>

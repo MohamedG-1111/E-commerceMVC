@@ -106,66 +106,87 @@
 
 </div>
 @section Scripts {
-    <script>
+<script>
 
-        const stripe = Stripe("pk_test_51TogX1HdvlOk3mpffT5ldPJ6h2As18w6yWvHhQeL1k6rVnCkmOnSLFzmI4sVBlg3lU8A5v2lZE0MgqfbV36f9mPv00Swh2T6Zp");
+    const stripe = Stripe("pk_test_51TogX1HdvlOk3mpffT5ldPJ6h2As18w6yWvHhQeL1k6rVnCkmOnSLFzmI4sVBlg3lU8A5v2lZE0MgqfbV36f9mPv00Swh2T6Zp");
 
-        const clientSecret = '@Model.ClientSecret';
+    const clientSecret = '@Model.ClientSecret';
 
-        const elements = stripe.elements({
-            clientSecret: clientSecret
-        });
+    const elements = stripe.elements({
+        clientSecret: clientSecret
+    });
 
-        const paymentElement = elements.create("payment");
+    const paymentElement = elements.create("payment");
 
-        paymentElement.mount("#payment-element");
-
-        $("#payment-form").submit(async function(e) {
-
-            e.preventDefault();
-
-            $("#submit").prop("disabled", true);
-            $("#error-message").text("");
-            var token = $('input[name="__RequestVerificationToken"]').val();
+    paymentElement.mount("#payment-element");
 
 
-            $.ajax({
-                url: "/Order/PlaceOrder",
-                type: "POST",
-                headers: {
-                    RequestVerificationToken: token
-                },
-                success: async function() {
+    $("#payment-form").submit(async function (e) {
 
-                    const { error } = await stripe.confirmPayment({
+        e.preventDefault();
 
-                        elements,
+        $("#submit").prop("disabled", true);
+        $("#error-message").text("");
 
-                        confirmParams: {
-                            return_url: "@Url.Action("Success", "Payments", null, Context.Request.Scheme)"
-                        }
+        var token = $('input[name="__RequestVerificationToken"]').val();
 
-                    });
 
-                    if (error) {
+        $.ajax({
 
-                        $("#error-message").text(error.message);
-                        $("#submit").prop("disabled", false);
+            url: "/Order/PlaceOrder",
+
+            type: "POST",
+
+            headers: {
+                RequestVerificationToken: token
+            },
+
+            success: async function (response) {
+
+
+
+                const { error } = await stripe.confirmPayment({
+
+                    elements,
+
+                    confirmParams: {
+
+                        return_url: "@Url.Action("Success", "Payments", null, Context.Request.Scheme)"
 
                     }
 
-                },
+                });
 
-                error: function(xhr) {
 
-                    $("#error-message").text(xhr.responseText || "Failed to create order.");
-                    $("#submit").prop("disabled", false);
+                if (error) {
+
+                    $("#error-message").text(error.message);
+
+
+                    setTimeout(function () {
+
+                        window.location.href =
+                            "/Order/MyOrders";
+
+                    }, 4000);
 
                 }
 
-            });
+            },
+
+
+            error: function (xhr) {
+
+                $("#error-message")
+                    .text(xhr.responseText || "Failed to create order.");
+
+                $("#submit").prop("disabled", false);
+
+            }
 
         });
 
-    </script>
+    });
+
+</script>
 }

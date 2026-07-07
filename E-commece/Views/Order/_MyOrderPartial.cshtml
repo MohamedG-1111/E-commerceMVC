@@ -85,7 +85,7 @@
       order.PaymentStatus == PaymentStatus.Rejected.ToString()))
                                     {
                                         <a asp-controller="Payments"
-                                           asp-action="Pay"
+                                           asp-action="RetryPayment"
                                            asp-route-orderId="@order.Id"
                                            class="btn btn-sm btn-success">
                                             <i class="bi bi-credit-card"></i>

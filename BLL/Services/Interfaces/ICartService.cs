@@ -1,5 +1,4 @@
 ﻿using E_commerce.BLL.ViewModels;
-using E_commerce.DAL.Entities;
 using Ecommerce.Utility.Result;
 
 namespace E_commerce.BLL.Services.Interfaces
@@ -21,7 +20,6 @@ namespace E_commerce.BLL.Services.Interfaces
 
 
         public Task<Result<CustomerCart>> RefreshCartAsync();
-        public Task<int> PriceForProductAsync(int quantity, Product product);
         public Task<Result<CustomerCart>> ClearCartAsync(string? UserId = null);
     }
 }

@@ -40,5 +40,29 @@ namespace E_commece.Controllers
 
             return Ok();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> RetryPayment(int orderId)
+        {
+            var result = await paymentService.RetryPaymentAsync(orderId);
+            if (!result.IsSuccess)
+            {
+                return HandleResult(result);
+            }
+            return View("CheckoutRetryPayment", result.Value);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PayRetryOrder(int orderId)
+        {
+            var result = await paymentService.CreateRetryPaymentAsync(orderId);
+
+            if (!result.IsSuccess)
+            {
+                return HandleResult(result);
+            }
+            return View(result.Value);
+        }
     }
 }

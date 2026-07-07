@@ -8,6 +8,7 @@ namespace E_commerce.BLL.Services.Interfaces
         Task<Result<CustomerCart>> CreateOrUpdatePaymentIntentAsync();
         Task RefundPaymentAsync(string paymentIntentId);
         Task HandleWebhookAsync(string json, string stripeSignature);
-        Task RetryPaymentAsync(int orderId);
+        public Task<Result<RetryPaymentClientSecretVM>> CreateRetryPaymentAsync(int orderId);
+        Task<Result<OrderPaymentVM>> RetryPaymentAsync(int orderId);
     }
 }

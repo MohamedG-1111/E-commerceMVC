@@ -3,7 +3,6 @@ using DataAccessLayer.Repositories.Interfaces;
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities;
-using Ecommerce.Utility;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
 using Microsoft.EntityFrameworkCore;
@@ -15,17 +14,19 @@ namespace E_commerce.BLL.Services.Implementation
         private readonly IProductService productService;
         private readonly ICurrentUserService currentUser;
         private readonly IUnitOfWork unitOfWork;
+        private readonly IPricingService pricingService;
         private static readonly TimeSpan DefaultTTL = TimeSpan.FromDays(7);
 
         public CartService(
             IRedisService redisService,
             IProductService productService,
-            ICurrentUserService currentUser, IUnitOfWork unitOfWork)
+            ICurrentUserService currentUser, IUnitOfWork unitOfWork, IPricingService pricingService)
         {
             this.redisService = redisService;
             this.productService = productService;
             this.currentUser = currentUser;
             this.unitOfWork = unitOfWork;
+            this.pricingService = pricingService;
         }
 
         // ================= ADD PRODUCT =================
@@ -72,7 +73,7 @@ namespace E_commerce.BLL.Services.Implementation
                 Name = product.Value.Title,
                 Image = product.Value.ImageUrl,
                 Count = model.quantity,
-                Price = await PriceForProductAsync(model.quantity, product.Value)
+                Price = await pricingService.PriceForProductAsync(model.quantity, product.Value)
             });
 
             return await CreateOrUpdateCartAsync(cart);
@@ -293,7 +294,7 @@ namespace E_commerce.BLL.Services.Implementation
 
                 item.Name = product.Title;
                 item.Image = product.ImageUrl;
-                item.Price = await PriceForProductAsync(item.Count, product);
+                item.Price = await pricingService.PriceForProductAsync(item.Count, product);
             }
 
             return await CreateOrUpdateCartAsync(cart);
@@ -301,15 +302,6 @@ namespace E_commerce.BLL.Services.Implementation
 
 
         // ================= PRICE =================
-        public async Task<int> PriceForProductAsync(int quantity, Product product)
-        {
-            return quantity switch
-            {
-                <= 50 => product.PriceFor1To50,
-                <= 100 => product.PriceFor50Plus,
-                _ => product.PriceFor100Plus
-            };
-        }
 
         public async Task<CustomerCart> CalculateCartAsync(CustomerCart cart)
         {
@@ -317,37 +309,13 @@ namespace E_commerce.BLL.Services.Implementation
                 return cart;
 
             var subTotal = cart.Items.Sum(x => x.Price * x.Count);
-            var result = await CalculatePricingAsync(subTotal);
+            var result = await pricingService.CalculatePricingAsync(subTotal);
 
             cart.SubTotal = subTotal;
             cart.Discount = result.discountAmount;
             cart.Total = result.total;
 
             return cart;
-        }
-        private async Task<(decimal discountAmount, decimal total)> CalculatePricingAsync(decimal subtotal)
-        {
-            var user = await currentUser.GetCurrentUser();
-
-            if (user == null || user.Role != Roles.Company)
-                return (0, subtotal);
-
-            var company = unitOfWork.Repository<Company>()
-                .GetAsQuery()
-                .FirstOrDefault(x => x.Id == user.CompanyId);
-
-            if (company == null)
-                return (0, subtotal);
-
-            var discountPercent = company?.DiscountPercentage ?? 0;
-
-            if (discountPercent <= 0)
-                return (0, subtotal);
-
-            var discountAmount = Math.Min(subtotal, subtotal * (discountPercent / 100m));
-            var total = subtotal - discountAmount;
-
-            return (discountAmount, total);
         }
     }
 }
