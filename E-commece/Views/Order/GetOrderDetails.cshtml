@@ -12,7 +12,7 @@
             <i class="bi bi-receipt"></i> Order #@Model.Id
         </h2>
 
-        <a asp-action="MyOrders" class="btn btn-outline-secondary">
+        <a asp-action="AllOrders" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back to Orders
         </a>
     </div>
@@ -68,6 +68,46 @@
 
         </div>
     </div>
+
+    @if (!string.IsNullOrEmpty(Model.Carrier) || !string.IsNullOrEmpty(Model.TrackingNumber))
+    {
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-truck text-primary"></i>
+                    Shipping Information
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row g-4">
+
+                    @if (!string.IsNullOrEmpty(Model.Carrier))
+                    {
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <small class="text-muted">Shipping Company</small>
+                                <h6 class="mt-2">@Model.Carrier</h6>
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.TrackingNumber))
+                    {
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <small class="text-muted">Tracking Number</small>
+                                <h6 class="mt-2">@Model.TrackingNumber</h6>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+        </div>
+    }
 
     <div class="card shadow-sm border-0">
 

@@ -7,22 +7,6 @@
 
 <div class="container py-4">
 
-    @if (TempData["success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show">
-            @TempData["success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    @if (TempData["error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show">
-            @TempData["error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
 
@@ -43,30 +27,47 @@
             @switch (Model.OrderStatus)
             {
                 case OrderStatus.Pending:
-                    <span class="badge bg-secondary fs-6 px-3 py-2 rounded-pill">Pending</span>
+                    <span class="badge fs-6 px-3 py-2 rounded-pill"
+                          style="background-color:#fff3cd;color:#8a6d00;">
+                        Pending
+                    </span>
                     break;
 
                 case OrderStatus.Approved:
-                    <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">Approved</span>
+                    <span class="badge fs-6 px-3 py-2 rounded-pill"
+                          style="background-color:#cfe2ff;color:#084298;">
+                        Approved
+                    </span>
                     break;
 
                 case OrderStatus.Processing:
-                    <span class="badge bg-info text-dark fs-6 px-3 py-2 rounded-pill">Processing</span>
+                    <span class="badge fs-6 px-3 py-2 rounded-pill"
+                          style="background-color:#cff4fc;color:#055160;">
+                        Processing
+                    </span>
                     break;
 
                 case OrderStatus.Shipped:
-                    <span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">Shipped</span>
+                    <span class="badge fs-6 px-3 py-2 rounded-pill"
+                          style="background-color:#e2d9f3;color:#4b2e83;">
+                        Shipped
+                    </span>
                     break;
 
                 case OrderStatus.Delivered:
-                    <span class="badge bg-success fs-6 px-3 py-2 rounded-pill">Delivered</span>
+                    <span class="badge fs-6 px-3 py-2 rounded-pill"
+                          style="background-color:#d1e7dd;color:#0f5132;">
+                        Delivered
+                    </span>
                     break;
 
                 case OrderStatus.Cancelled:
-                    <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">Cancelled</span>
+                    <span class="badge fs-6 px-3 py-2 rounded-pill"
+                          style="background-color:#f8d7da;color:#842029;">
+                        Cancelled
+                    </span>
                     break;
             }
-
             <a asp-action="AllOrders" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i>
                 Back to Orders
@@ -167,105 +168,108 @@
 
                     <hr />
 
-                    <form asp-action="UpdateStatus" method="post">
+                        <form asp-action="UpdateStatus" method="post">
 
-                        @Html.AntiForgeryToken()
+                            @Html.AntiForgeryToken()
 
-                        <input type="hidden" name="id" value="@Model.OrderId" />
+                            <input type="hidden" name="Id" value="@Model.OrderId" />
 
-                        @if (Model.OrderStatus == OrderStatus.Approved)
-                        {
-                            <button type="submit"
-                                    name="status"
-                                    value="@OrderStatus.Processing"
-                                    class="btn btn-primary">
-                                <i class="bi bi-gear"></i>
-                                Move to Processing
-                            </button>
-                        }
-                        else if (Model.OrderStatus == OrderStatus.Processing)
-                        {
-                            <button type="button"
-                                    id="showShippingForm"
-                                    class="btn btn-info text-white">
-                                <i class="bi bi-truck"></i>
-                                Ship Order
-                            </button>
+                            @if (Model.OrderStatus == OrderStatus.Approved)
+                            {
+                                <button type="submit"
+                                        name="OrderStatus"
+                                        value="@OrderStatus.Processing"
+                                        class="btn btn-primary">
+                                    <i class="bi bi-gear"></i>
+                                    Move to Processing
+                                </button>
+                            }
+                            else if (Model.OrderStatus == OrderStatus.Processing)
+                            {
+                                <button type="button"
+                                        id="showShippingForm"
+                                        class="btn btn-info text-white">
+                                    <i class="bi bi-truck"></i>
+                                    Ship Order
+                                </button>
 
-                            <div id="shippingForm" class="card mt-3 border-0 bg-light shadow-sm d-none">
+                                <div id="shippingForm" class="card mt-3 border-0 bg-light shadow-sm d-none">
 
-                                <div class="card-body">
+                                    <div class="card-body">
 
-                                    <h6 class="fw-bold mb-3">Shipping Information</h6>
+                                        <h6 class="fw-bold mb-3">Shipping Information</h6>
 
-                                    <div class="row">
+                                        <div class="row">
 
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Shipping Company</label>
-                                            <input asp-for="Carrier"
-                                                   class="form-control"
-                                                   placeholder="DHL, Aramex..." />
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Shipping Company</label>
+                                                <input asp-for="Carrier"
+                                                       class="form-control"
+                                                       placeholder="DHL, Aramex..." />
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Tracking Number</label>
+                                                <input asp-for="TrackingNumber"
+                                                       class="form-control"
+                                                       placeholder="Tracking Number" />
+                                            </div>
+
                                         </div>
 
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Tracking Number</label>
-                                            <input asp-for="TrackingNumber"
-                                                   class="form-control"
-                                                   placeholder="Tracking Number" />
+                                        <div class="d-flex gap-2">
+
+                                            <button type="submit"
+                                                    name="OrderStatus"
+                                                    value="@OrderStatus.Shipped"
+                                                    class="btn btn-success">
+                                                <i class="bi bi-check-circle"></i>
+                                                Confirm Shipment
+                                            </button>
+
+                                            <button type="button" id="cancelShipping" class="btn btn-outline-secondary">
+                                                Cancel
+                                            </button>
+
                                         </div>
-
-                                    </div>
-
-                                    <div class="d-flex gap-2">
-
-                                        <button type="submit"
-                                                name="status"
-                                                value="@OrderStatus.Shipped"
-                                                class="btn btn-success">
-                                            <i class="bi bi-check-circle"></i>
-                                            Confirm Shipment
-                                        </button>
-
-                                        <button type="button" id="cancelShipping" class="btn btn-outline-secondary">
-                                            Cancel
-                                        </button>
 
                                     </div>
 
                                 </div>
+                            }
+                            else if (Model.OrderStatus == OrderStatus.Shipped)
+                            {
+                                <button type="submit"
+                                        name="OrderStatus"
+                                        value="@OrderStatus.Delivered"
+                                        class="btn btn-success">
+                                    <i class="bi bi-check-circle"></i>
+                                    Mark as Delivered
+                                </button>
 
-                            </div>
-                        }
-                        else if (Model.OrderStatus == OrderStatus.Shipped)
-                        {
-                            <button type="submit"
-                                    name="status"
-                                    value="@OrderStatus.Delivered"
-                                    class="btn btn-success">
-                                <i class="bi bi-check-circle"></i>
-                                Mark as Delivered
-                            </button>
+                                <div class="alert alert-light border mt-3 mb-0">
+                                    <strong>Shipping Company:</strong> @Model.Carrier
+                                    <br />
+                                    <strong>Tracking Number:</strong> @Model.TrackingNumber
+                                </div>
+                            }
 
-                            <div class="alert alert-light border mt-3 mb-0">
-                                <strong>Shipping Company:</strong> @Model.Carrier
-                                <br />
-                                <strong>Tracking Number:</strong> @Model.TrackingNumber
-                            </div>
-                        }
+                            @if (Model.OrderStatus == OrderStatus.Delivered &&
+                                 Model.PaymentStatus == PaymentStatus.ApprovedForDelayedPayment)
+                            {
+                                <button type="submit"
+                                        name="PaymentStatus"
+                                        value="@PaymentStatus.Paid"
+                                        class="btn btn-warning">
+                                    <i class="bi bi-credit-card"></i>
+                                    Pay Now
+                                </button>
+                            }
 
-                        @if (Model.OrderStatus == OrderStatus.Delivered &&
-                          Model.PaymentStatus == PaymentStatus.ApprovedForDelayedPayment)
-                        {
-                            <button type="submit"
-                                    name="paymentStatus"
-                                    value="@PaymentStatus.Paid"
-                                    class="btn btn-warning">
-                                <i class="bi bi-credit-card"></i>
-                                Pay Now
-                            </button>
-                        }
+                        </form>
 
-                    </form>
+
+                 
 
                 </div>
 

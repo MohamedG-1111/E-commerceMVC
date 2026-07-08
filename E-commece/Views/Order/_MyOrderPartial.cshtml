@@ -32,14 +32,15 @@
                                     var statusClass = order.OrderStatus?.ToString().ToLower() switch
                                     {
                                         "pending" => "bg-warning-subtle text-warning-emphasis",
-                                        "approved" => "bg-info-subtle text-info-emphasis",
+                                        "approved" => "bg-primary-subtle text-primary-emphasis",
                                         "processing" => "bg-info-subtle text-info-emphasis",
-                                        "shipped" => "bg-primary-subtle text-primary-emphasis",
-                                        "completed" => "bg-success-subtle text-success-emphasis",
+                                        "shipped" => "bg-dark-subtle text-dark-emphasis",
+                                        "delivered" => "bg-success-subtle text-success-emphasis",
                                         "cancelled" => "bg-danger-subtle text-danger-emphasis",
                                         _ => "bg-secondary-subtle text-secondary-emphasis"
                                     };
                                 }
+
 
                                 <span class="badge rounded-pill @statusClass">
                                     @order.OrderStatus

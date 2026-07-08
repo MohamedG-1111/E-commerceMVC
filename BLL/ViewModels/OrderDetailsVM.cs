@@ -11,6 +11,9 @@
         public string OrderStatus { get; set; } = string.Empty;
 
         public string PaymentStatus { get; set; } = string.Empty;
+        public string? TrackingNumber { get; set; }
+
+        public string? Carrier { get; set; }
 
         public List<OrderDetailsItemVM> Items { get; set; } = new();
     }

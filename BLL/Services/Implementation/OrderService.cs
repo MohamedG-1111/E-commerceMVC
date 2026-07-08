@@ -147,7 +147,8 @@ namespace E_commerce.BLL.Services.Implementation
                     OrderDate = x.OrderDate,
                     OrderStatus = x.OrderStatus.ToString(),
                     PaymentStatus = x.PaymentStatus.ToString(),
-
+                    Carrier = x.Carrier,
+                    TrackingNumber = x.TrackingNumber,
                     Items = x.OrderDetails
                         .Select(d => new OrderDetailsItemVM
                         {
@@ -270,9 +271,32 @@ namespace E_commerce.BLL.Services.Implementation
             return Result<OrderDetailsForAdminVM>.Success(order);
         }
 
-        public Task<Result> UpdateOrderStatus(UpdateOrderStatus updateOrderStatus)
+        public async Task<Result> UpdateOrderStatus(UpdateOrderStatus updateOrderStatus)
         {
-            throw new NotImplementedException();
+            if (updateOrderStatus == null)
+                return Result.Failure("Invalid order status update data", errorType: ErrorType.VALIDATION);
+
+            var order = await unitOfWork.Repository<Order>().GetByIdAsync(updateOrderStatus.Id);
+            if (order == null)
+                return Result.Failure("Order Not Found", errorType: ErrorType.NOT_FOUND);
+
+            if (updateOrderStatus.OrderStatus.HasValue)
+                order.OrderStatus = updateOrderStatus.OrderStatus.Value;
+
+            if (updateOrderStatus.PaymentStatus.HasValue)
+                order.PaymentStatus = updateOrderStatus.PaymentStatus.Value;
+
+            if ((!string.IsNullOrEmpty(updateOrderStatus.TrackingNumber)) &&
+                !(string.IsNullOrEmpty(updateOrderStatus.Carrier)))
+            {
+                order.TrackingNumber = updateOrderStatus.TrackingNumber;
+                order.Carrier = updateOrderStatus.Carrier;
+                order.ShippingDate = DateTime.UtcNow;
+            }
+            unitOfWork.Repository<Order>().Update(order);
+            var result = await unitOfWork.SaveChangesAsync();
+
+            return result > 0 ? Result.Success() : Result.Failure("Failed Updated");
         }
     }
 }

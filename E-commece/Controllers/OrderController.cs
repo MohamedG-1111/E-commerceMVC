@@ -84,6 +84,19 @@ namespace E_commece.Controllers
                 return HandleResult(result);
             return View(result.Value);
         }
+
+        [Authorize(Roles = $"{Roles.Admin},{Roles.Employee}")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public async Task<IActionResult> UpdateStatus(UpdateOrderStatus updateOrderStatus)
+        {
+            var result = await orderService.UpdateOrderStatus(updateOrderStatus);
+            if (result.IsFailure)
+                return HandleResult(result);
+            TempData["Success"] = "Order status updated successfully.";
+            return RedirectToAction(nameof(GetOrderDetailsForAdmin), new { orderId = updateOrderStatus.Id });
+        }
     }
 }
 
