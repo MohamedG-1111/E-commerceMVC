@@ -231,6 +231,7 @@ namespace E_commerce.BLL.Services.Implementation
                 return;
 
             order.PaymentStatus = PaymentStatus.Rejected;
+            order.PaymentDate = DateTime.UtcNow;
             await _unitOfWork.SaveChangesAsync();
         }
 

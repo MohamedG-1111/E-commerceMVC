@@ -39,14 +39,15 @@ namespace E_commerce.BLL.Services.Implementation
                     "Must Be Login",
                     errorType: ErrorType.UNAUTHORIZED);
 
-            if (model is null || model.quantity <= 0)
+            if (model is null || model.Count <= 0)
                 return Result<CustomerCart>.Failure(
                     "Invalid Data",
                     errorType: ErrorType.VALIDATION);
 
-            var product = await productService.ProductDetailsAsync(model.ProductId);
+            var ProductDetailsVM = await productService.ProductDetailsAsync(model.ProductId);
 
-            if (product?.Value is null)
+
+            if (ProductDetailsVM?.Value is null)
                 return Result<CustomerCart>.Failure(
                     "Product Not Found",
                     errorType: ErrorType.NOT_FOUND);
@@ -66,14 +67,14 @@ namespace E_commerce.BLL.Services.Implementation
                 return Result<CustomerCart>.Failure(
                     "Product already exists in cart",
                     errorType: ErrorType.CONFLICT);
-
+            var product = ProductDetailsVM.Value.Product;
             cart.Items.Add(new CartItem
             {
-                ProductId = product.Value.Id,
-                Name = product.Value.Title,
-                Image = product.Value.ImageUrl,
-                Count = model.quantity,
-                Price = await pricingService.PriceForProductAsync(model.quantity, product.Value)
+                ProductId = product.Id,
+                Name = product.Title,
+                Image = product.ImageUrl,
+                Count = model.Count,
+                Price = await pricingService.PriceForProductAsync(model.Count, product)
             });
 
             return await CreateOrUpdateCartAsync(cart);
@@ -191,16 +192,37 @@ namespace E_commerce.BLL.Services.Implementation
 
             var item = cart.Items.FirstOrDefault(x => x.ProductId == productId);
 
+
             if (item is null)
                 return Result<CustomerCart>.Failure(
                     "Product not found in cart",
                     errorType: ErrorType.NOT_FOUND);
+            var product = await unitOfWork.Repository<Product>().GetAsQuery()
+               .FirstOrDefaultAsync(x => x.Id == productId);
+            if (product is null)
+            {
+                return Result<CustomerCart>.Failure(
+                     "Product not found",
+                     errorType: ErrorType.NOT_FOUND);
 
-            item.Count += change;
+            }
 
-            if (item.Count <= 0)
+            var newCount = item.Count + change;
+
+            if (newCount <= 0)
             {
                 cart.Items.Remove(item);
+            }
+            else
+            {
+                if (newCount > product.Stock)
+                {
+                    return Result<CustomerCart>.Failure(
+                        "The requested quantity is not available.",
+                        errorType: ErrorType.VALIDATION);
+                }
+
+                item.Count = newCount;
             }
 
 

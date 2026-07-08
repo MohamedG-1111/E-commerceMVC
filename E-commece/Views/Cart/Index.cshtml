@@ -4,121 +4,219 @@
 
 <div class="container py-5">
 
-        <div id="cart-container">
-            <partial name="_CartPartial.cshtml"/>
-        </div>
-    
+    <div id="cart-container">
+        <partial name="_CartPartial.cshtml" />
+    </div>
 
 </div>
+
+
 @section Scripts
 {
     <script>
-        // remove - btn Product
-        $(document).on("click", ".remove-btn", function() {
-                    var token = $('input[name="__RequestVerificationToken"]').val();
-            let id = $(this).data("id");
 
-            $.ajax({
-                url: "/Cart/RemoveProductFromCart",
-                type: "POST",
-                data: { productId: id },
-                headers: {
-        RequestVerificationToken: token
-    },
-                success: function(res) {
+        function updateCartCount() {
 
-                    $("#cart-container").html(res);
-                     $.get("/Cart/GetCartCount", function (count) {
-        $("#cart-count").text(count);
-    });
-
-                },
-                error: function() {
-                    alert("Error removing item");
-                }
-            });
-
-        });
-
-
-        // Refresh - btn Product
-        $(document).on("click", "#refresh-cart-btn", function() {
-
-            $.ajax({
-                url: "/Cart/RefreshCart",
-                type: "GET",
-                success: function(res) {
-
-                    $("#cart-container").html(res);
-                    $.get("/Cart/GetCartCount", function(count) {
-                        $("#cart-count").text(count);
-                    });
-
-                },
-                error: function() {
-                    alert("Error removing item");
-                }
-            });
-
-        });
-
-
-        // ------------------------ increase / decrease
-
-   $(document).on("click", ".increase-btn, .decrease-btn", function () {
-
-    let btn = $(this);
-    let productId = btn.data("id");
-    let isIncrease = btn.hasClass("increase-btn");
-    let change = isIncrease ? 1 : -1;
-
-    let row = btn.closest(".cart-item");
-    let countSpan = row.find(".item-count");
-    let price = parseFloat(row.find(".item-price").text().replace("$", ""));
-    let totalSpan = row.find(".item-total");
-
-    $.ajax({
-        url: "/Cart/ChangeQuanatity",
-        type: "Get",
-        data: {
-            productId: productId,
-            change: change
-        },
-        success: function (res) {
-            $("#cart-container").html(res);
-            $.get("/Cart/GetCartCount", function (count) {
+            $.get("/Cart/GetCartCount", function(count) {
                 $("#cart-count").text(count);
             });
-        },
-        error: function () {
-            alert("Error updating cart");
+
         }
-    });
-});
 
 
-// Clear Cart
+        function handleCartError(xhr) {
+
+            let message = xhr.responseJSON?.message
+                ?? "Something went wrong";
+
+            alert(message);
+
+        }
+
+
+
+        // Remove Product
+
+        $(document).on("click", ".remove-btn", function() {
+
+            let token = $('input[name="__RequestVerificationToken"]').val();
+
+            let id = $(this).data("id");
+
+
+            $.ajax({
+
+                url: "/Cart/RemoveProductFromCart",
+
+                type: "POST",
+
+                data: {
+                    productId: id
+                },
+
+                headers: {
+                    RequestVerificationToken: token
+                },
+
+
+                success: function(res) {
+
+                    $("#cart-container").html(res);
+
+                    updateCartCount();
+
+                },
+
+
+                error: handleCartError
+
+            });
+
+
+        });
+
+
+
+
+
+        // Refresh Cart
+
+        $(document).on("click", "#refresh-cart-btn", function() {
+
+
+            $.ajax({
+
+                url: "/Cart/RefreshCart",
+
+                type: "GET",
+
+
+                success: function(res) {
+
+
+                    $("#cart-container").html(res);
+
+                    updateCartCount();
+
+
+                },
+
+
+                error: handleCartError
+
+
+            });
+
+
+        });
+
+
+
+
+
+
+
+        // Increase / Decrease Quantity
+
+
+        $(document).on("click", ".increase-btn, .decrease-btn", function() {
+
+
+            let btn = $(this);
+
+
+            let productId = btn.data("id");
+
+
+            let change = btn.hasClass("increase-btn") ? 1 : -1;
+
+
+
+            $.ajax({
+
+
+                url: "/Cart/ChangeQuanatity",
+
+
+                type: "GET",
+
+
+                data: {
+
+                    productId: productId,
+
+                    change: change
+
+                },
+
+
+                success: function(res) {
+
+
+                    $("#cart-container").html(res);
+
+
+                    updateCartCount();
+
+
+                },
+
+
+                error: handleCartError
+
+
+            });
+
+
+
+        });
+
+
+
+
+
+
+
+        // Clear Cart
+
 
         $(document).on("click", "#clear-cart-btn", function() {
 
 
             $.ajax({
+
+
                 url: "/Cart/ClearCart",
+
+
                 type: "GET",
+
+
+
                 success: function(res) {
 
+
                     $("#cart-container").html(res);
-                    $.get("/Cart/GetCartCount", function(count) {
-                        $("#cart-count").text(count);
-                    });
+
+
+                    updateCartCount();
+
+
                 },
-                error: function() {
-                    alert("Error Clear Cart");
-                }
+
+
+                error: handleCartError
+
+
+
             });
 
-        });
-    </script>
 
+
+        });
+
+
+
+    </script>
 
 }

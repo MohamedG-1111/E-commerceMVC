@@ -13,5 +13,8 @@
         public string PaymentStatus { get; set; }
 
         public int ItemsCount { get; set; }
+
+
+        public string? ApplicationUserEmail { get; set; }
     }
 }

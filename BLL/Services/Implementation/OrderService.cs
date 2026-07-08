@@ -3,6 +3,7 @@ using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities;
 using E_commerce.DAL.Entities.enums;
+using Ecommerce.Utility;
 using Ecommerce.Utility.Pagination;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
@@ -67,16 +68,20 @@ namespace E_commerce.BLL.Services.Implementation
             return Result<CheckoutViewModel>.Success(checkoutVm);
         }
 
-        public async Task<Result<PaginatedResult<OrderVM>>> GetMyOrdersAsync(PaginationParameters parameters, OrderFilter? filter = null)
+        public async Task<Result<PaginatedResult<OrderVM>>> GetOrdersAsync(PaginationParameters parameters, OrderFilter? filter = null)
         {
             var userId = currentUserService.UserId;
-            if (userId == null)
-                return Result<PaginatedResult<OrderVM>>.Failure(
-                    "Must be logged in", errorType: ErrorType.UNAUTHORIZED);
-
+            var role = currentUserService.Role;
             var query = unitOfWork.Repository<Order>()
-                .GetAsQuery()
-                .Where(x => x.ApplicationUserId == userId);
+                .GetAsQuery();
+            if (role != Roles.Admin)
+            {
+                if (userId == null)
+                    return Result<PaginatedResult<OrderVM>>.Failure(
+                        "Must be logged in", errorType: ErrorType.UNAUTHORIZED);
+                query = query.Where(x => x.ApplicationUserId == userId);
+
+            }
             if (filter is not null)
             {
 
@@ -94,8 +99,14 @@ namespace E_commerce.BLL.Services.Implementation
 
                 if (filter.To.HasValue)
                     query = query.Where(x => x.OrderDate <= filter.To);
+
+                if (role == Roles.Admin && !string.IsNullOrWhiteSpace(filter.Email))
+                {
+                    query = query.Where(x => x.ApplicationUser.Email.Contains(filter.Email));
+                }
+
+
             }
-            parameters.PageSize = 3;
             var orders = await query.OrderByDescending(x => x.OrderDate).
              Select(x => new OrderVM
              {
@@ -104,7 +115,8 @@ namespace E_commerce.BLL.Services.Implementation
                  OrderDate = x.OrderDate,
                  OrderStatus = x.OrderStatus.ToString(),
                  PaymentStatus = x.PaymentStatus.ToString(),
-                 ItemsCount = x.OrderDetails.Sum(d => d.Count)
+                 ItemsCount = x.OrderDetails.Sum(d => d.Count),
+                 ApplicationUserEmail = x.ApplicationUser.Email,
              })
              .ToPagedResultAsync(parameters);
 
@@ -211,6 +223,56 @@ namespace E_commerce.BLL.Services.Implementation
                     errorType: ErrorType.INTERNAL_ERROR);
             await cartService.ClearCartAsync(order.ApplicationUserId);
             return Result.Success();
+        }
+
+        public async Task<Result<OrderDetailsForAdminVM>> GetOrderDetailsForAdmin(int OrderId)
+        {
+            if (OrderId <= 0)
+                return Result<OrderDetailsForAdminVM>.Failure(
+                    "Order Not Found",
+                    errorType: ErrorType.NOT_FOUND);
+
+            var repo = unitOfWork.Repository<Order>();
+
+            var order = await repo.GetAsQuery(false)
+                .Where(x => x.Id == OrderId)
+                .Select(x => new OrderDetailsForAdminVM
+                {
+                    OrderId = x.Id,
+                    UserName = x.ApplicationUser.FirstName + " " + x.ApplicationUser.LastName,
+                    UserEmail = x.ApplicationUser.Email!,
+                    Address = x.ApplicationUser.StreetAddress!,
+                    PostalCode = x.ApplicationUser.PostalCode!,
+                    Phone = x.ApplicationUser.PhoneNumber!,
+                    OrderTotal = x.OrderTotal,
+                    OrderDate = x.OrderDate,
+                    OrderStatus = x.OrderStatus,
+                    PaymentStatus = x.PaymentStatus,
+                    PaymentDate = x.PaymentDate,
+                    PaymentIntentId = x.PaymentIntentId,
+                    Carrier = x.Carrier,
+                    TrackingNumber = x.TrackingNumber,
+                    ShippingDate = x.ShippingDate,
+                    OrderDetails = x.OrderDetails.Select(d => new OrderItemVM
+                    {
+                        ProductName = d.Product.Title,
+                        Price = d.Price,
+                        Count = d.Count
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (order == null)
+                return Result<OrderDetailsForAdminVM>.Failure(
+                    "Order Not Found",
+                    errorType: ErrorType.NOT_FOUND);
+
+            return Result<OrderDetailsForAdminVM>.Success(order);
+        }
+
+        public Task<Result> UpdateOrderStatus(UpdateOrderStatus updateOrderStatus)
+        {
+            throw new NotImplementedException();
         }
     }
 }

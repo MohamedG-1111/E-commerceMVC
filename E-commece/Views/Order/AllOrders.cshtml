@@ -1,9 +1,10 @@
-﻿@using Ecommerce.Utility.Pagination
-@using E_commerce.DAL.Entities.enums
+﻿@using E_commerce.DAL.Entities.enums
+@using Ecommerce.Utility
+@using Ecommerce.Utility.Pagination
 @model PaginatedResult<OrderVM>
 
 @{
-    ViewData["Title"] = "My Orders";
+    ViewData["Title"] = "Orders";
 }
 
 <div class="container my-5">
@@ -75,7 +76,10 @@
                                id="to"
                                class="form-control" />
                     </div>
-
+                    @if (User.IsInRole(Roles.Admin))
+                    {
+                        <input id="email" class="form-control" placeholder="Search by email" />
+                    }
                     <div class="col-lg-2 d-grid">
                         <button type="button"
                                 id="clearFilter"
@@ -110,7 +114,8 @@
                     Status: $("#status").val(),
                     PaymentStatus: $("#payment").val(),
                     From: $("#from").val(),
-                    To: $("#to").val()
+                    To: $("#to").val(),
+                    Email: $("#email").val()
                 },
                 success: function(result) {
                     $("#orders-container").html(result);
@@ -127,9 +132,13 @@
         });
 
         // Filters
-        $("#status, #payment, #from, #to").on("change", function() {
-            loadOrders();
-        });
+        $("#status, #payment, #from, #to").on("change", function () {
+    loadOrders();
+});
+
+$("#email").on("input", function () {
+    loadOrders();
+});
 
         // Clear Filters
         $("#clearFilter").on("click", function() {
@@ -138,6 +147,7 @@
             $("#payment").val("");
             $("#from").val("");
             $("#to").val("");
+            $("#email").val("");
 
             loadOrders();
         });

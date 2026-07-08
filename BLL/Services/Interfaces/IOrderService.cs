@@ -10,7 +10,10 @@ namespace E_commerce.BLL.Services.Interfaces
 
         public Task<Result> PlaceOrderAsync();
 
-        public Task<Result<PaginatedResult<OrderVM>>> GetMyOrdersAsync(PaginationParameters Parameters, OrderFilter? filter = null);
+        public Task<Result<PaginatedResult<OrderVM>>> GetOrdersAsync(PaginationParameters Parameters, OrderFilter? filter = null);
         public Task<Result<OrderDetailsVM>> GetOrderDetails(int OrderId);
+        public Task<Result<OrderDetailsForAdminVM>> GetOrderDetailsForAdmin(int OrderId);
+
+        public Task<Result> UpdateOrderStatus(UpdateOrderStatus updateOrderStatus);
     }
 }

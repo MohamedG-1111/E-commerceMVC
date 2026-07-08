@@ -13,5 +13,7 @@ namespace E_commerce.BLL.ViewModels
         public DateTime? From { get; set; }
 
         public DateTime? To { get; set; }
+
+        public string? Email { get; set; }
     }
 }

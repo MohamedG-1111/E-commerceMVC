@@ -67,7 +67,7 @@ namespace E_commece.Controllers
 
             var model = new CreateOrUpdateProductViewModel
             {
-                Product = Resultproduct.Value,
+                Product = Resultproduct.Value!.Product,
                 Categories = await _categoryService.GetAllCategoriesItems()
             };
             ViewBag.ReturnUrl = returnUrl;
@@ -152,6 +152,24 @@ namespace E_commece.Controllers
             var result = await _productService.AllProductsAsync(parameter, searchTerm, category);
 
             return PartialView("~/Views/Product/_ProductTablePartial.cshtml", result.Value);
+        }
+
+        [AcceptVerbs("GET", "POST")]
+        public async Task<IActionResult> ValidateCount(int count, int productId)
+        {
+            var result = await _productService.ProductDetailsAsync(productId);
+
+            if (result.IsFailure)
+                return Json("Product not found.");
+
+            var product = result.Value!.Product;
+
+            if (count < 1)
+                return Json("Quantity must be greater than 0.");
+
+            if (count > product.Stock)
+                return Json("The requested quantity is not available.");
+            return Json(true);
         }
     }
 }

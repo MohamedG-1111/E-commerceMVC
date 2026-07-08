@@ -2,7 +2,6 @@
 using DataAccessLayer.Repositories.Interfaces;
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
-using E_commerce.DAL.Entities;
 using E_commerce.Utility.Settings;
 using Ecommerce.Utility.Pagination;
 using Ecommerce.Utility.Result;
@@ -119,18 +118,28 @@ namespace E_commerce.BLL.Services.Implementation
             return Result.Failure("Failed to delete product.", errorType: ErrorType.INTERNAL_ERROR);
         }
 
-        public async Task<Result<Product?>> ProductDetailsAsync(int Id)
+        public async Task<Result<ProductDetailsVM?>> ProductDetailsAsync(int Id)
         {
             if (Id <= 0)
-                return Result<Product?>.Failure("Invalid product ID.", errorType: ErrorType.NOT_FOUND);
+                return Result<ProductDetailsVM?>.Failure("Invalid product ID.", errorType: ErrorType.NOT_FOUND);
 
             var product = await _unitOfWork.ProductRepository.GetAsQuery()
                 .Include(x => x.Category)
                 .FirstOrDefaultAsync(x => x.Id == Id);
             if (product == null)
-                return Result<Product?>.Failure("Product not found.", errorType: ErrorType.NOT_FOUND);
+                return Result<ProductDetailsVM?>.Failure("Product not found.", errorType: ErrorType.NOT_FOUND);
 
-            return Result<Product?>.Success(product);
+            var productDetailsVM = new ProductDetailsVM
+            {
+                Product = product,
+                AddToCart = new AddToCartViewModel
+                {
+                    ProductId = product.Id,
+                    Count = 1
+                }
+            };
+
+            return Result<ProductDetailsVM?>.Success(productDetailsVM);
         }
 
         public async Task<Result> UpdateProductAsync(CreateOrUpdateProductViewModel obj)

@@ -1,9 +1,9 @@
 ﻿@using E_commerce.DAL.Entities
 @using E_commerce.Utility.Settings
-@model Product
+@model ProductDetailsVM
 
 @{
-    ViewData["Title"] = Model.Title;
+    ViewData["Title"] = Model.Product.Title;
 }
 
 <div class="container py-4">
@@ -15,11 +15,11 @@
             <!-- Product Image -->
             <div class="col-lg-5 bg-light d-flex align-items-center justify-content-center p-5">
 
-           @if (!string.IsNullOrEmpty(Model.ImageUrl))
+           @if (!string.IsNullOrEmpty(Model.Product.ImageUrl))
 {
                     <img asp-append-version="true"
-                         src="~/@FileSettings.ImagesPathProducts/@Model.ImageUrl"
-                         alt="@Model.Title"
+                         src="~/@FileSettings.ImagesPathProducts/@Model.Product.ImageUrl"
+                         alt="@Model.Product.Title"
                          class="img-fluid rounded shadow-sm border"
                    style="max-height:490px; object-fit:contain;" />
 
@@ -35,25 +35,25 @@
 
                     <!-- Category -->
                     <span class="badge bg-dark px-3 py-2 rounded-pill mb-3">
-                        @Model.Category?.Name
+                        @Model.Product.Category?.Name
                     </span>
 
                     <!-- Title -->
                     <h1 class="fw-bold display-6 mb-2">
-                        @Model.Title
+                        @Model.Product.Title
                     </h1>
                     <!-- Description -->
                     <h5 class="fw-bold mb-3">
-                        @Html.Raw(Model.Description)
+                        @Html.Raw(Model.Product.Description)
                     </h5>
                     <!-- Author -->
                     <p class="text-secondary fs-5 mb-4">
-                        By <span class="fw-semibold">@Model.Author</span>
+                        By <span class="fw-semibold">@Model.Product.Author</span>
                     </p>
                     <!-- ISBN -->
                     <div class="mb-4">
                         <span class="badge text-bg-secondary p-2">
-                            ISBN: @Model.ISBN
+                            ISBN: @Model.Product.ISBN
                         </span>
                     </div>
 
@@ -63,17 +63,17 @@
                         <div class="d-flex align-items-center gap-3">
 
                             <h2 class="text-success fw-bold mb-0">
-                                $@Model.PriceFor1To50
+                                $@Model.Product.PriceFor1To50
                             </h2>
 
                             <span class="text-decoration-line-through text-muted fs-5">
-                                $@Model.ListPrice
+                                $@Model.Product.ListPrice
                             </span>
 
                         </div>
 
                         <small class="text-success fw-semibold">
-                            Save $@(Model.ListPrice - Model.PriceFor1To50)
+							Save $@(Model.Product.ListPrice - Model.Product.    PriceFor1To50)
                         </small>
 
                     </div>
@@ -92,7 +92,7 @@
                                     </small>
 
                                     <h4 class="text-primary fw-bold mt-2">
-                                        $@Model.PriceFor1To50
+                                        $@Model.Product.PriceFor1To50
                                     </h4>
                                 </div>
                             </div>
@@ -106,7 +106,7 @@
                                     </small>
 
                                     <h4 class="text-primary fw-bold mt-2">
-                                        $@Model.PriceFor50Plus
+                                        $@Model.Product.PriceFor50Plus
                                     </h4>
                                 </div>
                             </div>
@@ -120,7 +120,7 @@
                                     </small>
 
                                     <h4 class="text-primary fw-bold mt-2">
-                                        $@Model.PriceFor100Plus
+                                        $@Model.Product.PriceFor100Plus
                                     </h4>
                                 </div>
                             </div>
@@ -128,45 +128,8 @@
 
                     </div>
 
-                    <!-- Add To Cart -->
-                    <form asp-controller="Cart"
-                          asp-action="AddToCart"
-                          method="post"
-                          class="mt-5">
-
-                        <input type="hidden" name="ProductId" value="@Model.Id" />
-
-                        <div class="row g-3">
-
-                            <div class="col-md-3">
-                                <input type="number"
-                                       name="quantity"
-                                       value="1"
-                                       min="1"
-                                       class="form-control form-control-lg text-center">
-                            </div>
-
-                            <div class="col-md-6">
-                                <button type="submit"
-                                        class="btn btn-success btn-lg w-100">
-
-                                    <i class="bi bi-cart-plus-fill me-2"></i>
-                                    Add To Cart
-
-                                </button>
-                            </div>
-
-                            <div class="col-md-3">
-                                <a asp-controller="Home"
-                                   asp-action="Index"
-                                   class="btn btn-outline-secondary btn-lg w-100">
-                                    Back
-                                </a>
-                            </div>
-
-                        </div>
-
-                    </form>
+                    <!-- AddToCart -->
+                    <partial name="/Views/Product/_AddToCartPartial.cshtml" model="@Model.AddToCart" />
 
                 </div>
 
@@ -177,3 +140,8 @@
     </div>
 
 </div>
+@section Scripts{
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+
+}

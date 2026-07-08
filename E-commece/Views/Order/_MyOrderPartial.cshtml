@@ -1,5 +1,6 @@
-﻿@using Ecommerce.Utility.Pagination
-@using E_commerce.DAL.Entities.enums
+﻿@using E_commerce.DAL.Entities.enums
+@using Ecommerce.Utility
+@using Ecommerce.Utility.Pagination
 @model PaginatedResult<OrderVM>
 
 <div id="orders-container">
@@ -72,15 +73,30 @@
 
                             <td class="text-end pe-4">
                                 <div class="d-inline-flex gap-2">
+                                    @if (User.IsInRole(Roles.Admin) || User.IsInRole(Roles.Employee))
+                                    {
+                                        <a asp-controller="Order"
+                                           asp-action="GetOrderDetailsForAdmin"
+                                           asp-route-orderId="@order.Id"
+                                           class="btn btn-sm btn-outline-dark">
+                                            View Details
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Order"
+                                           asp-action="GetOrderDetails"
+                                           asp-route-orderId="@order.Id"
+                                           class="btn btn-sm btn-outline-dark">
+                                            View Details
+                                        </a>
+                                    }
+                                    
+                                   
+                                    @if (!User.IsInRole(Roles.Admin) && !User.IsInRole(Roles.Employee))
+                                    {
 
-                                    <a asp-controller="Order"
-                                       asp-action="GetOrderDetails"
-                                       asp-route-orderId="@order.Id"
-                                       class="btn btn-sm btn-outline-dark">
-                                        View Details
-                                    </a>
-
-                                    @if (order.OrderStatus == OrderStatus.Pending.ToString() &&
+                                        @if (order.OrderStatus == OrderStatus.Pending.ToString() &&
      (order.PaymentStatus == PaymentStatus.Pending.ToString()||
       order.PaymentStatus == PaymentStatus.Rejected.ToString()))
                                     {
@@ -93,6 +109,7 @@
                                                 ? "Pay Now"
                                                 : "Retry Payment")
                                         </a>
+                                    }
                                     }
 
                                 </div>
