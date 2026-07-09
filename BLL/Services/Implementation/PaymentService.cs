@@ -315,6 +315,19 @@ namespace E_commerce.BLL.Services.Implementation
 
             if (order.OrderStatus != OrderStatus.Pending)
                 return Result<OrderPaymentVM>.Failure("Order cannot be paid", errorType: ErrorType.CONFLICT);
+            var paymentIntentService = new PaymentIntentService();
+            if (!string.IsNullOrEmpty(order.PaymentIntentId))
+            {
+                var intent = await paymentIntentService.GetAsync(order.PaymentIntentId);
+                if (intent.Status == "succeeded")
+                {
+                    await HandlePaymentSucceededAsync(order.PaymentIntentId);
+
+                    return Result<OrderPaymentVM>.Failure(
+                        "Payment has already been completed.", errorType: ErrorType.CONFLICT);
+                }
+
+            }
 
             foreach (var item in order.OrderDetails)
             {
@@ -378,18 +391,7 @@ namespace E_commerce.BLL.Services.Implementation
 
 
             var paymentIntentService = new PaymentIntentService();
-            if (!string.IsNullOrEmpty(order.PaymentIntentId))
-            {
-                var intent = await paymentIntentService.GetAsync(order.PaymentIntentId);
-                if (intent.Status == "succeeded")
-                {
-                    await HandlePaymentSucceededAsync(order.PaymentIntentId);
 
-                    return Result<RetryPaymentClientSecretVM>.Failure(
-                        "Payment has already been completed.");
-                }
-
-            }
             var paymentIntent = await paymentIntentService.CreateAsync(
                 new PaymentIntentCreateOptions
                 {
