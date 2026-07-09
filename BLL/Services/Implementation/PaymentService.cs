@@ -290,6 +290,7 @@ namespace E_commerce.BLL.Services.Implementation
         }
         public async Task<Result<OrderPaymentVM>> RetryPaymentAsync(int orderId)
         {
+            StripeConfiguration.ApiKey = _config["StripeSettings:SecretKey"];
             var userId = currentUserService.UserId;
 
             if (string.IsNullOrEmpty(userId))

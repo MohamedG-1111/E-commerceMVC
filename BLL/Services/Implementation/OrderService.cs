@@ -77,7 +77,7 @@ namespace E_commerce.BLL.Services.Implementation
             var role = currentUserService.Role;
             var query = unitOfWork.Repository<Order>()
                 .GetAsQuery();
-            if (role != Roles.Admin)
+            if (role != Roles.Admin && role != Roles.Employee)
             {
                 if (userId == null)
                     return Result<PaginatedResult<OrderVM>>.Failure(

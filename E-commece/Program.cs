@@ -19,7 +19,9 @@ namespace E_commece
 
             await app.SeedDatabaseAsync();
 
-            app.UseApplicationMiddlewares();
+            app.UseApplicationMiddlewares().
+            RegisterRecurringJobs();
+
             app.Run();
         }
     }
