@@ -1,4 +1,5 @@
 ﻿using E_commece.Middlewares;
+using Hangfire;
 
 namespace E_commece.Extensions
 {
@@ -17,7 +18,7 @@ namespace E_commece.Extensions
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseHangfireDashboard("/hangfire");
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",

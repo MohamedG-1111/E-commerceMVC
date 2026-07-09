@@ -27,21 +27,24 @@ namespace E_commece.Controllers
 
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = $"{Roles.Customer},{Roles.Company}")]
         public async Task<IActionResult> PlaceOrder()
         {
             var result = await orderService.PlaceOrderAsync();
-            if (result.IsFailure)
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+
+                return HandleAjaxResult(result);
+
+            if (result.IsSuccess)
             {
-                TempData["Error"] = result.ErrorMessage;
-                return RedirectToAction(nameof(CheckOut));
+                TempData["success"] = "Order placed successfully.";
+                return RedirectToAction(nameof(AllOrders));
             }
 
-            TempData["Success"] = "Order placed successfully.";
-            return RedirectToAction("MyOrders");
+            return HandleResult(result);
         }
 
 

@@ -8,6 +8,13 @@ namespace E_commece.Controllers
     {
         protected IActionResult HandleAjaxResult(Result result)
         {
+            if (result.IsSuccess)
+            {
+                return Ok(new
+                {
+                    success = true
+                });
+            }
             return result.ErrorType switch
             {
                 ErrorType.UNAUTHORIZED => Unauthorized(new

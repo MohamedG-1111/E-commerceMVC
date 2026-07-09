@@ -1,4 +1,6 @@
 ﻿using DataAccessLayer.Repositories.Interfaces;
+using E_commerce.BLL.Common.Dto;
+using E_commerce.BLL.Common.EmailTemplates;
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities;
@@ -7,6 +9,7 @@ using Ecommerce.Utility;
 using Ecommerce.Utility.Pagination;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Order = E_commerce.DAL.Entities.Order;
 namespace E_commerce.BLL.Services.Implementation
@@ -222,7 +225,11 @@ namespace E_commerce.BLL.Services.Implementation
             if (result <= 0)
                 return Result.Failure("Failed to place order",
                     errorType: ErrorType.INTERNAL_ERROR);
-            await cartService.ClearCartAsync(order.ApplicationUserId);
+            BackgroundJob.Enqueue(() => cartService.ClearCartAsync(order.ApplicationUserId));
+            var body = await OrderEmailAsync(order.Id);
+            BackgroundJob.Enqueue<EmailService>(x => x.SendEmailAsync(new EmailRequestDto(currentUser.Email!,
+                "Order Confirmation",
+                body)));
             return Result.Success();
         }
 
@@ -276,7 +283,10 @@ namespace E_commerce.BLL.Services.Implementation
             if (updateOrderStatus == null)
                 return Result.Failure("Invalid order status update data", errorType: ErrorType.VALIDATION);
 
-            var order = await unitOfWork.Repository<Order>().GetByIdAsync(updateOrderStatus.Id);
+            var order = await unitOfWork.Repository<Order>()
+                .GetAsQuery(false)
+                .Include(o => o.ApplicationUser)
+                .FirstOrDefaultAsync(o => o.Id == updateOrderStatus.Id);
             if (order == null)
                 return Result.Failure("Order Not Found", errorType: ErrorType.NOT_FOUND);
 
@@ -284,7 +294,10 @@ namespace E_commerce.BLL.Services.Implementation
                 order.OrderStatus = updateOrderStatus.OrderStatus.Value;
 
             if (updateOrderStatus.PaymentStatus.HasValue)
+            {
                 order.PaymentStatus = updateOrderStatus.PaymentStatus.Value;
+                order.PaymentDate = DateTime.UtcNow;
+            }
 
             if ((!string.IsNullOrEmpty(updateOrderStatus.TrackingNumber)) &&
                 !(string.IsNullOrEmpty(updateOrderStatus.Carrier)))
@@ -295,8 +308,28 @@ namespace E_commerce.BLL.Services.Implementation
             }
             unitOfWork.Repository<Order>().Update(order);
             var result = await unitOfWork.SaveChangesAsync();
+            if (result > 0)
+            {
+                var body = await OrderEmailAsync(order.Id);
+                BackgroundJob.Enqueue<EmailService>(x => x.SendEmailAsync(new EmailRequestDto(order.ApplicationUser.Email!,
+                    "Order Status Updated",
+                    body)));
+            }
 
             return result > 0 ? Result.Success() : Result.Failure("Failed Updated");
+        }
+
+
+        public async Task<string> OrderEmailAsync(int orderId)
+        {
+            var order = await unitOfWork.Repository<Order>()
+                .GetAsQuery()
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order is null)
+                throw new Exception("Order not found");
+
+            return EmailTemplates.OrderEmail(order);
         }
     }
 }

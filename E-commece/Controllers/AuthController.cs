@@ -1,4 +1,4 @@
-﻿using E_commerce.BLL.Dto;
+﻿using E_commerce.BLL.Common.Dto;
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using Ecommerce.Utility.Result;

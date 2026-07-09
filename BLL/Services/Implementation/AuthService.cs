@@ -1,5 +1,5 @@
 ﻿using DataAccessLayer.Repositories.Interfaces;
-using E_commerce.BLL.Dto;
+using E_commerce.BLL.Common.Dto;
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities.Users;

@@ -5,8 +5,8 @@
         public static string BuildActionEmail(
             string title,
             string message,
-            string buttonText,
-            string actionLink)
+            string? buttonText = null,
+            string? actionLink = null)
         {
             return $@"
 <table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f4f4;padding:40px 0;'>

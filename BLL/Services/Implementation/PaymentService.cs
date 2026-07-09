@@ -1,9 +1,12 @@
 ﻿using DataAccessLayer.Repositories.Interfaces;
+using E_commerce.BLL.Common.Dto;
+using E_commerce.BLL.Common.EmailTemplates;
 using E_commerce.BLL.Services.Interfaces;
 using E_commerce.BLL.ViewModels;
 using E_commerce.DAL.Entities.enums;
 using Ecommerce.Utility.Result;
 using Ecommerce.Utility.ResultPattern;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Stripe;
@@ -152,9 +155,10 @@ namespace E_commerce.BLL.Services.Implementation
         private async Task HandlePaymentSucceededAsync(string paymentIntentId)
         {
             var order = await _unitOfWork.Repository<OrderEntity>()
-                .GetAsQuery(false)
-                .Include(o => o.OrderDetails)
-                .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId);
+          .GetAsQuery(false)
+          .Include(o => o.ApplicationUser)
+          .Include(o => o.OrderDetails)
+          .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId);
 
             if (order == null)
                 return;
@@ -192,11 +196,16 @@ namespace E_commerce.BLL.Services.Implementation
 
                 order.PaymentStatus = PaymentStatus.Paid;
                 order.OrderStatus = OrderStatus.Approved;
+                order.PaymentDate = DateTime.UtcNow;
+
 
                 _unitOfWork.Repository<OrderEntity>().Update(order);
 
                 await _unitOfWork.SaveChangesAsync();
-
+                var body = EmailTemplates.OrderEmail(order);
+                BackgroundJob.Enqueue<EmailService>(x => x.SendEmailAsync(new EmailRequestDto(order.ApplicationUser.Email!,
+                    "Order Status Updated",
+                    body)));
                 await transaction.CommitAsync();
             }
             catch
@@ -231,7 +240,6 @@ namespace E_commerce.BLL.Services.Implementation
                 return;
 
             order.PaymentStatus = PaymentStatus.Rejected;
-            order.PaymentDate = DateTime.UtcNow;
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -368,8 +376,20 @@ namespace E_commerce.BLL.Services.Implementation
                 .GetAsQuery(false)
                 .FirstAsync(x => x.Id == orderId && x.ApplicationUserId == userId);
 
-            var paymentIntentService = new PaymentIntentService();
 
+            var paymentIntentService = new PaymentIntentService();
+            if (!string.IsNullOrEmpty(order.PaymentIntentId))
+            {
+                var intent = await paymentIntentService.GetAsync(order.PaymentIntentId);
+                if (intent.Status == "succeeded")
+                {
+                    await HandlePaymentSucceededAsync(order.PaymentIntentId);
+
+                    return Result<RetryPaymentClientSecretVM>.Failure(
+                        "Payment has already been completed.");
+                }
+
+            }
             var paymentIntent = await paymentIntentService.CreateAsync(
                 new PaymentIntentCreateOptions
                 {
