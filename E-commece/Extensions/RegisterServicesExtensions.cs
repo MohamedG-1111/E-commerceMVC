@@ -33,6 +33,7 @@ namespace E_commece.Extensions
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IPricingService, PricingService>();
             services.AddScoped<IDailyJobService, DailyJobService>();
+            services.AddTransient<ISMSService, SMSService>();
 
             return services;
         }

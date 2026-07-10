@@ -19,14 +19,16 @@ namespace E_commerce.BLL.Services.Implementation
         private readonly ICartService cartService;
         private readonly ICurrentUserService currentUserService;
         private readonly IUnitOfWork unitOfWork;
+        private readonly ISMSService smsService;
 
         public OrderService(ICartService cartService,
             ICurrentUserService currentUserService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork, ISMSService smsService)
         {
             this.cartService = cartService;
             this.currentUserService = currentUserService;
             this.unitOfWork = unitOfWork;
+            this.smsService = smsService;
         }
         public async Task<Result<CheckoutViewModel>> GetCheckoutData()
         {
@@ -314,6 +316,15 @@ namespace E_commerce.BLL.Services.Implementation
                 BackgroundJob.Enqueue<EmailService>(x => x.SendEmailAsync(new EmailRequestDto(order.ApplicationUser.Email!,
                     "Order Status Updated",
                     body)));
+                var phoneNumber = order.ApplicationUser.PhoneNumber!.Trim();
+
+                if (!phoneNumber.StartsWith("+"))
+                {
+                    if (phoneNumber.StartsWith("0"))
+                        phoneNumber = "+20" + phoneNumber[1..];
+                }
+                BackgroundJob.Enqueue(() => SendSMSAsync(phoneNumber,
+                    $"Your order status has been updated to {order.OrderStatus}."));
             }
 
             return result > 0 ? Result.Success() : Result.Failure("Failed Updated");
@@ -330,6 +341,16 @@ namespace E_commerce.BLL.Services.Implementation
                 throw new Exception("Order not found");
 
             return EmailTemplates.OrderEmail(order);
+        }
+        public async Task SendSMSAsync(string phoneNumber, string message)
+        {
+            try
+            {
+                await smsService.SendSMSAsync(phoneNumber, message);
+            }
+            catch (Exception ex)
+            {
+            }
         }
     }
 }

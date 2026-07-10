@@ -17,6 +17,7 @@ namespace E_commece.Extensions
              configuration.GetConnectionString("DefaultConnection")));
 
             services.AddHangfireServer();
+
             services.Configure<TwilioSettings>(configuration.GetSection("TwilioSettings"));
             return services;
         }
