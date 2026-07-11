@@ -108,7 +108,7 @@ namespace E_commerce.BLL.Services.Implementation
             var confirmationLink =
             $"{request.Scheme}://{request.Host}/Account/ConfirmEmail?userId={user.Id}&token={encodedToken}";
 
-            // 👇 reuse نفس الميثود
+
             return await SendEmailConfirmationAsync(user.Email!, confirmationLink);
         }
 

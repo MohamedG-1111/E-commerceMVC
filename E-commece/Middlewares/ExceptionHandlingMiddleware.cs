@@ -4,16 +4,17 @@
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
-
+        private readonly IWebHostEnvironment _environment;
 
         public ExceptionHandlingMiddleware(
             RequestDelegate next,
-            ILogger<ExceptionHandlingMiddleware> logger)
+            ILogger<ExceptionHandlingMiddleware> logger,
+            IWebHostEnvironment environment)
         {
             _next = next;
             _logger = logger;
+            _environment = environment;
         }
-
 
         public async Task InvokeAsync(HttpContext context)
         {
@@ -23,15 +24,24 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    ex,
-                    "Unhandled Exception occurred");
+                _logger.LogError(ex,
+                    "Unhandled exception occurred while processing request {Path}",
+                    context.Request.Path);
 
-                context.Response.Redirect("/Home/Error");
+                if (_environment.IsDevelopment())
+                {
+                    throw;
+                }
+
+                context.Response.Clear();
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+                context.Request.Path = "/Home/Error";
+
+                await _next(context);
             }
         }
     }
-
 
     public static class MiddlewareExtensions
     {

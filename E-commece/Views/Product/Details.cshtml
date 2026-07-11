@@ -1,13 +1,12 @@
-﻿@using E_commerce.DAL.Entities
-@using E_commerce.Utility.Settings
+﻿@using E_commerce.Utility.Settings
 
-@model Product
+@model ProductDetailsVM
 
 @{
     ViewData["Title"] = "Product Details";
 }
 @{
-    var badgeClass = Model.Stock switch
+    var badgeClass = Model.Product.Stock switch
     {
         0 => "bg-danger",
         <= 5 => "bg-warning text-dark",
@@ -33,11 +32,11 @@
                 <!-- Image -->
                 <div class="col-lg-4 text-center">
 
-                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    @if (!string.IsNullOrEmpty(Model.Product.ImageUrl))
                     {
                         <img asp-append-version="true"
-                             src="~/@FileSettings.ImagesPathProducts/@Model.ImageUrl"
-                             alt="@Model.Title"
+                             src="~/@FileSettings.ImagesPathProducts/@Model.Product.ImageUrl"
+                             alt="@Model.Product.Title"
                              class="img-fluid rounded shadow-sm border"
                              style="max-height: 420px; object-fit: cover;" />
                     }
@@ -54,26 +53,26 @@
                 <!-- Info -->
                 <div class="col-lg-8">
 
-                    <h2 class="fw-bold mb-2">@Model.Title</h2>
-                    <h3 class="fw-bold mb-2">By @Model.Author</h3>
+                    <h2 class="fw-bold mb-2">@Model.Product.Title</h2>
+                    <h3 class="fw-bold mb-2">By @Model.Product.Author</h3>
 
                     <div class="mb-3">
                         <span class="badge bg-info fs-6">
-                            @Model.Category?.Name
+                            @Model.Product.Category?.Name
                         </span>
                     </div>
 
                     <div class="mb-3">
                         <span class="badge @badgeClass fs-6 px-3 py-2">
                             <i class="bi bi-box-seam me-1"></i>
-                            Stock: @Model.Stock
+                            Stock: @Model.Product.Stock
                         </span>
                     </div>
 
                     <div class="mb-4">
                         <h6 class="text-muted">Description</h6>
                         <div class="border rounded p-3 bg-light">
-                            @Html.Raw(Model.Description)
+                            @Html.Raw(Model.Product.Description)
                         </div>
                     </div>
 
@@ -84,7 +83,7 @@
                             <div class="card border-success h-100">
                                 <div class="card-body">
                                     <small class="text-muted">List Price</small>
-                                    <h5 class="text-success mb-0">$@Model.ListPrice</h5>
+                                    <h5 class="text-success mb-0">$@Model.Product.ListPrice</h5>
                                 </div>
                             </div>
                         </div>
@@ -93,7 +92,7 @@
                             <div class="card border-primary h-100">
                                 <div class="card-body">
                                     <small class="text-muted">Price (1 - 50)</small>
-                                    <h5 class="text-primary mb-0">$@Model.PriceFor1To50</h5>
+                                    <h5 class="text-primary mb-0">$@Model.Product.PriceFor1To50</h5>
                                 </div>
                             </div>
                         </div>
@@ -102,7 +101,7 @@
                             <div class="card border-warning h-100">
                                 <div class="card-body">
                                     <small class="text-muted">Price (50+)</small>
-                                    <h5 class="text-warning mb-0">$@Model.PriceFor50Plus</h5>
+                                    <h5 class="text-warning mb-0">$@Model.Product.PriceFor50Plus</h5>
                                 </div>
                             </div>
                         </div>
@@ -111,7 +110,7 @@
                             <div class="card border-danger h-100">
                                 <div class="card-body">
                                     <small class="text-muted">Price (100+)</small>
-                                    <h5 class="text-danger mb-0">$@Model.PriceFor100Plus</h5>
+                                    <h5 class="text-danger mb-0">$@Model.Product.PriceFor100Plus</h5>
                                 </div>
                             </div>
                         </div>
@@ -121,7 +120,7 @@
                             <div class="card border-dark">
                                 <div class="card-body d-flex justify-content-between align-items-center">
                                     <small class="text-muted">ISBN</small>
-                                    <h5 class="mb-0 fw-bold">@Model.ISBN</h5>
+                                    <h5 class="mb-0 fw-bold">@Model.Product.ISBN</h5>
                                 </div>
                             </div>
                         </div>

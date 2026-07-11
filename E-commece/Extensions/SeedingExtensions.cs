@@ -1,7 +1,9 @@
-﻿using E_commerce.DAL.Data;
+﻿using DataAcessLayer.Data;
+using E_commerce.DAL.Data;
 using E_commerce.DAL.Entities.Users;
 using E_commerce.DAL.Seeding;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace E_commece.Extensions
 {
@@ -11,6 +13,9 @@ namespace E_commece.Extensions
         public static async Task<WebApplication> SeedDatabaseAsync(this WebApplication app)
         {
             using var scope = app.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            // Create database tables first
+            await dbContext.Database.MigrateAsync();
 
             var roleManager = scope.ServiceProvider
                 .GetRequiredService<RoleManager<IdentityRole>>();

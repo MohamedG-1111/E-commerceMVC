@@ -31,6 +31,9 @@ namespace E_commerce.BLL.Services.Implementation
 
         public async Task<Result> LoginAsync(LoginViewModel model)
         {
+            if (model == null)
+                return Result.Failure("Invalid login credentials", errorType: ErrorType.VALIDATION);
+
             var user = await userManager.FindByEmailAsync(model.Email);
 
             if (user == null)
@@ -38,6 +41,7 @@ namespace E_commerce.BLL.Services.Implementation
 
             if (!user.EmailConfirmed)
                 return Result.Failure("Please confirm your email first", errorType: ErrorType.VALIDATION);
+
             if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow)
             {
                 return Result.Failure(
@@ -45,21 +49,18 @@ namespace E_commerce.BLL.Services.Implementation
                     errorType: ErrorType.VALIDATION);
             }
 
-
-            if (model == null)
-                return Result.Failure("Invalid login credentials", errorType: ErrorType.VALIDATION);
             var result = await signInManager.PasswordSignInAsync(
-                model.Email,
+                user,
                 model.Password,
                 model.RememberMe,
-                true
+                lockoutOnFailure: true
             );
+
             if (!result.Succeeded)
                 return Result.Failure("Invalid login credentials", errorType: ErrorType.VALIDATION);
 
             return Result.Success();
         }
-
 
 
         public async Task<Result<RegisterResultDto>> RegisterAsync(RegisterationViewModel model)
@@ -76,6 +77,7 @@ namespace E_commerce.BLL.Services.Implementation
                 StreetAddress = model.StreetAddress,
                 City = model.City,
                 PostalCode = model.PostalCode,
+                Role = Roles.Customer
             };
             if (model.ProfilePicture != null)
             {
@@ -107,7 +109,6 @@ namespace E_commerce.BLL.Services.Implementation
                         "Failed to assign role",
                         errorType: ErrorType.INTERNAL_ERROR);
                 }
-
                 var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
                 var encodedToken = Uri.EscapeDataString(token);
 

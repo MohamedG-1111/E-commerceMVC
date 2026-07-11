@@ -87,6 +87,7 @@ namespace E_commerce.BLL.Services.Implementation
                 query = query.Where(x => x.ApplicationUserId == userId);
 
             }
+
             if (filter is not null)
             {
 
@@ -123,11 +124,10 @@ namespace E_commerce.BLL.Services.Implementation
                  ItemsCount = x.OrderDetails.Sum(d => d.Count),
                  ApplicationUserEmail = x.ApplicationUser.Email,
              })
-             .ToPagedResultAsync(parameters);
+                     .ToPagedResultAsync(parameters);
 
             return Result<PaginatedResult<OrderVM>?>.Success(orders);
         }
-
         public async Task<Result<OrderDetailsVM>> GetOrderDetails(int orderId)
         {
             if (orderId <= 0)

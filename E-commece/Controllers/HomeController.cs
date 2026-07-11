@@ -25,7 +25,13 @@ namespace E_commece.Controllers
 
             return View(result.Value);
         }
+        //[HttpGet]
+        //public async Task<IActionResult> Index(PaginationParameters parameter)
+        //{
+        //    var result = await productService.AllProductsAsync(parameter);
 
+        //    return Content("Service Works");
+        //}
         [HttpGet]
         public async Task<IActionResult> ProductDetails(int id)
         {
@@ -49,10 +55,8 @@ namespace E_commece.Controllers
             return View();
         }
 
+        [AllowAnonymous]
         [HttpGet]
-        [ResponseCache(Duration = 0,
-            Location = ResponseCacheLocation.None,
-            NoStore = true)]
         public IActionResult Error()
         {
             return View();
