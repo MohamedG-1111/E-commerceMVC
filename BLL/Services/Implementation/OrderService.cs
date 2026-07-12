@@ -295,12 +295,13 @@ namespace E_commerce.BLL.Services.Implementation
             if (updateOrderStatus.OrderStatus.HasValue)
                 order.OrderStatus = updateOrderStatus.OrderStatus.Value;
 
-            if (updateOrderStatus.PaymentStatus.HasValue)
-            {
-                order.PaymentStatus = updateOrderStatus.PaymentStatus.Value;
-                order.PaymentDate = DateTime.UtcNow;
-            }
-
+          if (updateOrderStatus.PaymentStatus == PaymentStatus.Paid &&
+     order.PaymentStatus != PaymentStatus.Paid)
+{
+    var paymentResult = await MarkOrderAsPaidAsync(order);
+    if (!paymentResult.IsSuccess)
+        return paymentResult;
+}
             if ((!string.IsNullOrEmpty(updateOrderStatus.TrackingNumber)) &&
                 !(string.IsNullOrEmpty(updateOrderStatus.Carrier)))
             {
@@ -352,6 +353,69 @@ namespace E_commerce.BLL.Services.Implementation
             {
             }
         }
+        private async Task<Result> MarkOrderAsPaidAsync(Order order)
+{
+    await using var transaction = await unitOfWork.BeginTransactionAsync();
+
+    try
+    {
+        var orderDetails = await unitOfWork.Repository<OrderDetails>()
+            .GetAsQuery()
+            .Where(od => od.OrderId == order.Id)
+            .Select(od => new
+            {
+                od.ProductId,
+                od.Count,
+                od.Product.Title
+            })
+            .ToListAsync();
+
+        foreach (var item in orderDetails)
+        {
+            var affectedRows = await unitOfWork.Repository<Product>()
+                .GetAsQuery(false)
+                .Where(p => p.Id == item.ProductId &&
+                            p.Stock >= item.Count)
+                .ExecuteUpdateAsync(x => x.SetProperty(
+                    p => p.Stock,
+                    p => p.Stock - item.Count));
+
+            if (affectedRows == 0)
+            {
+                await transaction.RollbackAsync();
+
+                return Result.Failure(
+                    $"Insufficient stock for product '{item.Title}'.",
+                    errorType: ErrorType.CONFLICT);
+            }
+        }
+
+        order.PaymentStatus = PaymentStatus.Paid;
+        order.PaymentDate = DateTime.UtcNow;
+
+        unitOfWork.Repository<Order>().Update(order);
+
+        var result = await unitOfWork.SaveChangesAsync();
+
+        if (result <= 0)
+        {
+            await transaction.RollbackAsync();
+
+            return Result.Failure(
+                "Failed to update payment status.",
+                errorType: ErrorType.INTERNAL_ERROR);
+        }
+
+        await transaction.CommitAsync();
+
+        return Result.Success();
+    }
+    catch
+    {
+        await transaction.RollbackAsync();
+        throw;
+    }
+}
     }
 }
 
