@@ -349,7 +349,7 @@ GitHub:
 https://github.com/MohamedG-1111
 
 LinkedIn:
-https://www.linkedin.com/](https://www.linkedin.com/in/mohamedgomaa-dev24
+https:https://www.linkedin.com/in/mohamedgomaa-dev24/
 
 ---
 
