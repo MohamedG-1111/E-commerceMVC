@@ -2,7 +2,9 @@
 
 A modern **E-Commerce Web Application** built with **ASP.NET Core MVC** following the **3-Tier Architecture**. The project demonstrates scalable backend development practices, secure authentication, online payments, caching, background processing, and third-party service integration.
 
----
+## 🌐 Live Demo
+
+https://smartbooks.runasp.net/
 
 ## 🚀 Features
 
@@ -326,12 +328,6 @@ dotnet run
 * Multi-language Support
 * Dark Mode
 * Real-time Notifications
-
----
-
-## 🌐 Live Demo
-
-https://smartbooks.runasp.net/
 
 ---
 
